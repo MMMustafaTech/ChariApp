@@ -1,0 +1,208 @@
+{
+  "app_name": "Tchad Numérique",
+  "welcome_message": "Bienvenue sur la plateforme",
+  "login_button": "Se connecter",
+  "login_title": "Connexion",
+  "national_id": "Numéro d'identité",
+  "password": "Mot de passe",
+  "forgot_password": "Mot de passe oublié ?",
+  "create_account": "Créer un compte",
+  "confirm_password": "Confirmer le mot de passe",
+  "email": "Adresse e-mail",
+  "other_services": "Autres services",
+  "home": "Accueil",
+  "my_requests": "Mes demandes",
+  "my_account": "Mon compte",
+   "greeting": "Bonjour",
+  "platform_welcome": "Bienvenue sur la plateforme numérique du Tchad",
+  "view_all": "Voir tout",
+  "digital_documents": "Documents numériques",
+  "quick_access": "Accès rapide",
+  "national_id_card": "Carte d'identité",
+  "passport": "Passeport",
+  "driving_license": "Permis de conduire",
+  "birth_certificate": "Acte de naissance",
+  "civil_registry_appointments": "Rendez-vous d'état civil",
+  "national_id_services": "Services d'identité nationale",
+  "birth_certificate_services": "Services d'acte de naissance",
+  "passport_appointments": "Rendez-vous passeport",
+  "passport_services": "Services de passeport",
+  "profile": "Mon profil",
+  "my_digital_documents": "Mes documents numériques",
+  "logout": "Déconnexion",
+  "other": "Autres",
+  "my_demands": "Mes demandes",
+  "passport_services_title": "Services de passeport",
+  "welcome": "Bienvenue",
+  "select_service": "Sélectionnez le service souhaité",
+  "passport_renewal": "Renouvellement du passeport",
+  "passport_issuance": "Délivrance du passeport",
+  "data_correction_request": "Demande de correction des données",
+  "lost_or_damaged_passport": "Passeport perdu ou endommagé",
+  "view_passport": "Afficher le passeport",
+  "official_digital_document": "Ce document est officiel et certifié numériquement",
+  "loading": "Chargement...",
+  "view_national_id": "Afficher la carte d'identité",
+  "birth_certificate_issuance": "Délivrance d'un acte de naissance",
+  "newborn_registration": "Enregistrement d'un nouveau-né",
+  "birth_certificate_view": "Délivrance d'un acte de naissance",
+  "view_birth_certificate": "Afficher l'acte de naissance",
+
+  "birth_certificate_data_correction": "Correction des données de l'acte de naissance",
+  "document_verification": "Vérification du document",
+  "enter_document_number_to_start": "Entrez le numéro du document pour commencer",
+  "enter_document_number": "Entrer le numéro du document",
+  "birth_certificate_number": "Numéro de l'acte de naissance *",
+  "show_data": "Afficher les données",
+  "document_found_successfully": "Document trouvé avec succès",
+
+  "what_do_you_want_to_correct": "Que souhaitez-vous corriger ?",
+  "select_data_to_correct": "Sélectionnez les données à corriger",
+
+  "child_name": "Nom de l'enfant",
+  "date_of_birth": "Date de naissance",
+  "place_of_birth": "Lieu de naissance",
+  "father_name": "Nom du père",
+  "mother_name": "Nom de la mère",
+  "father_profession": "Profession du père",
+  "mother_profession": "Profession de la mère",
+  "address": "Adresse",
+
+  "current_value": "Valeur actuelle",
+  "registered_in_document": "Valeur enregistrée dans le document",
+  "currently_registered_value": "Valeur actuellement enregistrée",
+
+  "new_value": "Nouvelle valeur",
+  "enter_correct_information": "Entrez les informations correctes",
+
+  "correction_reason": "Motif de la correction",
+  "helps_processing_request": "Aide au traitement de la demande",
+  "name_correction_example": "Exemple : corriger le nom pour qu'il corresponde à la carte d'identité",
+
+  "submit_correction_request": "Soumettre la demande de correction",
+  "request_will_be_reviewed": "La demande sera examinée et le résultat vous sera communiqué",
+
+  "applicant": "Demandeur",
+  "select_applicant": "Sélectionnez la personne qui soumettra la demande",
+
+  "father": "Père",
+  "mother": "Mère",
+
+  "newborn_registration_request": "Demande d'enregistrement d'un nouveau-né",
+
+  "parent_identity": "Informations des parents",
+  "enter_parent_ids": "Entrez les numéros d'identité des parents",
+
+  "father_national_id": "Numéro d'identité du père",
+  "mother_national_id": "Numéro d'identité de la mère",
+
+  "newborn_information": "Informations du nouveau-né",
+  "enter_all_information": "Saisissez toutes les informations",
+
+  "baby_name": "Nom du bébé",
+
+  "gender": "Sexe",
+  "male": "Masculin",
+  "female": "Féminin",
+
+  "hospital": "Hôpital",
+  "city": "Ville",
+  "country": "Pays",
+  "birth_date": "Date de naissance",
+
+  "submit_registration_request": "Soumettre la demande d'enregistrement",
+
+
+
+
+  "national_id_renewal": "Renouvellement de la carte d'identité",
+
+  "identity_verification": "Vérification de l'identité",
+  "enter_national_id_for_verification": "Entrez le numéro d'identité nationale pour vérification",
+  "national_id_number": "Numéro d'identité nationale",
+  "show_data_botton": "Afficher les données",
+  "identity_found_successfully": "Carte d'identité trouvée avec succès",
+
+  "current_data": "Données actuelles",
+  "registered_in_national_id": "Telles qu'enregistrées dans la carte d'identité",
+
+  "name": "Nom",
+  "card_number": "Numéro de carte",
+  "expiry_date": "Date d'expiration",
+
+  "renewal_reason": "Motif du renouvellement",
+  "select_renewal_reason": "Sélectionnez le motif du renouvellement",
+
+  "card_expired": "Carte expirée",
+  "update_personal_photo": "Mettre à jour la photo personnelle",
+  "other_reasons": "Autres raisons",
+
+  "new_personal_photo": "Nouvelle photo personnelle (facultatif)",
+  "attach_recent_photo": "Joignez une photo personnelle récente",
+
+  "attach_photo": "Joindre une photo (JPG ou PNG)",
+  "max_file_size": "Taille maximale : 5 Mo",
+
+  "submit_renewal_request": "Soumettre la demande de renouvellement",
+  "request_result_notification": "Votre demande sera examinée et le résultat vous sera communiqué",
+
+
+
+  "lost_or_damaged_replacement": "Remplacement pour perte ou détérioration",
+
+  "request_reason": "Motif de la demande",
+  "select_replacement_reason": "Sélectionnez le motif du remplacement",
+
+  "lost": "Perdu",
+  "damaged": "Endommagé",
+
+  "loss_details": "Détails de la perte",
+  "damage_details": "Détails de la détérioration",
+
+  "brief_case_description": "Brève description du cas (facultatif)",
+
+  "lost_id_example": "Exemple : la carte d'identité a été perdue le ...",
+  "damaged_id_example": "Exemple : la carte a été endommagée à cause de ...",
+
+  "loss_report_optional": "Déclaration de perte (facultatif)",
+  "damaged_card_photo_optional": "Photo de la carte endommagée (facultatif)",
+
+  "attach_supporting_document": "Joignez un document justificatif",
+
+  "attach_file": "Joindre un fichier (image ou PDF)",
+
+  "submit_request": "Soumettre la demande",
+
+
+
+
+
+  "passport_issuance_title": "Délivrance du passeport",
+  "linked_to_account": "Lié à votre compte",
+  "personal_information": "Informations personnelles",
+  "passport_personal_information": "Saisissez vos informations telles qu'elles doivent apparaître sur le passeport",
+  "first_name": "Prénom",
+  "last_name": "Nom de famille",
+  "required_documents": "Documents requis",
+  "attach_required_documents": "Joignez les documents requis",
+  "national_id_copy": "Copie de la carte d'identité",
+  "submit_passport_request": "Soumettre la demande de passeport",
+  "nationality": "Nationalité",
+  "profession": "Profession",
+
+
+   "passport_renewal_title": "Renouvellement du passeport",
+  "passport_verification": "Vérification du passeport",
+  "enter_national_id_for_passport_verification": "Entrez le numéro d'identité nationale pour vérification",
+  "passport_found_successfully": "Passeport trouvé avec succès",
+  "current_passport_data": "Données actuelles du passeport",
+  "registered_in_passport": "Telles qu'enregistrées dans le passeport",
+  "passport_number": "Numéro du passeport",
+  "passport_renewal_reason": "Motif du renouvellement",
+  "select_passport_renewal_reason": "Sélectionnez le motif du renouvellement",
+  "passport_expired": "Passeport expiré",
+  "passport_expiring_soon": "Expiration proche du passeport",
+  "new_personal_photo_optional": "Nouvelle photo personnelle (facultatif)",
+  "attach_recent_personal_photo": "Joignez une photo personnelle récente",
+  "submit_passport_renewal_request": "Soumettre la demande de renouvellement"
+}

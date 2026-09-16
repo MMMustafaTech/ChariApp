@@ -3,6 +3,7 @@ import 'package:frontend/controller/auth_controller.dart';
 import 'package:frontend/core/constant/app_colors.dart';
 import 'package:frontend/view/widget/button.dart';
 import 'package:frontend/view/widget/textfield.dart';
+import 'package:frontend/generated/l10n.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,7 +14,6 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final AuthController controller = AuthController();
-  bool _otpRequested = false;
 
   @override
   void dispose() {
@@ -52,8 +52,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           child: Column(
                             children: [
                               const SizedBox(height: 20),
-                              const Text(
-                                "انشاء حساب",
+                              Text(
+                                S.of(context).create_account,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 30,
@@ -62,59 +62,43 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               const SizedBox(height: 10),
                               CustomTextFormAuth(
-                                hinttext: "رقم الهوية",
+                                hinttext: S.of(context).national_id,
                                 controller: controller.idController,
                                 isPassword: false,
                               ),
                               const SizedBox(height: 12),
                               CustomTextFormAuth(
-                                hinttext: "الايميل",
+                                hinttext: S.of(context).email,
                                 controller: controller.emailController,
                                 isPassword: false,
                               ),
                               const SizedBox(height: 12),
                               CustomTextFormAuth(
-                                hinttext: "كلمة المرور",
+                                hinttext: S.of(context).password,
                                 controller: controller.passController,
                                 isPassword: true,
                               ),
                               const SizedBox(height: 12),
                               CustomTextFormAuth(
-                                hinttext: "تاكيد كلمة المرور",
+                                hinttext: S.of(context).confirm_password,
                                 controller: controller.confirmPassController,
                                 isPassword: true,
                               ),
-                              if (_otpRequested) ...[
-                                const SizedBox(height: 12),
-                                CustomTextFormAuth(
-                                  hinttext: "رمز التحقق المكوّن من 6 أرقام",
-                                  controller: controller.otpController,
-                                  isPassword: false,
-                                ),
-                              ],
                               const SizedBox(height: 10),
                               CustomButtonAuth(
-                                text: _otpRequested
-                                    ? "تأكيد الرمز وإنشاء الحساب"
-                                    : "إرسال رمز التحقق",
+                                text: S.of(context).create_account,
                                 onPressed: () async {
-                                  final success = _otpRequested
-                                      ? await controller.completeSignup(context)
-                                      : await controller.requestSignupOtp(context);
+                                  final success = await controller.signup(
+                                    context,
+                                  );
                                   if (success) {
-                                    if (_otpRequested) {
-                                      if (context.mounted) {
-                                        Navigator.of(context).pushNamed("login");
-                                      }
-                                    } else {
-                                      setState(() => _otpRequested = true);
-                                    }
+                                    Navigator.of(context).pushNamed("login");
                                   }
                                 },
                               ),
                               SizedBox(height: 30),
                               CustomButtonAuth(
-                                text: "تسجيل الدخول",
+                                text: S.of(context).login_title,
                                 textColor: Colors.white,
                                 color: Colors.grey[400],
                                 onPressed: () {

@@ -3,6 +3,9 @@ import 'package:frontend/core/constant/app_colors.dart';
 import 'package:frontend/view/widget/button.dart';
 import 'package:frontend/view/widget/textfield.dart';
 import 'package:frontend/controller/auth_controller.dart';
+import 'package:frontend/generated/l10n.dart';
+
+// import 'package:frontend/main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 SizedBox(height: 20),
                 Text(
-                  "تسجيل الدخول",
+                  S.of(context).login_title,
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 30,
@@ -53,13 +56,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 90),
                 CustomTextFormAuth(
-                  hinttext: "الرقم الوطني (National ID)",
+                  hinttext: S.of(context).national_id,
                   isPassword: false,
                   controller: controller.idController,
                 ),
                 SizedBox(height: 12),
                 CustomTextFormAuth(
-                  hinttext: "PassWord",
+                  hinttext: S.of(context).password,
                   isPassword: true,
                   controller: controller.passController,
                 ),
@@ -68,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: () {},
                     child: Text(
-                      "نسيت كلمة المرور؟",
+                      S.of(context).forgot_password,
                       style: TextStyle(
                         color: AppColors.error,
                         fontSize: 19,
@@ -79,22 +82,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 40),
                 CustomButtonAuth(
-                  text: "تسجيل الدخول",
+                  text: S.of(context).login_button,
                   onPressed: () async {
                     final user = await controller.login(context);
-                    if (!context.mounted) return;
                     if (user != null) {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        "home",
-                        (_) => false,
-                        arguments: user,
-                      );
+                      Navigator.of(context).pushNamed("home", arguments: user);
                     }
                   },
                 ),
                 SizedBox(height: 30),
                 CustomButtonAuth(
-                  text: "انشاء حساب",
+                  text: S.of(context).create_account,
                   textColor: Colors.white,
                   color: Colors.grey[400],
                   onPressed: () {

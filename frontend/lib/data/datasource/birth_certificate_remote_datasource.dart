@@ -1,43 +1,72 @@
-import 'package:frontend/data/datasource/chari_api.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/data/model/birth_certificate_model.dart';
+import 'package:http/http.dart' as http;
 
 class BirthCertificateRemoteDatasource {
-  BirthCertificateRemoteDatasource({ChariApi? api}) : _api = api ?? ChariApi();
+  final String baseUrl =
+      "https://absherapp-production.up.railway.app/birth-certificate";
 
-  final ChariApi _api;
-
-  Future<BirthCertificateModel?> getBirthCertificate() async {
+  Future<BirthCertificateModel?> getBirthCertificate(String nationalId) async {
     try {
-      return BirthCertificateModel.fromJson(await _api.birthCertificateDocument());
-    } catch (_) {
+      print(Uri.parse("$baseUrl/birth-certificate/$nationalId"));
+      final response = await http.get(
+        Uri.parse("$baseUrl/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      debugPrint("status: ${response.statusCode}");
+      debugPrint("body : ${response.body}");
+
+      if (response.statusCode == 200) {
+        return BirthCertificateModel.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      debugPrint("error : $e");
       return null;
     }
   }
 
-  Future<bool> issuanceOfBirthCertificate() => _submit('CERTIFICATE_EXTRACT');
-
-  Future<bool> newBornRegistration(Map<String, dynamic> details) =>
-      _submit('NEWBORN_REGISTRATION', newbornRegistration: details);
-
-  Future<bool> requestForDataCorrection(String reason) =>
-      _submit('DATA_CORRECTION', reason: reason);
-
-  Future<bool> _submit(
-    String kind, {
-    String? reason,
-    Map<String, dynamic>? newbornRegistration,
-  }) async {
+  Future<bool> issuanceOfBirthCertificate(String nationalId) async {
     try {
-      await _api.submitBirthCertificateRequest(
-        kind,
-        reason: reason,
-        newbornRegistration: newbornRegistration,
+      final response = await http.post(
+        Uri.parse("$baseUrl/birth-certificate/$nationalId"),
+        headers: {"Content-Type": "application/json"},
       );
-      return true;
-    } catch (_) {
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("error: $e");
       return false;
     }
   }
 
-  Future<List<Map<String, dynamic>>> requests() => _api.birthCertificateRequests();
+  Future<bool> newBornRegistration(String nationalId) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/birth-certificate/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
+  }
+
+  Future<bool> requestForDataCorrection(String nationalId) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/birth-certificate/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
+  }
 }

@@ -31,15 +31,15 @@ class PassportModel {
     passportNumber: json["passportNumber"] ?? "",
     firstName: json["firstName"] ?? "",
     lastName: json["lastName"] ?? "",
-    birthDate: json["dateOfBirth"] ?? json["birthDate"] ?? "",
-    birthPlace: json["placeOfBirth"] ?? json["birthPlace"] ?? "",
-    issueDate: json["issuedOn"] ?? json["issueDate"] ?? "",
-    expiryDate: json["expiresOn"] ?? json["expiryDate"] ?? "",
-    issuePlace: json["placeOfIssue"] ?? json["issuePlace"] ?? "",
-    issueingAuthority: json["issuingAuthority"] ?? json["issueingAuthority"] ?? "",
+    birthDate: json["birthDate"] ?? "",
+    birthPlace: json["birthPlace"] ?? "",
+    issueDate: json["issueDate"] ?? "",
+    expiryDate: json["expiryDate"] ?? "",
+    issuePlace: json["issuePlace"] ?? "",
+    issueingAuthority: json["issueingAuthority"] ?? "",
     profession: json["profession"] ?? "",
     nationality: json["nationality"] ?? "",
-    gender: json["sex"] ?? json["gender"] ?? "",
+    gender: json["gender"] ?? "",
   );
 
   Map<String, dynamic> toJson() => {

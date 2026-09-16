@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constant/app_colors.dart';
-import 'package:frontend/data/datasource/chari_api.dart';
 import 'package:frontend/data/model/user_model.dart';
 import 'package:frontend/view/widget/cart.dart';
 import 'package:frontend/view/widget/quick_acsess_card.dart';
+import 'package:frontend/generated/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,12 +39,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-                    _buildSectionTitle("وثائقك الرقمية", onTap: () {}),
+                    const SizedBox(height: 10),
+                    _buildSectionTitle(
+                      S.of(context).digital_documents,
+                      onTap: () {},
+                    ),
                     const SizedBox(height: 12),
                     _buildDigitalDocs(),
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("الوصول السريع"),
+                    const SizedBox(height: 12),
+                    _buildSectionTitle(
+                      S.of(context).quick_access,
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: 10),
+                    _buildSectionTitle(S.of(context).quick_access),
                     const SizedBox(height: 12),
                     _buildQuickAccess(),
                     const SizedBox(height: 20),
@@ -83,15 +91,15 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "مرحباً، ${user?.name ?? ''}",
+                "Merhaba, ${user?.name ?? ''}",
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const Text(
-                "أهلاً بك في منصة تشاد الرقمية",
+              Text(
+                S.of(context).platform_welcome,
                 style: TextStyle(color: Colors.grey, fontSize: 13),
               ),
             ],
@@ -112,25 +120,25 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (onTap != null)
-          GestureDetector(
-            onTap: onTap,
-            child: const Text(
-              "عرض الكل",
-              style: TextStyle(
-                color: Color.fromARGB(255, 0, 51, 139),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+          // GestureDetector(
+          //   onTap: onTap,
+          //   child: Text(
+          //     S.of(context).view_all,
+          //     style: TextStyle(
+          //       color: Color.fromARGB(255, 0, 51, 139),
+          //       fontSize: 14,
+          //       fontWeight: FontWeight.w600,
+          //     ),
+          //   ),
+          // ),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
             ),
           ),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
       ],
     );
   }
@@ -144,19 +152,21 @@ class _HomeScreenState extends State<HomeScreen> {
         physics: const BouncingScrollPhysics(),
         children: [
           CustomFeatureCard(
-            title: "الهوية الوطنية",
+            title: S.of(context).national_id_card,
             textColor: Colors.white,
             icon: Icons.badge_rounded,
             fontSize: 19,
             onTap: () {
-              Navigator.of(context).pushNamed("NationalIdShowScreen");
+              Navigator.of(
+                context,
+              ).pushNamed("NationalIdShowScreen", arguments: user);
             },
             startColor: const Color.fromARGB(255, 145, 123, 0),
             endColor: AppColors.buttonColor,
           ),
           const SizedBox(width: 15),
           CustomFeatureCard(
-            title: "جواز السفر",
+            title: S.of(context).passport,
             fontSize: 19,
             textColor: Colors.white,
             icon: Icons.flight,
@@ -168,13 +178,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(width: 15),
           CustomFeatureCard(
-            title: "رخصة القيادة",
+            title: S.of(context).driving_license,
             fontSize: 19,
             textColor: Colors.white,
             icon: Icons.directions_car,
             onTap: () {},
             startColor: const Color.fromARGB(255, 94, 9, 3),
             endColor: AppColors.error,
+          ),
+          const SizedBox(width: 15),
+          CustomFeatureCard(
+            title: S.of(context).birth_certificate,
+            fontSize: 19,
+            textColor: Colors.white,
+            icon: Icons.my_library_books_rounded,
+            onTap: () {
+              Navigator.of(
+                context,
+              ).pushNamed("birthcertificate", arguments: user);
+            },
+            startColor: const Color.fromARGB(255, 7, 122, 11),
+            endColor: const Color.fromARGB(255, 16, 195, 22),
           ),
         ],
       ),
@@ -191,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisSpacing: 15,
       children: [
         CustomQuickAcsessCard(
-          title: "مواعيد الأحوال المدنية",
+          title: S.of(context).civil_registry_appointments,
           icon: Icons.calendar_month_rounded,
           onTap: () {},
           startColor: AppColors.containerBackground,
@@ -199,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: Colors.black87,
         ),
         CustomQuickAcsessCard(
-          title: "خدمات الهوية الوطنية",
+          title: S.of(context).national_id_services,
           icon: Icons.badge_outlined,
           onTap: () {
             Navigator.of(
@@ -211,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: Colors.black87,
         ),
         CustomQuickAcsessCard(
-          title: "خدمات شهادة الميلاد",
+          title: S.of(context).birth_certificate_services,
           icon: Icons.article_outlined,
           onTap: () {
             Navigator.of(
@@ -223,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: Colors.black87,
         ),
         CustomQuickAcsessCard(
-          title: "مواعيد الجوازات",
+          title: S.of(context).passport_appointments,
           icon: Icons.access_time_rounded,
           onTap: () {},
           startColor: AppColors.containerBackground,
@@ -231,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: Colors.black87,
         ),
         CustomQuickAcsessCard(
-          title: "خدمات جواز السفر",
+          title: S.of(context).passport_services,
           icon: Icons.flight_outlined,
           onTap: () {
             Navigator.of(context).pushNamed("passportServices");
@@ -267,33 +291,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.home_outlined),
-            title: const Text("الرئيسية"),
+            title: Text(S.of(context).home),
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text("الملف الشخصي"),
+            title: Text(S.of(context).my_account),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.badge_outlined),
-            title: const Text("وثائقي الرقمية"),
+            title: Text(S.of(context).my_digital_documents),
             onTap: () {},
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              "تسجيل الخروج",
+            title: Text(
+              S.of(context).logout,
               style: TextStyle(color: Colors.red),
             ),
-            onTap: () async {
-              try {
-                await ChariApi().logout();
-              } finally {
-                if (!mounted) return;
-                Navigator.of(context).pushReplacementNamed("login");
-              }
+            onTap: () {
+              Navigator.of(context).pushReplacementNamed("login");
             },
           ),
         ],
@@ -308,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: const BoxDecoration(color: AppColors.background),
       child: Column(
         children: [
-          Container(
+          SizedBox(
             height: 4,
             child: Row(
               children: [
@@ -327,10 +346,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavIcon(Icons.home, 0, "الرئيسية"),
-              _buildNavIcon(Icons.apps_outlined, 1, "خدمات أخرى"),
-              _buildNavIcon(Icons.assignment_outlined, 2, "طلباتي"),
-              _buildNavIcon(Icons.person_outline, 3, "حسابي"),
+              _buildNavIcon(Icons.home, 0, S.of(context).home),
+              _buildNavIcon(Icons.apps_outlined, 1, S.of(context).other),
+              _buildNavIcon(
+                Icons.assignment_outlined,
+                2,
+                S.of(context).my_demands,
+              ),
+              _buildNavIcon(Icons.person_outline, 3, S.of(context).my_account),
             ],
           ),
         ],

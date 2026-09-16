@@ -38,7 +38,7 @@ class BirthCertificateModel {
 
   factory BirthCertificateModel.fromJson(Map<String, dynamic> json) =>
       BirthCertificateModel(
-        certificatenumber: json["certificatenumber"] ?? "",
+        certificatenumber: json["certificateNumber"] ?? "",
         fullName: json["fullName"] ?? "",
         gender: json["gender"] ?? "",
         birthDate: json["birthDate"] ?? "",
@@ -49,26 +49,26 @@ class BirthCertificateModel {
         fatherProfession: json["fatherProfession"] ?? "",
         motherName: json["motherName"] ?? "",
         motherBirthDate: json["motherBirthDate"] ?? "",
-        motherBirthplace: json["motherBirthplace"] ?? "",
-        motherprofession: json["motherprofession"] ?? "",
+        motherBirthplace: json["motherBirthPlace"] ?? "",
+        motherprofession: json["motherProfession"] ?? "",
         declarationDate: json["declarationDate"] ?? "",
         address: json["address"] ?? "",
       );
 
   Map<String, dynamic> toJson() => {
-    "certificatenumber": certificatenumber,
+    "certificateNumber": certificatenumber,
     "fullName": fullName,
     "gender": gender,
     "birthDate": birthDate,
     "birthPlace": birthPlace,
-    "fathername": fathername,
+    "fatherName": fathername,
     "fatherBirthDate": fatherBirthDate,
     "fatherBirthPlace": fatherBirthPlace,
     "fatherProfession": fatherProfession,
     "motherName": motherName,
     "motherBirthDate": motherBirthDate,
-    "motherBirthplace": motherBirthplace,
-    "motherprofession": motherprofession,
+    "motherBirthPlace": motherBirthplace,
+    "motherProfession": motherprofession,
     "declarationDate": declarationDate,
     "address": address,
   };

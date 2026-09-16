@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constant/app_colors.dart';
+import 'package:frontend/generated/l10n.dart';
 
 class BirthCertificateServicesScreen extends StatefulWidget {
   const BirthCertificateServicesScreen({super.key});
@@ -65,8 +66,8 @@ class _BirthCertificateServicesScreenState
       appBar: AppBar(
         backgroundColor: const Color(0xFF002F6C),
         foregroundColor: Colors.white,
-        title: const Text(
-          "خدمات شهادة الميلاد",
+        title: Text(
+          S.of(context).birth_certificate_services,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -78,16 +79,16 @@ class _BirthCertificateServicesScreenState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             const SizedBox(height: 30),
-            const Text(
-              "مرحباً بك",
+            Text(
+              S.of(context).welcome,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textMain,
               ),
             ),
-            const Text(
-              "اختر الخدمة  المطلوبة",
+            Text(
+              S.of(context).select_service,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -97,14 +98,14 @@ class _BirthCertificateServicesScreenState
             const SizedBox(height: 30),
 
             _buildServiceCard(
-              title: "تسجيل مولود جديد",
+              title: S.of(context).newborn_registration,
               icon: Icons.child_care_rounded,
               onTap: () =>
                   Navigator.of(context).pushNamed("NewbornRegistration"),
             ),
 
             _buildServiceCard(
-              title: "إصدار شهادة ميلاد",
+              title: S.of(context).birth_certificate_view,
               icon: Icons.assignment_turned_in_rounded,
               onTap: () {
                 Navigator.of(context).pushNamed("IssuanceOfBirthCertificate");
@@ -112,7 +113,7 @@ class _BirthCertificateServicesScreenState
             ),
 
             _buildServiceCard(
-              title: "طلب تعديل بيانات",
+              title: S.of(context).data_correction_request,
               icon: Icons.edit_note_rounded,
               onTap: () {
                 Navigator.of(context).pushNamed("RequestForDataCorrection");

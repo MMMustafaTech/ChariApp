@@ -4,32 +4,69 @@ import 'package:frontend/data/model/passport_model.dart';
 
 class PassportController {
   final PassportRemoteDatasource _datasource = PassportRemoteDatasource();
+
   PassportModel? passport;
 
-  Future<PassportModel?> fetchPassport(BuildContext context) async {
-    passport = await _datasource.getPassport();
-    if (!context.mounted) return null;
-    if (passport == null) {
-      _showMessage(context, 'لا توجد وثيقة جواز مرتبطة بهذا الحساب');
+  // جلب بيانات الجواز
+  Future<PassportModel?> fetchPassport(
+    BuildContext context,
+    String nationalId,
+  ) async {
+    try {
+      passport = await _datasource.getPassport(nationalId);
+      if (!context.mounted) return null;
+      if (passport == null) {
+        _showMessage(context, "لم يتم العثور على بيانات الجواز");
+      }
+      return passport;
+    } catch (e) {
+      if (!context.mounted) return null;
+      debugPrint("خطأ في جلب الجواز: $e");
+      _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      return null;
     }
-    return passport;
   }
 
-  Future<bool> submitRequest(
+  // طلب استخراج جواز جديد
+  Future<bool> requestNewPassport(
     BuildContext context,
-    String kind, {
-    String? reason,
-  }) async {
-    final success = await _datasource.requestPassport(kind, reason: reason);
-    if (!context.mounted) return false;
-    _showMessage(
-      context,
-      success ? 'تم تقديم الطلب بنجاح' : 'تعذر تقديم الطلب. تحقق من حالة طلباتك وحاول لاحقًا.',
-    );
-    return success;
+    String nationalId,
+  ) async {
+    try {
+      final success = await _datasource.requestNewPassport(nationalId);
+      if (!context.mounted) return false;
+      if (success) {
+        _showMessage(context, "تم تقديم طلب استخراج الجواز بنجاح");
+      } else {
+        _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      }
+      return success;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
+  }
+
+  // طلب تجديد الجواز
+  Future<bool> renewPassport(BuildContext context, String nationalId) async {
+    try {
+      final success = await _datasource.renewPassport(nationalId);
+      if (!context.mounted) return false;
+      if (success) {
+        _showMessage(context, "تم تقديم طلب تجديد الجواز بنجاح");
+      } else {
+        _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      }
+      return success;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

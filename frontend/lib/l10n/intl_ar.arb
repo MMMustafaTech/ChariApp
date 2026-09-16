@@ -1,0 +1,205 @@
+{
+  "app_name": "تشاد الرقمية",
+  "welcome_message": "مرحباً بك في منصة",
+  "login_button": "تسجيل الدخول",
+  "login_title": "تسجيل الدخول",
+  "national_id": "رقم الهوية",
+  "password": "كلمة المرور",
+  "forgot_password": "نسيت كلمة المرور؟",
+  "create_account": "إنشاء حساب",
+  "confirm_password": "تأكيد كلمة المرور",
+  "email": "البريد الإلكتروني",
+  "other_services": "الخدمات الأخرى",
+  "home": "الرئيسية",
+  "my_requests": "طلباتي",
+  "my_account": "حسابي",
+   "greeting": "مرحباً",
+  "platform_welcome": "مرحباً بك في منصة تشاد الرقمية",
+  "view_all": "عرض الكل",
+  "digital_documents": "وثائقك الرقمية",
+  "quick_access": "الوصول السريع",
+  "national_id_card": "الهوية الوطنية",
+  "passport": "جواز السفر",
+  "driving_license": "رخصة القيادة",
+  "birth_certificate": "شهادة الميلاد",
+  "civil_registry_appointments": "مواعيد الأحوال المدنية",
+  "national_id_services": "خدمات الهوية الوطنية",
+  "birth_certificate_services": "خدمات شهادة الميلاد",
+  "passport_appointments": "مواعيد الجوازات",
+  "passport_services": "خدمات الجوازات",
+  "profile": "ملفي الشخصي",
+  "my_digital_documents": "وثائقي الرقمية",
+  "logout": "تسجيل الخروج",
+  "other": "أخرى",
+  "my_demands": "طلباتي",
+  "passport_services_title": "خدمات الجوازات",
+  "welcome": "مرحباً بك",
+  "select_service": "اختر الخدمة المطلوبة",
+  "passport_renewal": "تجديد جواز السفر",
+  "passport_issuance": "إصدار جواز سفر",
+  "data_correction_request": "طلب تصحيح البيانات",
+  "lost_or_damaged_passport": "جواز سفر مفقود أو تالف",
+  "view_passport": "عرض جواز السفر",
+  "official_digital_document": "هذه الوثيقة رسمية ومعتمدة رقمياً",
+  "loading": "جاري التحميل...",
+  "view_national_id": "عرض الهوية الوطنية",
+  "birth_certificate_issuance": "إصدار شهادة الميلاد",
+  "newborn_registration": "تسجيل مولود جديد",
+  "birth_certificate_view": "إصدار شهادة الميلاد",
+  "view_birth_certificate": "عرض شهادة الميلاد",
+
+  "birth_certificate_data_correction": "تصحيح بيانات شهادة الميلاد",
+  "document_verification": "التحقق من الوثيقة",
+  "enter_document_number_to_start": "أدخل رقم الوثيقة للبدء",
+  "enter_document_number": "أدخل رقم الوثيقة",
+  "birth_certificate_number": "رقم شهادة الميلاد *",
+  "show_data": "عرض البيانات",
+  "document_found_successfully": "تم العثور على الوثيقة بنجاح",
+
+  "what_do_you_want_to_correct": "ما الذي تريد تصحيحه؟",
+  "select_data_to_correct": "اختر نوع البيانات المراد تصحيحها",
+
+  "child_name": "اسم الطفل",
+  "date_of_birth": "تاريخ الميلاد",
+  "place_of_birth": "مكان الميلاد",
+  "father_name": "اسم الأب",
+  "mother_name": "اسم الأم",
+  "father_profession": "مهنة الأب",
+  "mother_profession": "مهنة الأم",
+  "address": "العنوان",
+
+  "current_value": "القيمة الحالية",
+  "registered_in_document": "القيمة المسجلة في الوثيقة",
+  "currently_registered_value": "القيمة المسجلة حالياً",
+
+  "new_value": "القيمة الجديدة",
+  "enter_correct_information": "أدخل المعلومات الصحيحة",
+
+  "correction_reason": "سبب التصحيح",
+  "helps_processing_request": "يساعد في معالجة الطلب",
+  "name_correction_example": "مثال: تصحيح الاسم ليتوافق مع الهوية الوطنية",
+
+  "submit_correction_request": "إرسال طلب التصحيح",
+  "request_will_be_reviewed": "سيتم مراجعة الطلب وإبلاغك بالنتيجة",
+
+  "applicant": "مقدم الطلب",
+  "select_applicant": "اختر من سيقدم الطلب",
+
+  "father": "الأب",
+  "mother": "الأم",
+
+  "newborn_registration_request": "طلب تسجيل مولود جديد",
+
+  "parent_identity": "بيانات الوالدين",
+  "enter_parent_ids": "أدخل أرقام هوية الوالدين",
+
+  "father_national_id": "رقم هوية الأب",
+  "mother_national_id": "رقم هوية الأم",
+
+  "newborn_information": "بيانات المولود",
+  "enter_all_information": "أدخل جميع البيانات",
+
+  "baby_name": "اسم المولود",
+
+  "gender": "الجنس",
+  "male": "ذكر",
+  "female": "أنثى",
+
+  "hospital": "المستشفى",
+  "city": "المدينة",
+  "country": "الدولة",
+  "birth_date": "تاريخ الميلاد",
+
+  "submit_registration_request": "إرسال طلب التسجيل",
+
+
+
+  "national_id_renewal": "تجديد الهوية الوطنية",
+
+  "identity_verification": "التحقق من الهوية",
+  "enter_national_id_for_verification": "أدخل رقم الهوية الوطنية للتحقق",
+  "national_id_number": "رقم الهوية الوطنية",
+  "show_data_botton": "عرض البيانات",
+  "identity_found_successfully": "تم العثور على الهوية بنجاح",
+
+  "current_data": "البيانات الحالية",
+  "registered_in_national_id": "كما هي مسجلة في الهوية الوطنية",
+
+  "name": "الاسم",
+  "card_number": "رقم البطاقة",
+  "expiry_date": "تاريخ الانتهاء",
+
+  "renewal_reason": "سبب التجديد",
+  "select_renewal_reason": "اختر سبب طلب التجديد",
+
+  "card_expired": "انتهاء صلاحية البطاقة",
+  "update_personal_photo": "تحديث الصورة الشخصية",
+  "other_reasons": "أسباب أخرى",
+
+  "new_personal_photo": "صورة شخصية جديدة (اختياري)",
+  "attach_recent_photo": "أرفق صورة شخصية حديثة",
+
+  "attach_photo": "إرفاق صورة (JPG أو PNG)",
+  "max_file_size": "الحد الأقصى: 5 ميجابايت",
+
+  "submit_renewal_request": "تقديم طلب التجديد",
+  "request_result_notification": "سيتم مراجعة الطلب وإشعارك بالنتيجة",
+
+
+
+
+  "lost_or_damaged_replacement": "بدل فاقد أو تالف",
+  "request_reason": "سبب الطلب",
+  "select_replacement_reason": "اختر سبب طلب البدل",
+
+  "lost": "فاقد",
+  "damaged": "تالف",
+
+  "loss_details": "تفاصيل الفقدان",
+  "damage_details": "تفاصيل التلف",
+
+  "brief_case_description": "وصف مختصر للحالة (اختياري)",
+
+  "lost_id_example": "مثال: تم فقدان الهوية بتاريخ ...",
+  "damaged_id_example": "مثال: تعرضت البطاقة لتلف بسبب ...",
+
+  "loss_report_optional": "بلاغ الفقدان (اختياري)",
+  "damaged_card_photo_optional": "صورة البطاقة التالفة (اختياري)",
+
+  "attach_supporting_document": "أرفق مستند يثبت الحالة",
+
+  "attach_file": "إرفاق ملف (صورة أو PDF)",
+
+  "submit_request": "تقديم الطلب",
+
+
+
+  "passport_issuance_title": "إصدار جواز سفر",
+  "linked_to_account": "مرتبط بحسابك",
+  "personal_information": "البيانات الشخصية",
+  "passport_personal_information": "أدخل بياناتك كما تريد أن تظهر في الجواز",
+  "first_name": "الاسم الأول",
+  "last_name": "اللقب",
+  "required_documents": "المستندات المطلوبة",
+  "attach_required_documents": "أرفق المستندات اللازمة",
+  "national_id_copy": "نسخة من الهوية الوطنية",
+  "submit_passport_request": "تقديم طلب الإصدار",
+  "nationality": "الجنسية",
+  "profession": "المهنة",
+
+
+  "passport_renewal_title": "تجديد جواز السفر",
+  "passport_verification": "التحقق من الجواز",
+  "enter_national_id_for_passport_verification": "أدخل رقم الهوية الوطنية للتحقق",
+  "passport_found_successfully": "تم العثور على الجواز بنجاح",
+  "current_passport_data": "البيانات الحالية",
+  "registered_in_passport": "كما هي مسجلة في الجواز",
+  "passport_number": "رقم الجواز",
+  "passport_renewal_reason": "سبب التجديد",
+  "select_passport_renewal_reason": "اختر سبب طلب التجديد",
+  "passport_expired": "انتهاء صلاحية الجواز",
+  "passport_expiring_soon": "اقتراب انتهاء الصلاحية",
+  "new_personal_photo_optional": "صورة شخصية جديدة (اختياري)",
+  "attach_recent_personal_photo": "أرفق صورة شخصية حديثة",
+  "submit_passport_renewal_request": "تقديم طلب التجديد"
+}

@@ -1,0 +1,238 @@
+{
+  
+  "app_name": "Çad Dijital",
+  "welcome_message": "Platformuna Hoş Geldiniz",
+  "login_button": "Giriş Yap",
+
+
+
+  "login_title": "Giriş Yap",
+  "national_id": "Kimlik Numarası",
+  "password": "Şifre",
+  "confirm_password": "Şifre Onayla",
+  "forgot_password": "Şifremi Unuttum?",
+  "create_account": "Hesap Oluştur",
+  "email": "E-posta",
+
+
+
+
+  "other_services": "Diğer Hizmetler",
+  "home": "Ana Sayfa",
+  "my_requests": "Başvurularım",
+  "my_account": "Hesabım",
+
+
+
+  "greeting": "Merhaba",
+  "platform_welcome": "Çad Dijital Platformuna Hoş Geldiniz",
+  "view_all": "Tümünü Gör",
+  "digital_documents": "Dijital Belgeleriniz",
+  "quick_access": "Hızlı Erişim",
+  "national_id_card": "Nüfus Cüzdanı",
+  "passport": "Pasaport",
+  "driving_license": "Sürücü Belgesi",
+  "birth_certificate": "Doğum Belgesi",
+  "civil_registry_appointments": "Nüfus Müdürlüğü Randevuları",
+  "national_id_services": "Kimlik Hizmetleri",
+  "birth_certificate_services": "Doğum Belgesi Hizmetleri",
+  "passport_appointments": "Pasaport Randevuları",
+  "passport_services": "Pasaport Hizmetleri",
+
+
+
+
+  "profile": "Profilim",
+  "my_digital_documents": "Dijital Belgelerim",
+  "logout": "Çıkış Yap",
+
+
+
+  "other": "Diğer",
+  "my_demands": "Taleplerim",
+
+
+  "passport_services_title": "Pasaport Hizmetleri",
+  "welcome": "Hoş Geldiniz",
+  "select_service": "İstediğiniz hizmeti seçin",
+  "passport_renewal": "Pasaport Yenileme",
+  "passport_issuance": "Pasaport Çıkarma",
+  "data_correction_request": "Bilgi Düzeltme Talebi",
+  "lost_or_damaged_passport": "Kayıp / Hasarlı Pasaport",
+
+
+
+  "view_passport": "Pasaportu Görüntüle",
+  "official_digital_document": "Bu belge resmidir ve dijital olarak doğrulanmıştır",
+
+
+  "loading": "Yükleniyor...",
+  "view_national_id": "Kimlik Kartını Görüntüle",
+
+
+  "birth_certificate_issuance": "Doğum Belgesi Çıkarma",
+  "newborn_registration": "Yeni Doğan Kaydı",
+  "birth_certificate_view": "Doğum Belgesi Çıkarma",
+  "view_birth_certificate": "Doğum Belgesini Görüntüle",
+
+  "birth_certificate_data_correction": "Doğum Belgesi Bilgi Düzeltme",
+  "document_verification": "Belge Doğrulama",
+  "enter_document_number_to_start": "Başlamak için belge numarasını girin",
+  "enter_document_number": "Belge Numarasını Girin",
+  "birth_certificate_number": "Doğum Belgesi Numarası *",
+  "show_data": "Bilgileri Göster",
+  "document_found_successfully": "Belge başarıyla bulundu",
+
+  "what_do_you_want_to_correct": "Ne düzeltmek istiyorsunuz?",
+  "select_data_to_correct": "Düzeltilecek bilgiyi seçin",
+
+  "child_name": "Çocuğun Adı",
+  "date_of_birth": "Doğum Tarihi",
+  "place_of_birth": "Doğum Yeri",
+  "father_name": "Baba Adı",
+  "mother_name": "Anne Adı",
+  "father_profession": "Baba Mesleği",
+  "mother_profession": "Anne Mesleği",
+  "address": "Adres",
+
+  "current_value": "Mevcut Değer",
+  "registered_in_document": "Belgede kayıtlı değer",
+  "currently_registered_value": "Şu anda kayıtlı değer",
+
+  "new_value": "Yeni Değer",
+  "enter_correct_information": "Doğru bilgiyi girin",
+
+  "correction_reason": "Düzeltme Nedeni",
+  "helps_processing_request": "Talebin işlenmesini kolaylaştırır",
+  "name_correction_example": "Örnek: İsmi kimlik kartıyla uyumlu olacak şekilde düzeltme",
+
+  "submit_correction_request": "Düzeltme Talebini Gönder",
+  "request_will_be_reviewed": "Başvuru incelenecek ve sonuç size bildirilecektir",
+
+  "applicant": "Başvuru Sahibi",
+  "select_applicant": "Başvuruyu kimin yapacağını seçin",
+
+  "father": "Baba",
+  "mother": "Anne",
+
+  "newborn_registration_request": "Yeni Doğan Kayıt Talebi",
+
+  "parent_identity": "Ebeveyn Kimliği",
+  "enter_parent_ids": "Ebeveyn kimlik numaralarını girin",
+
+  "father_national_id": "Baba Kimlik Numarası",
+  "mother_national_id": "Anne Kimlik Numarası",
+
+  "newborn_information": "Yeni Doğan Bilgileri",
+  "enter_all_information": "Tüm bilgileri girin",
+
+  "baby_name": "Bebek Adı",
+
+  "gender": "Cinsiyet",
+  "male": "Erkek",
+  "female": "Kadın",
+
+  "hospital": "Hastane",
+  "city": "Şehir",
+  "country": "Ülke",
+  "birth_date": "Doğum Tarihi",
+
+  "submit_registration_request": "Kayıt Başvurusu Gönder",
+
+
+
+
+
+  "national_id_renewal": "Kimlik Yenileme",
+
+  "identity_verification": "Kimlik Doğrulama",
+  "enter_national_id_for_verification": "Doğrulama için kimlik numarasını girin",
+  "national_id_number": "Kimlik Numarası",
+  "show_data_botton": "Bilgileri Göster",
+  "identity_found_successfully": "Kimlik başarıyla bulundu",
+
+  "current_data": "Mevcut Bilgiler",
+  "registered_in_national_id": "Kimlik kartında kayıtlı olduğu şekliyle",
+
+  "name": "Ad Soyad",
+  "card_number": "Kart Numarası",
+  "expiry_date": "Son Geçerlilik Tarihi",
+
+  "renewal_reason": "Yenileme Nedeni",
+  "select_renewal_reason": "Yenileme talebinin nedenini seçin",
+
+  "card_expired": "Kartın Süresi Doldu",
+  "update_personal_photo": "Kişisel Fotoğrafı Güncelle",
+  "other_reasons": "Diğer Nedenler",
+
+  "new_personal_photo": "Yeni Vesikalık Fotoğraf (İsteğe Bağlı)",
+  "attach_recent_photo": "Güncel bir fotoğraf yükleyin",
+
+  "attach_photo": "Fotoğraf Ekle (JPG veya PNG)",
+  "max_file_size": "Maksimum boyut: 5 MB",
+
+  "submit_renewal_request": "Yenileme Talebini Gönder",
+  "request_result_notification": "Başvurunuz incelenecek ve sonuç size bildirilecektir",
+
+
+
+
+   "lost_or_damaged_replacement": "Kayıp veya Hasarlı Kimlik Yenileme",
+
+  "request_reason": "Başvuru Nedeni",
+  "select_replacement_reason": "Yenileme nedenini seçin",
+
+  "lost": "Kayıp",
+  "damaged": "Hasarlı",
+
+  "loss_details": "Kayıp Detayları",
+  "damage_details": "Hasar Detayları",
+
+  "brief_case_description": "Durumu kısaca açıklayın (İsteğe Bağlı)",
+
+  "lost_id_example": "Örnek: Kimlik şu tarihte kayboldu ...",
+  "damaged_id_example": "Örnek: Kart şu nedenle hasar gördü ...",
+
+  "loss_report_optional": "Kayıp Tutanağı (İsteğe Bağlı)",
+  "damaged_card_photo_optional": "Hasarlı Kart Fotoğrafı (İsteğe Bağlı)",
+
+  "attach_supporting_document": "Durumu doğrulayan belge yükleyin",
+
+  "attach_file": "Dosya Ekle (Resim veya PDF)",
+
+  "submit_request": "Başvuruyu Gönder",
+
+
+
+
+
+  "passport_issuance_title": "Pasaport Çıkarma",
+  "linked_to_account": "Hesabınızla bağlantılı",
+  "personal_information": "Kişisel Bilgiler",
+  "passport_personal_information": "Bilgilerinizi pasaportta görünmesini istediğiniz şekilde girin",
+  "first_name": "Ad",
+  "last_name": "Soyad",
+  "required_documents": "Gerekli Belgeler",
+  "attach_required_documents": "Gerekli belgeleri yükleyin",
+  "national_id_copy": "Kimlik Kartı Kopyası",
+  "submit_passport_request": "Pasaport Başvurusunu Gönder",
+  "nationality": "Uyruk",
+  "profession": "Meslek",
+
+
+
+  "passport_renewal_title": "Pasaport Yenileme",
+  "passport_verification": "Pasaport Doğrulama",
+  "enter_national_id_for_passport_verification": "Doğrulama için kimlik numarasını girin",
+  "passport_found_successfully": "Pasaport başarıyla bulundu",
+  "current_passport_data": "Mevcut Pasaport Bilgileri",
+  "registered_in_passport": "Pasaportta kayıtlı olduğu şekliyle",
+  "passport_number": "Pasaport Numarası",
+  "passport_renewal_reason": "Yenileme Nedeni",
+  "select_passport_renewal_reason": "Yenileme talebinin nedenini seçin",
+  "passport_expired": "Pasaportun Süresi Doldu",
+  "passport_expiring_soon": "Pasaport Süresi Yakında Dolacak",
+  "new_personal_photo_optional": "Yeni Vesikalık Fotoğraf (İsteğe Bağlı)",
+  "attach_recent_personal_photo": "Güncel bir vesikalık fotoğraf yükleyin",
+  "submit_passport_renewal_request": "Yenileme Talebini Gönder"
+}

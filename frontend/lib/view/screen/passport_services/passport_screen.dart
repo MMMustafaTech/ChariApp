@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/data/model/passport_model.dart';
+import 'package:frontend/data/model/user_model.dart';
 import 'package:frontend/controller/passport_controller.dart';
+import 'package:frontend/generated/l10n.dart';
 
 class PassportScreen extends StatefulWidget {
   const PassportScreen({super.key});
@@ -17,19 +19,21 @@ class _PassportScreenState extends State<PassportScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (isLoading) {
-      _loadData();
+    final user = ModalRoute.of(context)?.settings.arguments as UserModel?;
+    if (user != null && isLoading) {
+      _loadData(user.id);
     }
   }
 
-  Future<void> _loadData() async {
-    final result = await _passportController.fetchPassport(context);
+  Future<void> _loadData(String id) async {
+    final result = await _passportController.fetchPassport(context, id);
     if (mounted) {
       setState(() {
         passport = result;
         isLoading = false;
       });
     }
+    print("the national id $id");
   }
 
   @override
@@ -39,8 +43,8 @@ class _PassportScreenState extends State<PassportScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF002F6C),
         foregroundColor: Colors.white,
-        title: const Text(
-          "الجواز الإلكتروني",
+        title: Text(
+          S.of(context).view_passport,
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
         ),
         centerTitle: true,
@@ -70,13 +74,13 @@ class _PassportScreenState extends State<PassportScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.security, color: Colors.grey, size: 18),
                       SizedBox(width: 8),
                       Text(
-                        "هذه الوثيقة رسمية ومعتمدة رقمياً",
+                        S.of(context).official_digital_document,
                         style: TextStyle(color: Colors.grey, fontSize: 13),
                       ),
                     ],
@@ -130,7 +134,7 @@ class _PassportScreenState extends State<PassportScreen> {
                 top: h * 0.19,
                 left: w * 0.29,
                 child: _buildPassportText(
-                  (passport?.lastName ?? "Loading...").toUpperCase(),
+                  (passport?.lastName ?? S.of(context).loading).toUpperCase(),
                   w * 0.033,
                 ),
               ),
@@ -139,7 +143,7 @@ class _PassportScreenState extends State<PassportScreen> {
                 top: h * 0.26,
                 left: w * 0.29,
                 child: _buildPassportText(
-                  (passport?.firstName ?? "Loading...").toUpperCase(),
+                  (passport?.firstName ?? S.of(context).loading).toUpperCase(),
                   w * 0.033,
                 ),
               ),

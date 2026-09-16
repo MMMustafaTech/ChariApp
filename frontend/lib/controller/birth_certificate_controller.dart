@@ -5,43 +5,88 @@ import 'package:frontend/data/model/birth_certificate_model.dart';
 class BirthCertificateController {
   final BirthCertificateRemoteDatasource _datasource =
       BirthCertificateRemoteDatasource();
+  BirthCertificateModel? birthCertificate;
 
-  Future<BirthCertificateModel?> fetchBirthCertificate(BuildContext context) async {
-    final document = await _datasource.getBirthCertificate();
-    if (document == null && context.mounted) {
-      _showMessage(context, 'لا توجد شهادة ميلاد مرتبطة بهذا الحساب');
+  Future<BirthCertificateModel?> fetchBirthCertificate(
+    BuildContext context,
+    String nationalId,
+  ) async {
+    try {
+      birthCertificate = await _datasource.getBirthCertificate(nationalId);
+      if (!context.mounted) return null;
+      if (birthCertificate == null) {
+        _showMessage(context, "لم يتم العثور على بيانات الجواز");
+      }
+      return birthCertificate;
+    } catch (e) {
+      if (!context.mounted) return null;
+      debugPrint("خطأ في جلب الجواز: $e");
+      _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      return null;
     }
-    return document;
   }
 
-  Future<bool> issuanceOfBirthCertificate(BuildContext context) =>
-      _submit(context, _datasource.issuanceOfBirthCertificate(), 'تم تقديم طلب الشهادة');
+  Future<bool> issuanceOfBirthCertificate(
+    BuildContext context,
+    String nationalId,
+  ) async {
+    try {
+      final success = await _datasource.issuanceOfBirthCertificate(nationalId);
+      if (!context.mounted) return false;
+      if (success) {
+        _showMessage(context, "تم تقديم طلب استخراج شهادة ميلاد");
+      } else {
+        _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      }
+      return success;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
+  }
 
+  // طلب تجديد الجواز
   Future<bool> newBornRegistration(
     BuildContext context,
-    Map<String, dynamic> details,
-  ) => _submit(
-        context,
-        _datasource.newBornRegistration(details),
-        'تم تقديم طلب تسجيل المولود',
-      );
-
-  Future<bool> requestForDataCorrection(BuildContext context, String reason) =>
-      _submit(
-        context,
-        _datasource.requestForDataCorrection(reason),
-        'تم تقديم طلب تعديل البيانات',
-      );
-
-  Future<bool> _submit(BuildContext context, Future<bool> operation, String successMessage) async {
-    final success = await operation;
-    if (context.mounted) {
-      _showMessage(context, success ? successMessage : 'تعذر تقديم الطلب. حاول لاحقًا.');
+    String nationalId,
+  ) async {
+    try {
+      final success = await _datasource.newBornRegistration(nationalId);
+      if (!context.mounted) return false;
+      if (success) {
+        _showMessage(context, "تم تقديم طلب اضافة مولود جديد بنجاح");
+      } else {
+        _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      }
+      return success;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
     }
-    return success;
+  }
+
+  Future<bool> requestForDataCorrection(
+    BuildContext context,
+    String nationalId,
+  ) async {
+    try {
+      final success = await _datasource.requestForDataCorrection(nationalId);
+      if (!context.mounted) return false;
+      if (success) {
+        _showMessage(context, "تم تقديم طلب تعديل بيانات شهادة الميلاد بنجاح");
+      } else {
+        _showMessage(context, "حدث خطأ، حاول مرة أخرى");
+      }
+      return success;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
   }
 
   void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

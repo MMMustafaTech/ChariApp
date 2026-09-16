@@ -1,27 +1,57 @@
-import 'package:frontend/data/datasource/chari_api.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:frontend/data/model/passport_model.dart';
+import 'package:http/http.dart' as http;
+// import 'package:frontend/data/model/user_model.dart';
 
 class PassportRemoteDatasource {
-  PassportRemoteDatasource({ChariApi? api}) : _api = api ?? ChariApi();
+  final String baseUrl = "https://absherapp-production.up.railway.app";
 
-  final ChariApi _api;
-
-  Future<PassportModel?> getPassport() async {
+  Future<PassportModel?> getPassport(String nationalId) async {
     try {
-      return PassportModel.fromJson(await _api.passportDocument());
-    } catch (_) {
+      final response = await http.get(
+        Uri.parse("$baseUrl/passport/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      debugPrint("status: ${response.statusCode}");
+      debugPrint("body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return PassportModel.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      debugPrint("error: $e");
       return null;
     }
   }
 
-  Future<bool> requestPassport(String kind, {String? reason}) async {
+  Future<bool> requestNewPassport(String nationalId) async {
     try {
-      await _api.submitPassportRequest(kind, reason: reason);
-      return true;
-    } catch (_) {
+      final response = await http.post(
+        Uri.parse("$baseUrl/passport/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("error: $e");
       return false;
     }
   }
 
-  Future<List<Map<String, dynamic>>> requests() => _api.passportRequests();
+  Future<bool> renewPassport(String nationalId) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/passport/renew/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("error: $e");
+      return false;
+    }
+  }
 }

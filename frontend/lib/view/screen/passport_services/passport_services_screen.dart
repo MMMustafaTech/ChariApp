@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/controller/passport_controller.dart';
 import 'package:frontend/core/constant/app_colors.dart';
+import 'package:frontend/generated/l10n.dart';
 
 class PassportServicesScreen extends StatefulWidget {
   const PassportServicesScreen({super.key});
@@ -10,11 +10,6 @@ class PassportServicesScreen extends StatefulWidget {
 }
 
 class _PassportServicesScreen extends State<PassportServicesScreen> {
-  final PassportController _controller = PassportController();
-
-  Future<void> _submit(String kind, {String? reason}) async {
-    await _controller.submitRequest(context, kind, reason: reason);
-  }
   Widget _buildServiceCard({
     required String title,
     required IconData icon,
@@ -69,8 +64,8 @@ class _PassportServicesScreen extends State<PassportServicesScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF002F6C),
         foregroundColor: Colors.white,
-        title: const Text(
-          "خدمات جواز السفر",
+        title: Text(
+          S.of(context).passport_services,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -82,16 +77,16 @@ class _PassportServicesScreen extends State<PassportServicesScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             const SizedBox(height: 30),
-            const Text(
-              "مرحباً بك",
+            Text(
+              S.of(context).welcome,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textMain,
               ),
             ),
-            const Text(
-              "اختر الخدمة  المطلوبة",
+            Text(
+              S.of(context).select_service,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -101,29 +96,29 @@ class _PassportServicesScreen extends State<PassportServicesScreen> {
             const SizedBox(height: 30),
 
             _buildServiceCard(
-              title: "تجديد جواز السفر",
+              title: S.of(context).passport_renewal,
               icon: Icons.fiber_new_rounded,
-              onTap: () => _submit('RENEWAL'),
+              onTap: () => Navigator.of(context).pushNamed("PassportRenewal"),
             ),
 
             _buildServiceCard(
-              title: "إصدار جواز سفر",
+              title: S.of(context).passport_issuance,
               icon: Icons.assignment_turned_in_rounded,
-              onTap: () => _submit('ISSUANCE'),
+              onTap: () => Navigator.of(context).pushNamed("PassportIssuance"),
             ),
 
             _buildServiceCard(
-              title: "طلب تعديل بيانات",
+              title: S.of(context).data_correction_request,
               icon: Icons.edit_note_rounded,
-              onTap: () => _submit(
-                'DATA_CORRECTION',
-                reason: 'طلب تعديل بيانات الجواز',
-              ),
+              onTap: () =>
+                  Navigator.of(context).pushNamed("RequestForDataCorrection"),
             ),
+
             _buildServiceCard(
-              title: "بدل فاقد / تالف",
+              title: S.of(context).lost_or_damaged_passport,
               icon: Icons.replay_rounded,
-              onTap: () => _submit('LOST', reason: 'طلب بدل فاقد أو تالف'),
+              onTap: () =>
+                  Navigator.of(context).pushNamed("Passportlostordamaged"),
             ),
           ],
         ),

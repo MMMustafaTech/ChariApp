@@ -1,18 +1,28 @@
-import 'package:frontend/data/datasource/chari_api.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:frontend/data/model/identity_model.dart';
+import 'package:http/http.dart' as http;
 
 class IdentityRemoteDatasource {
-  IdentityRemoteDatasource({ChariApi? api}) : _api = api ?? ChariApi();
+  final String baseUrl = "https://absherapp-production.up.railway.app";
 
-  final ChariApi _api;
-
-  Future<Map<String, dynamic>> document() => _api.nationalIdentityDocument();
-
-  Future<bool> submit(String kind, {String? reason}) async {
+  Future<IdentityModel?> getIdentity(String nationalId) async {
     try {
-      await _api.submitNationalIdentityRequest(kind, reason: reason);
-      return true;
-    } catch (_) {
-      return false;
+      final response = await http.get(
+        Uri.parse("$baseUrl/api/national-ids/$nationalId"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      debugPrint("status: ${response.statusCode}");
+      debugPrint("body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        return IdentityModel.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      debugPrint("error: $e");
+      return null;
     }
   }
 }

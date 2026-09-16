@@ -1,0 +1,208 @@
+{
+  "app_name": "Chad Digital",
+  "welcome_message": "Welcome to the Platform",
+  "login_button": "Login",
+  "login_title": "Sign In",
+  "national_id": "National ID Number",
+  "password": "Password",
+  "confirm_password": "Confirm Password",
+  "forgot_password": "Forgot Password?",
+  "create_account": "Create Account",
+  "email": "Email",
+  "other_services": "Other Services",
+  "home": "Home",
+  "my_requests": "My Requests",
+  "my_account": "My Account",
+   "greeting": "Hello",
+  "platform_welcome": "Welcome to Chad Digital Platform",
+  "view_all": "View All",
+  "digital_documents": "Digital Documents",
+  "quick_access": "Quick Access",
+  "national_id_card": "National ID",
+  "passport": "Passport",
+  "driving_license": "Driving License",
+  "birth_certificate": "Birth Certificate",
+  "civil_registry_appointments": "Civil Registry Appointments",
+  "national_id_services": "National ID Services",
+  "birth_certificate_services": "Birth Certificate Services",
+  "passport_appointments": "Passport Appointments",
+  "passport_services": "Passport Services",
+  "profile": "My Profile",
+  "my_digital_documents": "My Digital Documents",
+  "logout": "Logout",
+  "other": "Other",
+  "my_demands": "My Requests",
+  "passport_services_title": "Passport Services",
+  "welcome": "Welcome",
+  "select_service": "Select the desired service",
+  "passport_renewal": "Passport Renewal",
+  "passport_issuance": "Passport Issuance",
+  "data_correction_request": "Data Correction Request",
+  "lost_or_damaged_passport": "Lost or Damaged Passport",
+  "view_passport": "View Passport",
+  "official_digital_document": "This document is official and digitally certified",
+  "loading": "Loading...",
+  "view_national_id": "View National ID",
+  "birth_certificate_issuance": "Birth Certificate Issuance",
+  "newborn_registration": "Newborn Registration",
+  "birth_certificate_view": "Birth Certificate Issuance",
+  "view_birth_certificate": "View Birth Certificate",
+
+  "birth_certificate_data_correction": "Birth Certificate Data Correction",
+  "document_verification": "Document Verification",
+  "enter_document_number_to_start": "Enter the document number to begin",
+  "enter_document_number": "Enter Document Number",
+  "birth_certificate_number": "Birth Certificate Number *",
+  "show_data": "Show Data",
+  "document_found_successfully": "Document found successfully",
+
+  "what_do_you_want_to_correct": "What would you like to correct?",
+  "select_data_to_correct": "Select the data to be corrected",
+
+  "child_name": "Child Name",
+  "date_of_birth": "Date of Birth",
+  "place_of_birth": "Place of Birth",
+  "father_name": "Father Name",
+  "mother_name": "Mother Name",
+  "father_profession": "Father Profession",
+  "mother_profession": "Mother Profession",
+  "address": "Address",
+
+  "current_value": "Current Value",
+  "registered_in_document": "Value registered in the document",
+  "currently_registered_value": "Currently registered value",
+
+  "new_value": "New Value",
+  "enter_correct_information": "Enter the correct information",
+
+  "correction_reason": "Reason for Correction",
+  "helps_processing_request": "Helps process the request",
+  "name_correction_example": "Example: Correcting the name to match the National ID",
+
+  "submit_correction_request": "Submit Correction Request",
+  "request_will_be_reviewed": "The request will be reviewed and you will be notified of the result",
+
+  "applicant": "Applicant",
+  "select_applicant": "Select who will submit the request",
+
+  "father": "Father",
+  "mother": "Mother",
+
+  "newborn_registration_request": "Newborn Registration Request",
+
+  "parent_identity": "Parents Information",
+  "enter_parent_ids": "Enter the parents' ID numbers",
+
+  "father_national_id": "Father National ID",
+  "mother_national_id": "Mother National ID",
+
+  "newborn_information": "Newborn Information",
+  "enter_all_information": "Enter all information",
+
+  "baby_name": "Baby Name",
+
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+
+  "hospital": "Hospital",
+  "city": "City",
+  "country": "Country",
+  "birth_date": "Birth Date",
+
+  "submit_registration_request": "Submit Registration Request",
+
+
+
+
+  "national_id_renewal": "National ID Renewal",
+
+  "identity_verification": "Identity Verification",
+  "enter_national_id_for_verification": "Enter the National ID number for verification",
+  "national_id_number": "National ID Number",
+  "show_data_botton": "Show Data",
+  "identity_found_successfully": "Identity found successfully",
+
+  "current_data": "Current Data",
+  "registered_in_national_id": "As registered in the National ID",
+
+  "name": "Name",
+  "card_number": "Card Number",
+  "expiry_date": "Expiry Date",
+
+  "renewal_reason": "Renewal Reason",
+  "select_renewal_reason": "Select the reason for renewal",
+
+  "card_expired": "Card Expired",
+  "update_personal_photo": "Update Personal Photo",
+  "other_reasons": "Other Reasons",
+
+  "new_personal_photo": "New Personal Photo (Optional)",
+  "attach_recent_photo": "Attach a recent personal photo",
+
+  "attach_photo": "Attach Photo (JPG or PNG)",
+  "max_file_size": "Maximum size: 5 MB",
+
+  "submit_renewal_request": "Submit Renewal Request",
+  "request_result_notification": "Your request will be reviewed and you will be notified of the result",
+
+
+  "lost_or_damaged_replacement": "Lost or Damaged ID Replacement",
+
+  "request_reason": "Request Reason",
+  "select_replacement_reason": "Select the reason for replacement",
+
+  "lost": "Lost",
+  "damaged": "Damaged",
+
+  "loss_details": "Loss Details",
+  "damage_details": "Damage Details",
+
+  "brief_case_description": "Brief description of the case (Optional)",
+
+  "lost_id_example": "Example: The ID was lost on ...",
+  "damaged_id_example": "Example: The card was damaged because of ...",
+
+  "loss_report_optional": "Loss Report (Optional)",
+  "damaged_card_photo_optional": "Damaged Card Photo (Optional)",
+
+  "attach_supporting_document": "Attach a supporting document",
+
+  "attach_file": "Attach File (Image or PDF)",
+
+  "submit_request": "Submit Request",
+
+
+
+
+
+  "passport_issuance_title": "Passport Issuance",
+  "linked_to_account": "Linked to your account",
+  "personal_information": "Personal Information",
+  "passport_personal_information": "Enter your information as it should appear in the passport",
+  "first_name": "First Name",
+  "last_name": "Last Name",
+  "required_documents": "Required Documents",
+  "attach_required_documents": "Attach the required documents",
+  "national_id_copy": "Copy of National ID",
+  "submit_passport_request": "Submit Passport Request",
+  "nationality": "Nationality",
+  "profession": "Profession",
+
+
+
+  "passport_renewal_title": "Passport Renewal",
+  "passport_verification": "Passport Verification",
+  "enter_national_id_for_passport_verification": "Enter the National ID number for verification",
+  "passport_found_successfully": "Passport found successfully",
+  "current_passport_data": "Current Passport Data",
+  "registered_in_passport": "As registered in the passport",
+  "passport_number": "Passport Number",
+  "passport_renewal_reason": "Renewal Reason",
+  "select_passport_renewal_reason": "Select the reason for renewal",
+  "passport_expired": "Passport Expired",
+  "passport_expiring_soon": "Passport Expiring Soon",
+  "new_personal_photo_optional": "New Personal Photo (Optional)",
+  "attach_recent_personal_photo": "Attach a recent personal photo",
+  "submit_passport_renewal_request": "Submit Renewal Request"
+}
