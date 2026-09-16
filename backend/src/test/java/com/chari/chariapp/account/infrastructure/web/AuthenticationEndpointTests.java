@@ -56,7 +56,7 @@ class AuthenticationEndpointTests {
         String email = "citizen-" + UUID.randomUUID() + "@example.com";
         String password = "a-secure-password";
         CitizenId citizenId = CitizenId.newId();
-        String registryReference = UUID.randomUUID().toString();
+        String registryReference = "CID001";
         citizenStore.save(new Citizen(
                 citizenId,
                 new NationalIdReference(dataProtector.lookup(registryReference), dataProtector.encrypt(registryReference)),
@@ -72,10 +72,19 @@ class AuthenticationEndpointTests {
 
         String login = response(mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"%s\",\"password\":\"%s\"}".formatted(email, password)))
+                        .content("{\"nationalId\":\"cid001\",\"password\":\"%s\"}".formatted(password)))
                 .andExpect(status().isOk())
                 .andReturn());
         String initialRefreshToken = jsonField(login, "refreshToken");
+
+        for (String invalidBody : new String[] {
+                "{\"nationalId\":\"CID001\",\"password\":\"wrong-password\"}",
+                "{\"nationalId\":\"CID999\",\"password\":\"a-secure-password\"}"
+        }) {
+            mockMvc.perform(post("/api/v1/auth/login")
+                    .contentType(MediaType.APPLICATION_JSON).content(invalidBody))
+                    .andExpect(status().isUnauthorized());
+        }
 
         String refresh = response(mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)

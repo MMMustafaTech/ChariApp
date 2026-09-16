@@ -6,6 +6,9 @@ import com.chari.chariapp.account.application.LogoutUseCase;
 import com.chari.chariapp.account.application.RefreshTokenUseCase;
 import com.chari.chariapp.account.application.TokenPair;
 import com.chari.chariapp.shared.security.PersonalDataProtector;
+import com.chari.chariapp.shared.security.PersonalDataNormalizer;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -43,6 +46,10 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
+        if (request.nationalId() != null) {
+            String lookup = dataProtector.lookup(PersonalDataNormalizer.nationalId(request.nationalId()));
+            return response(loginUseCase.login(new LoginCommand(null, request.password(), lookup)));
+        }
         String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
         return response(loginUseCase.login(new LoginCommand(dataProtector.lookup(normalizedEmail), request.password())));
     }
@@ -64,9 +71,16 @@ public class AuthenticationController {
     }
 
     public record LoginRequest(
-            @NotBlank @Email @Size(max = 254) String email,
+            @Pattern(regexp = "[A-Za-z0-9 -]{6,32}") String nationalId,
+            @Email @Size(max = 254) String email,
             @NotBlank @Size(min = 12, max = 128) String password
     ) {
+        @AssertTrue(message = "Provide exactly one login identifier")
+        public boolean isIdentifierValid() {
+            return nationalId != null
+                    ? nationalId.matches(".*[A-Za-z0-9].*") && email == null
+                    : email != null && !email.isBlank();
+        }
     }
 
     public record RefreshRequest(@NotBlank @Size(max = 512) String refreshToken) {

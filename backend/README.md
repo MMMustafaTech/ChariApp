@@ -21,12 +21,12 @@ https://chari-api.onrender.com
 Authorization: Bearer <accessToken>
 ```
 
-بيانات الحسابات التجريبية التالية تعمل محليًا فقط عند تشغيل `APP_DEMO_DATA_ENABLED=true`، ولا توجد بيانات demo على Render حاليًا.
+بيانات الحسابات التجريبية التالية تعمل محليًا فقط عند تشغيل `APP_DEMO_DATA_ENABLED=true`.
 
-- مواطن موجود: `citizen@local.chari.test` / `LocalPass123!`
+- مواطن موجود: الرقم الوطني `987654321` / `LocalPass123!`
 - مواطن للتسجيل محليًا: الرقم الوطني `123456789`، ورمز OTP يظهر في Log الـBackend.
 
-على Render، قاعدة البيانات جديدة ولا تحتوي مواطنين أو حسابات جاهزة. كما أن OTP مؤقت ويظهر في Render Logs فقط؛ لم يتم ربط SMS حقيقية بعد.
+لإضافة سجل مواطن الاختبار `CID001` شغّل النسخة الجديدة مرة مع `APP_TEST_DATA_ENROLLMENT_CITIZEN_ENABLED=true` ثم أعده إلى `false`. هذا لا ينشئ حسابًا أو كلمة مرور، ولا يعدّل المواطن السابق `123456789`. أنشئ حساب الهوية الجديدة عبر OTP واختر كلمة مرورك. OTP مؤقت ويظهر في Render Logs فقط؛ لم يتم ربط SMS حقيقية بعد.
 
 تطبيق الجوال يستطيع استدعاء الخدمة المنشورة مباشرة. واجهة الويب تحتاج إضافة أصلها (domain) إلى إعداد CORS في Render قبل اختبار الطلبات من المتصفح.
 
@@ -65,8 +65,10 @@ Authorization: Bearer <accessToken>
 `POST /api/v1/auth/login`
 
 ```json
-{ "email": "citizen@local.chari.test", "password": "LocalPass123!" }
+{ "nationalId": "987654321", "password": "LocalPass123!" }
 ```
+
+دخول المواطن بالرقم الوطني وكلمة المرور. استخدم `CID001` بعد إنشاء حسابه مع كلمة المرور التي اخترتها. البريد يبقى مطلوبًا عند إنشاء الحساب فقط. يدعم الباك اند دخول البريد القديم للتوافق؛ أرسل `nationalId` أو `email` وليس كليهما.
 
 الاستجابة تتضمن `accessToken` و`refreshToken` و`expiresIn`. الـaccess token قصير العمر؛ عند 401 استخدم:
 

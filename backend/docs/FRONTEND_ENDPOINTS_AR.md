@@ -2,7 +2,7 @@
 
 **Base URL المنشور للتجربة:** `https://chari-api.onrender.com`  
 **Base URL المحلي:** `http://localhost:8080`  
-الخدمة المنشورة تحتوي سجل مواطن اختبار للهوية `123456789` فقط؛ أنشئ الحساب له من خلال تدفق OTP، ولا توجد حسابات موظف أو أدمن تجريبية مستضافة. قد يتأخر أول طلب بعد السكون لأن Render يستخدم الخطة المجانية.
+هوية الاختبار الجديدة `CID001`: ينشئها الباك اند عند تشغيل `APP_TEST_DATA_ENROLLMENT_CITIZEN_ENABLED=true` مرة، ثم يُعاد الإعداد إلى `false`. أنشئ حسابها عبر OTP واختر كلمة مرور؛ لا توجد كلمة مرور افتراضية. الهوية القديمة `123456789` وحسابها لا يتغيران. قد يتأخر أول طلب بعد السكون لأن Render يستخدم الخطة المجانية.
 كل مسار يبدأ بـ `/api/v1/me/` يحتاج Header:
 
 ```http
@@ -18,9 +18,11 @@ Authorization: Bearer <accessToken>
 | `POST /auth/enrollment/otp` | `{"nationalId":"123456789"}` | `202` مع `{"challengeId":"uuid"}` |
 | `POST /auth/enrollment/otp/verify` | `{"challengeId":"uuid","code":"123456"}` | `204 No Content` |
 | `POST /auth/enrollment/accounts` | `{"challengeId":"uuid","email":"...","password":"..."}` | `201` مع `{"accountId":"uuid"}` |
-| `POST /api/v1/auth/login` | `{"email":"...","password":"..."}` | `200` مع `accessToken`, `refreshToken`, `tokenType`, `expiresIn` |
+| `POST /api/v1/auth/login` | `{"nationalId":"CID001","password":"..."}` | `200` مع `accessToken`, `refreshToken`, `tokenType`, `expiresIn` |
 | `POST /api/v1/auth/refresh` | `{"refreshToken":"..."}` | Token pair جديد بنفس حقول login |
 | `POST /api/v1/auth/logout` | `{"refreshToken":"..."}` | `204 No Content` |
+
+دخول المواطن بالرقم الوطني وكلمة المرور؛ البريد مطلوب عند التسجيل فقط. دخول البريد القديم مدعوم للتوافق، لكن لا ترسل البريد والرقم الوطني معًا.
 
 مثال login/refresh:
 

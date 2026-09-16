@@ -42,11 +42,11 @@ class ChariApi {
     );
   }
 
-  Future<SessionTokens> login(String email, String password) async {
+  Future<SessionTokens> login(String nationalId, String password) async {
     final json = await _object(await _client.request(
       'POST',
       '/api/v1/auth/login',
-      body: {'email': email, 'password': password},
+      body: {'nationalId': nationalId, 'password': password},
     ));
     final tokens = SessionTokens.fromJson(json);
     SessionStore.save(tokens);

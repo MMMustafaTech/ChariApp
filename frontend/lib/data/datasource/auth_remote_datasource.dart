@@ -23,9 +23,10 @@ class AuthRemoteDatasource {
         password: password,
       );
 
-  Future<UserModel?> login(String email, String password) async {
-    await _api.login(email, password);
-    return UserModel(id: '', email: email, password: '', name: '');
+  Future<UserModel?> login(String nationalId, String password) async {
+    await _api.login(nationalId, password);
+    final profile = await _api.profile();
+    return UserModel(id: nationalId, email: profile['email'] as String? ?? '', password: '', name: '');
   }
 
   Future<void> logout() => _api.logout();

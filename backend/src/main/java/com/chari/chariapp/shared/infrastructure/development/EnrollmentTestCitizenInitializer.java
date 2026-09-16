@@ -28,8 +28,8 @@ import java.time.Instant;
 @ConditionalOnProperty(prefix = "app.test-data.enrollment-citizen", name = "enabled", havingValue = "true")
 public class EnrollmentTestCitizenInitializer implements ApplicationRunner {
 
-    public static final String NATIONAL_ID = "123456789";
-    public static final String PHONE = "+23590000001";
+    public static final String NATIONAL_ID = "CID001";
+    public static final String PHONE = "+23590000003";
 
     private static final Logger log = LoggerFactory.getLogger(EnrollmentTestCitizenInitializer.class);
 

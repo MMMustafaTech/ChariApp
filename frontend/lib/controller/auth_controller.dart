@@ -66,19 +66,19 @@ class AuthController {
   }
 
   Future<UserModel?> login(BuildContext context) async {
-    if (emailController.text.trim().isEmpty || passController.text.isEmpty) {
-      _showMessage(context, 'أدخل البريد الإلكتروني وكلمة المرور');
+    if (idController.text.trim().isEmpty || passController.text.isEmpty) {
+      _showMessage(context, 'أدخل الرقم الوطني وكلمة المرور');
       return null;
     }
     try {
       final user = await _datasource.login(
-        emailController.text.trim(),
+        idController.text.trim(),
         passController.text,
       );
       if (user == null) _showMessage(context, 'تعذر تسجيل الدخول');
       return user;
     } on ApiException catch (_) {
-      _showMessage(context, 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      _showMessage(context, 'الرقم الوطني أو كلمة المرور غير صحيحة');
       return null;
     }
   }

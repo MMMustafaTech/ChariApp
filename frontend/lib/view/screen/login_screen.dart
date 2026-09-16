@@ -53,9 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 90),
                 CustomTextFormAuth(
-                  hinttext: "البريد الإلكتروني",
+                  hinttext: "الرقم الوطني (National ID)",
                   isPassword: false,
-                  controller: controller.emailController,
+                  controller: controller.idController,
                 ),
                 SizedBox(height: 12),
                 CustomTextFormAuth(

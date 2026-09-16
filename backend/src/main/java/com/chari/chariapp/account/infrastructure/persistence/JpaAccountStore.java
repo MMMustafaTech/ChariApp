@@ -38,6 +38,11 @@ public class JpaAccountStore implements AccountStore {
     }
 
     @Override
+    public Optional<Account> findByNationalIdLookup(String nationalIdLookup) {
+        return accountRepository.findByNationalIdLookup(nationalIdLookup).map(AccountJpaEntity::toDomain);
+    }
+
+    @Override
     public Optional<Account> findById(com.chari.chariapp.account.domain.AccountId accountId) {
         return accountRepository.findById(accountId.value().toString()).map(AccountJpaEntity::toDomain);
     }

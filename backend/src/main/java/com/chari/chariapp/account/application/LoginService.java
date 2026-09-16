@@ -51,7 +51,9 @@ public class LoginService implements LoginUseCase {
     @Transactional
     public TokenPair login(LoginCommand command) {
         Objects.requireNonNull(command, "Login command is required");
-        Account account = accountStore.findByEmailLookup(command.emailLookup())
+        Account account = (command.nationalIdLookup() != null
+                ? accountStore.findByNationalIdLookup(command.nationalIdLookup())
+                : accountStore.findByEmailLookup(command.emailLookup()))
                 .filter(candidate -> candidate.status() == AccountStatus.ACTIVE)
                 .filter(candidate -> passwordHasher.matches(command.rawPassword(), candidate.passwordHash()))
                 .orElseThrow(InvalidCredentialsException::new);

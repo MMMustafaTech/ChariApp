@@ -14,6 +14,10 @@ public interface AccountStore {
 
     Optional<Account> findByEmailLookup(String emailLookup);
 
+    default Optional<Account> findByNationalIdLookup(String nationalIdLookup) {
+        return Optional.empty();
+    }
+
     Optional<Account> findById(AccountId accountId);
 
     default Account updateStatus(AccountId accountId, com.chari.chariapp.account.domain.AccountStatus status) {
