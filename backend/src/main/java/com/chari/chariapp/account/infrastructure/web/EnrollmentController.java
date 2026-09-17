@@ -9,6 +9,7 @@ import com.chari.chariapp.account.application.VerifyEnrollmentOtpCommand;
 import com.chari.chariapp.account.application.VerifyEnrollmentOtpUseCase;
 import com.chari.chariapp.account.domain.AccountId;
 import com.chari.chariapp.account.domain.EnrollmentChallengeId;
+import com.chari.chariapp.citizen.domain.PhoneReference;
 import com.chari.chariapp.shared.security.PersonalDataProtector;
 import com.chari.chariapp.shared.security.PersonalDataNormalizer;
 import jakarta.validation.Valid;
@@ -53,8 +54,15 @@ public class EnrollmentController {
             @Valid @RequestBody EnrollmentOtpRequest request
     ) {
         try {
+            String normalizedPhone = PersonalDataNormalizer.phone(request.phoneNumber());
+            String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
             var challengeId = requestEnrollmentOtp.request(new RequestEnrollmentOtpCommand(
-                    dataProtector.lookup(PersonalDataNormalizer.nationalId(request.nationalId()))
+                    dataProtector.lookup(PersonalDataNormalizer.nationalId(request.nationalId())),
+                    new PhoneReference(
+                            dataProtector.lookup(normalizedPhone),
+                            dataProtector.encrypt(normalizedPhone)
+                    ),
+                    dataProtector.lookup(normalizedEmail)
             ));
             return ResponseEntity.accepted().body(new EnrollmentOtpRequestResponse(challengeId.value()));
         } catch (EnrollmentUnavailableException ignored) {
@@ -86,7 +94,9 @@ public class EnrollmentController {
     }
 
     public record EnrollmentOtpRequest(
-            @NotBlank @Pattern(regexp = "[A-Za-z0-9 -]{6,32}") String nationalId
+            @NotBlank @Pattern(regexp = "[A-Za-z0-9 -]{6,32}") String nationalId,
+            @NotBlank @Pattern(regexp = "\\+[1-9]\\d{7,14}") String phoneNumber,
+            @NotBlank @Email @Size(max = 254) String email
     ) {
     }
 

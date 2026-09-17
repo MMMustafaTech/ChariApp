@@ -1,6 +1,7 @@
 package com.chari.chariapp.account.application;
 
 import com.chari.chariapp.account.application.port.out.EnrollmentChallengeStore;
+import com.chari.chariapp.account.application.port.out.AccountStore;
 import com.chari.chariapp.account.application.port.out.OtpCodeGenerator;
 import com.chari.chariapp.account.application.port.out.OtpSender;
 import com.chari.chariapp.account.application.port.out.VerificationCodeHasher;
@@ -21,6 +22,7 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
     private static final Duration OTP_LIFETIME = Duration.ofMinutes(5);
 
     private final CitizenStore citizenStore;
+    private final AccountStore accountStore;
     private final EnrollmentChallengeStore challengeStore;
     private final OtpCodeGenerator codeGenerator;
     private final VerificationCodeHasher codeHasher;
@@ -29,6 +31,7 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
 
     public RequestEnrollmentOtpService(
             CitizenStore citizenStore,
+            AccountStore accountStore,
             EnrollmentChallengeStore challengeStore,
             OtpCodeGenerator codeGenerator,
             VerificationCodeHasher codeHasher,
@@ -36,6 +39,7 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
             Clock clock
     ) {
         this.citizenStore = Objects.requireNonNull(citizenStore, "Citizen store is required");
+        this.accountStore = Objects.requireNonNull(accountStore, "Account store is required");
         this.challengeStore = Objects.requireNonNull(challengeStore, "Challenge store is required");
         this.codeGenerator = Objects.requireNonNull(codeGenerator, "OTP code generator is required");
         this.codeHasher = Objects.requireNonNull(codeHasher, "Verification code hasher is required");
@@ -48,8 +52,11 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
         Objects.requireNonNull(command, "Request OTP command is required");
         Citizen citizen = citizenStore.findByNationalIdLookup(command.nationalIdLookup())
                 .orElseThrow(EnrollmentUnavailableException::new);
-        PhoneReference verifiedPhone = citizen.verifiedPhoneOptional()
-                .orElseThrow(EnrollmentUnavailableException::new);
+        if (accountStore.existsByEmailLookup(command.emailLookup())
+                || accountStore.existsByCitizenId(citizen.id())) {
+            throw new EnrollmentUnavailableException();
+        }
+        PhoneReference requestedPhone = Objects.requireNonNull(command.phone(), "Phone is required");
 
         String code = codeGenerator.generate();
         Instant now = Instant.now(clock);
@@ -57,8 +64,8 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
                 EnrollmentChallengeId.newId(),
                 citizen.id(),
                 VerificationChallengePurpose.ACCOUNT_ENROLLMENT,
-                verifiedPhone.lookup(),
-                verifiedPhone.ciphertext(),
+                requestedPhone.lookup(),
+                requestedPhone.ciphertext(),
                 codeHasher.hash(code),
                 now.plus(OTP_LIFETIME),
                 0,
@@ -66,7 +73,7 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
                 null
         );
         challengeStore.save(challenge);
-        otpSender.sendEnrollmentCode(verifiedPhone, code);
+        otpSender.sendEnrollmentCode(requestedPhone, code);
         return challenge.id();
     }
 }

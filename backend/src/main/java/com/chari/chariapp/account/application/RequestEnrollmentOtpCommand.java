@@ -1,4 +1,10 @@
 package com.chari.chariapp.account.application;
 
-public record RequestEnrollmentOtpCommand(String nationalIdLookup) {
+import com.chari.chariapp.citizen.domain.PhoneReference;
+
+public record RequestEnrollmentOtpCommand(
+        String nationalIdLookup,
+        PhoneReference phone,
+        String emailLookup
+) {
 }

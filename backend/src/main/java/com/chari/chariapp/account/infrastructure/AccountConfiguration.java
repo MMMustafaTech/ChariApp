@@ -112,6 +112,7 @@ public class AccountConfiguration {
     @Bean
     public RequestEnrollmentOtpUseCase requestEnrollmentOtpUseCase(
             CitizenStore citizenStore,
+            AccountStore accountStore,
             EnrollmentChallengeStore challengeStore,
             OtpCodeGenerator codeGenerator,
             VerificationCodeHasher codeHasher,
@@ -119,16 +120,17 @@ public class AccountConfiguration {
             Clock clock
     ) {
         return new RequestEnrollmentOtpService(
-                citizenStore, challengeStore, codeGenerator, codeHasher, otpSender, clock
+                citizenStore, accountStore, challengeStore, codeGenerator, codeHasher, otpSender, clock
         );
     }
 
     @Bean
     public VerifyEnrollmentOtpUseCase verifyEnrollmentOtpUseCase(
             EnrollmentChallengeStore challengeStore,
+            CitizenStore citizenStore,
             VerificationCodeHasher codeHasher,
             Clock clock
     ) {
-        return new VerifyEnrollmentOtpService(challengeStore, codeHasher, clock);
+        return new VerifyEnrollmentOtpService(challengeStore, citizenStore, codeHasher, clock);
     }
 }

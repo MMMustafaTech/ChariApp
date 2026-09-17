@@ -41,7 +41,7 @@ class SecurityBoundaryTests {
     void enrollmentRequestIsPublicButLegacyRegistrationIsNot() throws Exception {
         mockMvc.perform(post("/auth/enrollment/otp")
                         .contentType("application/json")
-                        .content("{\"nationalId\":\"ABC-123456\"}"))
+                        .content("{\"nationalId\":\"ABC-123456\",\"phoneNumber\":\"+23599123456\",\"email\":\"test@example.com\"}"))
                 .andExpect(status().isAccepted());
 
         mockMvc.perform(post("/auth/register")

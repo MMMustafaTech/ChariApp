@@ -15,7 +15,7 @@ Authorization: Bearer <accessToken>
 
 | الطريقة والمسار | Body | يرجع |
 |---|---|---|
-| `POST /auth/enrollment/otp` | `{"nationalId":"123456789"}` | `202` مع `{"challengeId":"uuid"}` |
+| `POST /auth/enrollment/otp` | `{"nationalId":"123456789","phoneNumber":"+23599123456","email":"citizen@example.com"}` | `202` مع `{"challengeId":"uuid"}` |
 | `POST /auth/enrollment/otp/verify` | `{"challengeId":"uuid","code":"123456"}` | `204 No Content` |
 | `POST /auth/enrollment/accounts` | `{"challengeId":"uuid","email":"...","password":"..."}` | `201` مع `{"accountId":"uuid"}` |
 | `POST /api/v1/auth/login` | `{"nationalId":"CID001","password":"..."}` | `200` مع `accessToken`, `refreshToken`, `tokenType`, `expiresIn` |

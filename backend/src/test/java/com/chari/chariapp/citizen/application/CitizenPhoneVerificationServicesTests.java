@@ -64,7 +64,7 @@ class CitizenPhoneVerificationServicesTests {
 
         ConfirmCitizenPhoneVerificationService confirmService = new ConfirmCitizenPhoneVerificationService(
                 citizens, new SingleAccountStore(operator), challenges,
-                new VerifyEnrollmentOtpService(challenges, hasher, CLOCK), audit, CLOCK
+                new VerifyEnrollmentOtpService(challenges, citizens, hasher, CLOCK), audit, CLOCK
         );
         confirmService.confirm(new ConfirmCitizenPhoneVerificationCommand(citizen.id(), challengeId, "123456", operator.id()));
 

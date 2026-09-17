@@ -1,11 +1,14 @@
 package com.chari.chariapp.account.application;
 
 import com.chari.chariapp.account.application.port.out.EnrollmentChallengeStore;
+import com.chari.chariapp.account.application.port.out.AccountStore;
 import com.chari.chariapp.account.application.port.out.OtpCodeGenerator;
 import com.chari.chariapp.account.application.port.out.OtpSender;
 import com.chari.chariapp.account.application.port.out.VerificationCodeHasher;
 import com.chari.chariapp.account.domain.EnrollmentChallenge;
 import com.chari.chariapp.account.domain.EnrollmentChallengeId;
+import com.chari.chariapp.account.domain.Account;
+import com.chari.chariapp.account.domain.AccountId;
 import com.chari.chariapp.account.domain.VerificationChallengePurpose;
 import com.chari.chariapp.citizen.application.port.out.CitizenStore;
 import com.chari.chariapp.citizen.domain.Citizen;
@@ -28,6 +31,7 @@ class EnrollmentOtpServicesTests {
 
     private static final String NATIONAL_ID_LOOKUP = "a".repeat(64);
     private static final String PHONE_LOOKUP = "b".repeat(64);
+    private static final String EMAIL_LOOKUP = "c".repeat(64);
     private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-08-28T00:00:00Z"), ZoneOffset.UTC);
 
     @Test
@@ -36,10 +40,13 @@ class EnrollmentOtpServicesTests {
         InMemoryChallengeStore challengeStore = new InMemoryChallengeStore();
         CapturingOtpSender sender = new CapturingOtpSender();
         RequestEnrollmentOtpService service = new RequestEnrollmentOtpService(
-                new SingleCitizenStore(citizen), challengeStore, () -> "123456", new PrefixCodeHasher(), sender, CLOCK
+                new SingleCitizenStore(citizen), new NoAccountsStore(), challengeStore,
+                () -> "123456", new PrefixCodeHasher(), sender, CLOCK
         );
 
-        EnrollmentChallengeId challengeId = service.request(new RequestEnrollmentOtpCommand(NATIONAL_ID_LOOKUP));
+        EnrollmentChallengeId challengeId = service.request(new RequestEnrollmentOtpCommand(
+                NATIONAL_ID_LOOKUP, citizen.verifiedPhone(), EMAIL_LOOKUP
+        ));
 
         EnrollmentChallenge challenge = challengeStore.findById(challengeId).orElseThrow();
         assertThat(challenge.destinationLookup()).isEqualTo(PHONE_LOOKUP);
@@ -50,7 +57,7 @@ class EnrollmentOtpServicesTests {
     }
 
     @Test
-    void doesNotIssueAnOtpForAMigratedCitizenWithoutAVerifiedPhone() {
+    void sendsOtpToThePhoneProvidedForAMigratedCitizen() {
         Citizen migratedCitizen = new Citizen(
                 CitizenId.newId(),
                 new NationalIdReference(NATIONAL_ID_LOOKUP, "encrypted-national-id"),
@@ -59,41 +66,53 @@ class EnrollmentOtpServicesTests {
                 Instant.parse("2026-08-27T00:00:00Z")
         );
         RequestEnrollmentOtpService service = new RequestEnrollmentOtpService(
-                new SingleCitizenStore(migratedCitizen), new InMemoryChallengeStore(), () -> "123456",
+                new SingleCitizenStore(migratedCitizen), new NoAccountsStore(), new InMemoryChallengeStore(), () -> "123456",
                 new PrefixCodeHasher(), new CapturingOtpSender(), CLOCK
         );
 
-        assertThatThrownBy(() -> service.request(new RequestEnrollmentOtpCommand(NATIONAL_ID_LOOKUP)))
-                .isInstanceOf(EnrollmentUnavailableException.class);
+        EnrollmentChallengeId challengeId = service.request(new RequestEnrollmentOtpCommand(
+                NATIONAL_ID_LOOKUP, new PhoneReference(PHONE_LOOKUP, "encrypted-phone"), EMAIL_LOOKUP
+        ));
+
+        assertThat(challengeId).isNotNull();
     }
 
     @Test
     void verifiesTheCorrectOtpAndRecordsTheVerificationTime() {
         InMemoryChallengeStore store = new InMemoryChallengeStore();
+        Citizen citizen = citizen();
+        SingleCitizenStore citizens = new SingleCitizenStore(citizen);
         EnrollmentChallenge challenge = new EnrollmentChallenge(
-                EnrollmentChallengeId.newId(), CitizenId.newId(), VerificationChallengePurpose.ACCOUNT_ENROLLMENT,
+                EnrollmentChallengeId.newId(), citizen.id(), VerificationChallengePurpose.ACCOUNT_ENROLLMENT,
                 PHONE_LOOKUP, "encrypted-phone", "hash:123456",
                 Instant.parse("2026-08-28T00:05:00Z"), 0, null, null
         );
         store.save(challenge);
-        VerifyEnrollmentOtpService service = new VerifyEnrollmentOtpService(store, new PrefixCodeHasher(), CLOCK);
+        VerifyEnrollmentOtpService service = new VerifyEnrollmentOtpService(
+                store, citizens, new PrefixCodeHasher(), CLOCK
+        );
 
         service.verify(new VerifyEnrollmentOtpCommand(challenge.id(), "123456"));
 
         assertThat(store.findById(challenge.id()).orElseThrow().verifiedAt())
                 .isEqualTo(Instant.parse("2026-08-28T00:00:00Z"));
+        assertThat(citizens.findById(citizen.id()).orElseThrow().verifiedPhoneOptional())
+                .contains(new PhoneReference(PHONE_LOOKUP, "encrypted-phone"));
     }
 
     @Test
     void countsIncorrectOtpAttemptsWithoutExposingTheCorrectCode() {
         InMemoryChallengeStore store = new InMemoryChallengeStore();
+        Citizen citizen = citizen();
         EnrollmentChallenge challenge = new EnrollmentChallenge(
-                EnrollmentChallengeId.newId(), CitizenId.newId(), VerificationChallengePurpose.ACCOUNT_ENROLLMENT,
+                EnrollmentChallengeId.newId(), citizen.id(), VerificationChallengePurpose.ACCOUNT_ENROLLMENT,
                 PHONE_LOOKUP, "encrypted-phone", "hash:123456",
                 Instant.parse("2026-08-28T00:05:00Z"), 0, null, null
         );
         store.save(challenge);
-        VerifyEnrollmentOtpService service = new VerifyEnrollmentOtpService(store, new PrefixCodeHasher(), CLOCK);
+        VerifyEnrollmentOtpService service = new VerifyEnrollmentOtpService(
+                store, new SingleCitizenStore(citizen), new PrefixCodeHasher(), CLOCK
+        );
 
         assertThatThrownBy(() -> service.verify(new VerifyEnrollmentOtpCommand(challenge.id(), "000000")))
                 .isInstanceOf(InvalidEnrollmentOtpException.class);
@@ -161,7 +180,7 @@ class EnrollmentOtpServicesTests {
     }
 
     private static final class SingleCitizenStore implements CitizenStore {
-        private final Citizen citizen;
+        private Citizen citizen;
 
         private SingleCitizenStore(Citizen citizen) {
             this.citizen = citizen;
@@ -184,12 +203,40 @@ class EnrollmentOtpServicesTests {
 
         @Override
         public Citizen updateVerifiedPhone(CitizenId citizenId, PhoneReference verifiedPhone, Instant verifiedAt) {
-            throw new UnsupportedOperationException();
+            citizen = new Citizen(citizen.id(), citizen.nationalId(), verifiedPhone, verifiedAt, citizen.createdAt());
+            return citizen;
         }
 
         @Override
         public Citizen save(Citizen citizen) {
             return citizen;
+        }
+    }
+
+    private static class NoAccountsStore implements AccountStore {
+        @Override
+        public boolean existsByEmailLookup(String emailLookup) {
+            return false;
+        }
+
+        @Override
+        public boolean existsByCitizenId(CitizenId citizenId) {
+            return false;
+        }
+
+        @Override
+        public Optional<Account> findByEmailLookup(String emailLookup) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Account> findById(AccountId accountId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Account save(Account account) {
+            return account;
         }
     }
 }
