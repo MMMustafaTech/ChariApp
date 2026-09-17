@@ -51,10 +51,18 @@ public class RequestEnrollmentOtpService implements RequestEnrollmentOtpUseCase 
     public EnrollmentChallengeId request(RequestEnrollmentOtpCommand command) {
         Objects.requireNonNull(command, "Request OTP command is required");
         Citizen citizen = citizenStore.findByNationalIdLookup(command.nationalIdLookup())
-                .orElseThrow(EnrollmentUnavailableException::new);
-        if (accountStore.existsByEmailLookup(command.emailLookup())
-                || accountStore.existsByCitizenId(citizen.id())) {
-            throw new EnrollmentUnavailableException();
+                .orElseThrow(() -> new EnrollmentUnavailableException(
+                        EnrollmentUnavailableException.Reason.NATIONAL_ID_NOT_FOUND
+                ));
+        if (accountStore.existsByCitizenId(citizen.id())) {
+            throw new EnrollmentUnavailableException(
+                    EnrollmentUnavailableException.Reason.CITIZEN_ACCOUNT_EXISTS
+            );
+        }
+        if (accountStore.existsByEmailLookup(command.emailLookup())) {
+            throw new EnrollmentUnavailableException(
+                    EnrollmentUnavailableException.Reason.EMAIL_ALREADY_EXISTS
+            );
         }
         PhoneReference requestedPhone = Objects.requireNonNull(command.phone(), "Phone is required");
 

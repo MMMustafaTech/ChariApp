@@ -46,12 +46,35 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage(), 400));
     }
 
-    @ExceptionHandler({AccountAlreadyExistsException.class, EnrollmentUnavailableException.class})
-    public ResponseEntity<EnrollmentErrorResponse> handleEnrollmentUnavailable(Exception ex) {
+    @ExceptionHandler(EnrollmentUnavailableException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleEnrollmentUnavailable(EnrollmentUnavailableException ex) {
         log.warn("Enrollment unavailable: {} ({})", ex.getClass().getSimpleName(), ex.getMessage());
+        return switch (ex.reason()) {
+            case NATIONAL_ID_NOT_FOUND -> enrollmentError(
+                    HttpStatus.NOT_FOUND,
+                    "NATIONAL_ID_NOT_FOUND",
+                    "رقم الهوية غير موجود"
+            );
+            case CITIZEN_ACCOUNT_EXISTS -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "CITIZEN_ACCOUNT_EXISTS",
+                    "يوجد حساب مسجل لهذه الهوية"
+            );
+            case EMAIL_ALREADY_EXISTS -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "EMAIL_ALREADY_EXISTS",
+                    "البريد الإلكتروني مستخدم مسبقًا"
+            );
+        };
+    }
+
+    @ExceptionHandler(AccountAlreadyExistsException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleAccountAlreadyExists(AccountAlreadyExistsException ex) {
+        log.warn("Account creation conflict: {}", ex.getMessage());
         return enrollmentError(
-                "ENROLLMENT_UNAVAILABLE",
-                "تعذر إكمال التسجيل بهذه البيانات"
+                HttpStatus.CONFLICT,
+                "ACCOUNT_ALREADY_EXISTS",
+                "يوجد حساب مسجل بهذه البيانات"
         );
     }
 
@@ -145,8 +168,16 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<EnrollmentErrorResponse> enrollmentError(String code, String message) {
-        return ResponseEntity.badRequest().body(new EnrollmentErrorResponse(
-                code, message, HttpStatus.BAD_REQUEST.value()
+        return enrollmentError(HttpStatus.BAD_REQUEST, code, message);
+    }
+
+    private ResponseEntity<EnrollmentErrorResponse> enrollmentError(
+            HttpStatus status,
+            String code,
+            String message
+    ) {
+        return ResponseEntity.status(status).body(new EnrollmentErrorResponse(
+                code, message, status.value()
         ));
     }
 

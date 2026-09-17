@@ -52,8 +52,15 @@ public class CreateVerifiedCitizenAccountService implements CreateVerifiedCitize
         }
 
         EmailReference email = new EmailReference(command.emailLookup(), command.encryptedEmail());
-        if (accountStore.existsByEmailLookup(email.lookup()) || accountStore.existsByCitizenId(challenge.citizenId())) {
-            throw new AccountAlreadyExistsException("email or citizen");
+        if (accountStore.existsByCitizenId(challenge.citizenId())) {
+            throw new EnrollmentUnavailableException(
+                    EnrollmentUnavailableException.Reason.CITIZEN_ACCOUNT_EXISTS
+            );
+        }
+        if (accountStore.existsByEmailLookup(email.lookup())) {
+            throw new EnrollmentUnavailableException(
+                    EnrollmentUnavailableException.Reason.EMAIL_ALREADY_EXISTS
+            );
         }
 
         // The conditional update prevents two simultaneous registration requests from using the same proof.

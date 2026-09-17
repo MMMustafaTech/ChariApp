@@ -216,7 +216,7 @@ Authorization: Bearer <accessToken>
 - `409`: تعارض في حالة الطلب أو محاولة إنشاء طلب/موعد مفتوح مكرر.
 - `429`: حاول لاحقًا؛ يوجد rate limit لمسارات الدخول وOTP.
 
-استخدم `code` في منطق الواجهة، واعرض `message` أو رسالة الحقل. تبقى حالات الهوية/الحساب برسالة `ENROLLMENT_UNAVAILABLE` عامة لحماية الخصوصية. لا تسجل كلمات المرور أو OTP أو access/refresh tokens داخل logs أو analytics.
+استخدم `code` في منطق الواجهة، واعرض `message` أو رسالة الحقل. في الوضع التجريبي الحالي ترجع حالات الهوية/الحساب أكواد `NATIONAL_ID_NOT_FOUND` و`CITIZEN_ACCOUNT_EXISTS` و`EMAIL_ALREADY_EXISTS` بشكل صريح. هذا يكشف معلومات من السجل ويجب إعادته إلى رسالة عامة قبل الاستخدام الحقيقي. لا تسجل كلمات المرور أو OTP أو access/refresh tokens داخل logs أو analytics.
 
 ## قواعد مهمة
 

@@ -2,7 +2,6 @@ package com.chari.chariapp.account.infrastructure.web;
 
 import com.chari.chariapp.account.application.CreateVerifiedCitizenAccountCommand;
 import com.chari.chariapp.account.application.CreateVerifiedCitizenAccountUseCase;
-import com.chari.chariapp.account.application.EnrollmentUnavailableException;
 import com.chari.chariapp.account.application.RequestEnrollmentOtpCommand;
 import com.chari.chariapp.account.application.RequestEnrollmentOtpUseCase;
 import com.chari.chariapp.account.application.VerifyEnrollmentOtpCommand;
@@ -53,22 +52,17 @@ public class EnrollmentController {
     public ResponseEntity<EnrollmentOtpRequestResponse> requestOtp(
             @Valid @RequestBody EnrollmentOtpRequest request
     ) {
-        try {
-            String normalizedPhone = PersonalDataNormalizer.phone(request.phoneNumber());
-            String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
-            var challengeId = requestEnrollmentOtp.request(new RequestEnrollmentOtpCommand(
-                    dataProtector.lookup(PersonalDataNormalizer.nationalId(request.nationalId())),
-                    new PhoneReference(
-                            dataProtector.lookup(normalizedPhone),
-                            dataProtector.encrypt(normalizedPhone)
-                    ),
-                    dataProtector.lookup(normalizedEmail)
-            ));
-            return ResponseEntity.accepted().body(new EnrollmentOtpRequestResponse(challengeId.value()));
-        } catch (EnrollmentUnavailableException ignored) {
-            // Keep the response shape identical so this endpoint does not confirm registry membership.
-            return ResponseEntity.accepted().body(new EnrollmentOtpRequestResponse(UUID.randomUUID()));
-        }
+        String normalizedPhone = PersonalDataNormalizer.phone(request.phoneNumber());
+        String normalizedEmail = request.email().trim().toLowerCase(Locale.ROOT);
+        var challengeId = requestEnrollmentOtp.request(new RequestEnrollmentOtpCommand(
+                dataProtector.lookup(PersonalDataNormalizer.nationalId(request.nationalId())),
+                new PhoneReference(
+                        dataProtector.lookup(normalizedPhone),
+                        dataProtector.encrypt(normalizedPhone)
+                ),
+                dataProtector.lookup(normalizedEmail)
+        ));
+        return ResponseEntity.accepted().body(new EnrollmentOtpRequestResponse(challengeId.value()));
     }
 
     @PostMapping("/otp/verify")

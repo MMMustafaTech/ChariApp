@@ -43,7 +43,8 @@ class SecurityBoundaryTests {
         mockMvc.perform(post("/auth/enrollment/otp")
                         .contentType("application/json")
                         .content("{\"nationalId\":\"ABC-123456\",\"phoneNumber\":\"+23599123456\",\"email\":\"test@example.com\"}"))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NATIONAL_ID_NOT_FOUND"));
 
         mockMvc.perform(post("/auth/register")
                         .contentType("application/json")
