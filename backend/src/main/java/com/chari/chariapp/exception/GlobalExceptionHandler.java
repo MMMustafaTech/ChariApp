@@ -24,6 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -43,22 +46,75 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ex.getMessage(), 400));
     }
 
+    @ExceptionHandler({AccountAlreadyExistsException.class, EnrollmentUnavailableException.class})
+    public ResponseEntity<EnrollmentErrorResponse> handleEnrollmentUnavailable(Exception ex) {
+        log.warn("Enrollment unavailable: {} ({})", ex.getClass().getSimpleName(), ex.getMessage());
+        return enrollmentError(
+                "ENROLLMENT_UNAVAILABLE",
+                "تعذر إكمال التسجيل بهذه البيانات"
+        );
+    }
+
+    @ExceptionHandler(EnrollmentProofUnavailableException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleEnrollmentProofUnavailable(
+            EnrollmentProofUnavailableException ex
+    ) {
+        log.warn("Enrollment proof rejected: {}", ex.getMessage());
+        return enrollmentError(
+                "ENROLLMENT_PROOF_INVALID",
+                "انتهت صلاحية التحقق أو تم استخدامه؛ اطلب رمزًا جديدًا"
+        );
+    }
+
+    @ExceptionHandler(InvalidEnrollmentOtpException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleInvalidEnrollmentOtp(InvalidEnrollmentOtpException ex) {
+        log.warn("Enrollment OTP rejected: {}", ex.getMessage());
+        return enrollmentError(
+                "INVALID_OTP",
+                "رمز التحقق غير صحيح أو انتهت صلاحيته"
+        );
+    }
+
+    @ExceptionHandler(WeakPasswordException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleWeakPassword(WeakPasswordException ex) {
+        return enrollmentError(
+                "WEAK_PASSWORD",
+                "كلمة المرور يجب أن تتكون من 12 إلى 128 حرفًا"
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.putIfAbsent(error.getField(), validationMessage(error.getField()))
+        );
+        log.warn("Client validation rejected fields: {}", fieldErrors.keySet());
+        return ResponseEntity.badRequest().body(new EnrollmentErrorResponse(
+                "VALIDATION_ERROR",
+                "بيانات الطلب غير صحيحة",
+                HttpStatus.BAD_REQUEST.value(),
+                fieldErrors
+        ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleUnreadableRequest(HttpMessageNotReadableException ex) {
+        log.warn("Unreadable request body: {}", ex.getMessage());
+        return enrollmentError(
+                "MALFORMED_JSON",
+                "صيغة JSON غير صحيحة أو أحد الحقول من نوع غير متوقع"
+        );
+    }
+
     @ExceptionHandler({
-            AccountAlreadyExistsException.class,
-            EnrollmentProofUnavailableException.class,
-            EnrollmentUnavailableException.class,
             CitizenPhoneVerificationException.class,
-            InvalidEnrollmentOtpException.class,
-            WeakPasswordException.class,
             AttachmentUploadException.class,
-            IllegalArgumentException.class,
-            MethodArgumentNotValidException.class,
-            HttpMessageNotReadableException.class
+            IllegalArgumentException.class
     })
-    public ResponseEntity<ErrorResponse> handleEnrollmentInput(Exception ex) {
+    public ResponseEntity<EnrollmentErrorResponse> handleInvalidInput(Exception ex) {
         log.warn("Client input rejected: {} ({})", ex.getClass().getSimpleName(), ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("Unable to complete enrollment", HttpStatus.BAD_REQUEST.value()));
+        return enrollmentError("INVALID_REQUEST", "بيانات الطلب غير صحيحة");
     }
 
     @ExceptionHandler({InvalidCredentialsException.class, InvalidRefreshTokenException.class})
@@ -86,5 +142,23 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("Something went wrong", 500));
+    }
+
+    private ResponseEntity<EnrollmentErrorResponse> enrollmentError(String code, String message) {
+        return ResponseEntity.badRequest().body(new EnrollmentErrorResponse(
+                code, message, HttpStatus.BAD_REQUEST.value()
+        ));
+    }
+
+    private String validationMessage(String field) {
+        return switch (field) {
+            case "nationalId" -> "رقم الهوية مطلوب ويجب أن يتكون من 6 إلى 32 حرفًا أو رقمًا";
+            case "phoneNumber" -> "رقم الهاتف مطلوب بالصيغة الدولية مثل +23599123456";
+            case "email" -> "البريد الإلكتروني غير صالح";
+            case "password" -> "كلمة المرور يجب أن تتكون من 12 إلى 128 حرفًا";
+            case "challengeId" -> "معرّف عملية التحقق مطلوب";
+            case "code" -> "رمز التحقق يجب أن يتكون من 6 أرقام";
+            default -> "القيمة غير صحيحة";
+        };
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -48,6 +49,18 @@ class SecurityBoundaryTests {
                         .contentType("application/json")
                         .content("{\"nationalId\":\"ABC-123456\",\"email\":\"test@example.com\",\"password\":\"a-secure-password\"}"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void enrollmentValidationIdentifiesInvalidFieldsWithoutExposingRegistryData() throws Exception {
+        mockMvc.perform(post("/auth/enrollment/otp")
+                        .contentType("application/json")
+                        .content("{\"nationalId\":\"CID002\",\"phoneNumber\":\"99123456\",\"email\":\"not-an-email\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.message").value("بيانات الطلب غير صحيحة"))
+                .andExpect(jsonPath("$.fieldErrors.phoneNumber").exists())
+                .andExpect(jsonPath("$.fieldErrors.email").exists());
     }
 
     @Test
