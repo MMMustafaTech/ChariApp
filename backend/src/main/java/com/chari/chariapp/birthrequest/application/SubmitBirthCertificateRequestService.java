@@ -19,9 +19,9 @@ public class SubmitBirthCertificateRequestService {
         if (kind == BirthCertificateRequestKind.NEWBORN_REGISTRATION && details == null) throw new IllegalArgumentException("Newborn registration details are required");
         if (kind != BirthCertificateRequestKind.NEWBORN_REGISTRATION && details != null) throw new IllegalArgumentException("Newborn details are only valid for a newborn registration");
         CitizenId citizenId = access.requireActiveCitizen(actorId);
-        if (requests.hasOpenRequest(citizenId)) throw new BirthCertificateRequestConflictException("An open birth certificate request already exists");
+        if (requests.hasOpenRequest(citizenId, kind)) throw new BirthCertificateRequestConflictException(BirthCertificateRequestConflictException.Reason.OPEN_REQUEST_EXISTS);
         Instant now = Instant.now(clock); BirthCertificateRequest request = BirthCertificateRequest.submitted(citizenId, kind, reason, now);
-        try { requests.save(request); } catch (DataIntegrityViolationException ex) { throw new BirthCertificateRequestConflictException("An open birth certificate request already exists"); }
+        try { requests.save(request); } catch (DataIntegrityViolationException ex) { throw new BirthCertificateRequestConflictException(BirthCertificateRequestConflictException.Reason.OPEN_REQUEST_EXISTS); }
         if (details != null) newbornDetails.save(request.id(), details);
         history.append(new BirthCertificateRequestStatusChange(UUID.randomUUID(), request.id(), null, BirthCertificateRequestStatus.SUBMITTED, null, actorId, now));
         audit.record(actorId.value().toString(), "BIRTH_CERTIFICATE_REQUEST_SUBMITTED", "SERVICE_REQUEST", request.id().toString(), "kind=" + kind, now);

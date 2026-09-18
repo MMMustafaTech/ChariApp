@@ -463,6 +463,16 @@ POST /api/v1/operations/citizens/{citizenId}/phone-verifications/{challengeId}/c
 | `CITIZEN_ACCOUNT_EXISTS` | يوجد حساب مرتبط بهذه الهوية (`409`). |
 | `EMAIL_ALREADY_EXISTS` | البريد الإلكتروني مستخدم مسبقًا (`409`). |
 | `ACCOUNT_ALREADY_EXISTS` | يوجد حساب مسجل بهذه البيانات (`409`). |
+| `BIRTH_REQUEST_VALIDATION_ERROR` | بيانات تسجيل المولود غير صحيحة؛ اقرأ `fieldErrors` (`400`). |
+| `BIRTH_REQUEST_ALREADY_OPEN` | يوجد طلب شهادة ميلاد مفتوح من النوع نفسه (`409`). |
+| `BIRTH_REQUEST_ATTACHMENTS_CLOSED` | لا يمكن إضافة مرفقات بعد بدء المراجعة (`409`). |
+| `BIRTH_REQUEST_SELF_REVIEW_NOT_ALLOWED` | الموظف يحاول مراجعة طلبه الشخصي (`409`). |
+| `BIRTH_REQUEST_NOT_AWAITING_REVIEW` | لا يمكن بدء المراجعة من الحالة الحالية (`409`). |
+| `BIRTH_REQUEST_NOT_UNDER_REVIEW` | لا يمكن اتخاذ قرار قبل بدء المراجعة (`409`). |
+| `BIRTH_REQUEST_REVIEWER_MISMATCH` | متخذ القرار ليس الموظف الذي بدأ المراجعة (`409`). |
+| `BIRTH_REQUEST_REJECTION_REASON_REQUIRED` | سبب الرفض مطلوب (`400`). |
+| `ATTACHMENT_INVALID` | نوع المرفق أو حجمه أو محتواه غير صالح (`400`). |
+| `RESOURCE_NOT_FOUND` | الطلب أو المرفق غير موجود أو لا يخص المستخدم (`404`). |
 
 > تنبيه تجريبي: الأكواد الأربعة السابقة تكشف وجود الهوية أو الحساب لتسهيل الاختبار فقط. قبل الاستخدام الحقيقي يجب إعادتها إلى استجابة عامة لا تسمح بفحص بيانات المواطنين.
 

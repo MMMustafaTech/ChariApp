@@ -38,7 +38,7 @@ public class BirthCertificateRequestAttachmentService {
     public BirthCertificateRequestAttachment upload(AccountId actor, UUID requestId, AttachmentUpload upload) {
         CitizenId citizen = access.requireActiveCitizen(actor);
         BirthCertificateRequest request = ownedRequest(citizen, requestId);
-        if (request.status() != BirthCertificateRequestStatus.SUBMITTED) throw new BirthCertificateRequestConflictException("Attachments can only be added before review starts");
+        if (request.status() != BirthCertificateRequestStatus.SUBMITTED) throw new BirthCertificateRequestConflictException(BirthCertificateRequestConflictException.Reason.ATTACHMENTS_CLOSED);
         String contentType = AttachmentUploadPolicy.validateMetadata(upload);
         String storageKey = UUID.randomUUID().toString();
         Instant now = Instant.now(clock);

@@ -157,6 +157,8 @@ Authorization: Bearer <accessToken>
 
 قيم `gender`: `MALE` أو `FEMALE`. استخدم `GET /api/v1/me/birth-certificate-requests/{id}/newborn-registration` لعرض هذه البيانات لصاحب الطلب فقط.
 
+يُمنع تكرار طلب شهادة ميلاد مفتوح من نفس `kind` فقط. يمكن للمواطن إبقاء طلب `CERTIFICATE_EXTRACT` وطلب `NEWBORN_REGISTRATION` مفتوحين معًا. يرجع التكرار `409` مع `code: BIRTH_REQUEST_ALREADY_OPEN`.
+
 > `APPROVED` تعني أن الطلب تمت الموافقة عليه، لكنها لا تنشئ وثيقة حكومية جديدة تلقائيًا في هذه المرحلة.
 
 ## المرفقات

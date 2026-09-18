@@ -26,7 +26,8 @@ public class BirthCertificateRequestJpaEntity {
     protected BirthCertificateRequestJpaEntity() { }
     private BirthCertificateRequestJpaEntity(BirthCertificateRequest request) { apply(request); }
     static BirthCertificateRequestJpaEntity from(BirthCertificateRequest request) { return new BirthCertificateRequestJpaEntity(request); }
-    void apply(BirthCertificateRequest request) { id=request.id().toString(); citizenId=request.citizenId().value().toString(); type=TYPE; requestKind=request.kind(); requestReason=request.requestReason(); status=request.status(); submittedAt=request.submittedAt(); reviewedBy=request.reviewedBy()==null?null:request.reviewedBy().value().toString(); reviewedAt=request.reviewedAt(); decisionReason=request.decisionReason(); openRequestKey=request.status().isOpen()?citizenId:null; openRequestType=request.status().isOpen()?TYPE:null; }
+    void apply(BirthCertificateRequest request) { id=request.id().toString(); citizenId=request.citizenId().value().toString(); type=TYPE; requestKind=request.kind(); requestReason=request.requestReason(); status=request.status(); submittedAt=request.submittedAt(); reviewedBy=request.reviewedBy()==null?null:request.reviewedBy().value().toString(); reviewedAt=request.reviewedAt(); decisionReason=request.decisionReason(); openRequestKey=request.status().isOpen()?citizenId:null; openRequestType=request.status().isOpen()?openRequestType(request.kind()):null; }
+    static String openRequestType(BirthCertificateRequestKind kind) { return TYPE + ":" + kind.name(); }
     BirthCertificateRequest toDomain() { return new BirthCertificateRequest(UUID.fromString(id),new CitizenId(UUID.fromString(citizenId)),requestKind,requestReason,status,reviewedBy==null?null:new AccountId(UUID.fromString(reviewedBy)),submittedAt,reviewedAt,decisionReason); }
     boolean isBirthCertificateRequest() { return TYPE.equals(type); }
 }

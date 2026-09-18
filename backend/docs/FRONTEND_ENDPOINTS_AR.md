@@ -129,6 +129,8 @@ Authorization: Bearer <accessToken>
 
 قيم النوع: `NEWBORN_REGISTRATION`, `CERTIFICATE_EXTRACT`, `DATA_CORRECTION`. قيم الجنس: `MALE`, `FEMALE`.
 
+يسمح للمواطن بطلب مفتوح واحد من كل `kind` في الوقت نفسه؛ لذلك يمكن أن يكون لديه `CERTIFICATE_EXTRACT` و`NEWBORN_REGISTRATION` مفتوحان معًا. تكرار النوع المفتوح نفسه يرجع `409` مع `code: BIRTH_REQUEST_ALREADY_OPEN`.
+
 ### استجابة تاريخ الطلب
 
 كل عنصر في التاريخ يرجع: `id`, `requestId`, `fromStatus`, `toStatus`, `reason`, `changedBy`, `changedAt`.

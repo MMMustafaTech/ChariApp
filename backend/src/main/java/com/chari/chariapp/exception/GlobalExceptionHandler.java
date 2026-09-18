@@ -33,10 +33,9 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<?> handleNotFound(NotFoundException ex) {
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(ex.getMessage(), 404));
+    public ResponseEntity<EnrollmentErrorResponse> handleNotFound(NotFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return enrollmentError(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "الطلب أو المورد غير موجود");
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -124,20 +123,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<EnrollmentErrorResponse> handleUnreadableRequest(HttpMessageNotReadableException ex) {
         log.warn("Unreadable request body: {}", ex.getMessage());
+        Map<String, String> newbornFieldErrors = newbornFieldErrors(rootCauseMessage(ex));
+        if (!newbornFieldErrors.isEmpty()) {
+            return ResponseEntity.badRequest().body(new EnrollmentErrorResponse(
+                    "BIRTH_REQUEST_VALIDATION_ERROR",
+                    "بيانات تسجيل المولود غير صحيحة",
+                    HttpStatus.BAD_REQUEST.value(),
+                    newbornFieldErrors
+            ));
+        }
         return enrollmentError(
                 "MALFORMED_JSON",
                 "صيغة JSON غير صحيحة أو أحد الحقول من نوع غير متوقع"
         );
     }
 
-    @ExceptionHandler({
-            CitizenPhoneVerificationException.class,
-            AttachmentUploadException.class,
-            IllegalArgumentException.class
-    })
+    @ExceptionHandler(AttachmentUploadException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleAttachmentUpload(AttachmentUploadException ex) {
+        log.warn("Attachment rejected: {}", ex.getMessage());
+        return enrollmentError("ATTACHMENT_INVALID", attachmentMessage(ex.getMessage()));
+    }
+
+    @ExceptionHandler({CitizenPhoneVerificationException.class, IllegalArgumentException.class})
     public ResponseEntity<EnrollmentErrorResponse> handleInvalidInput(Exception ex) {
         log.warn("Client input rejected: {} ({})", ex.getClass().getSimpleName(), ex.getMessage());
-        return enrollmentError("INVALID_REQUEST", "بيانات الطلب غير صحيحة");
+        return enrollmentError("INVALID_REQUEST", invalidRequestMessage(ex.getMessage()));
     }
 
     @ExceptionHandler({InvalidCredentialsException.class, InvalidRefreshTokenException.class})
@@ -151,13 +161,62 @@ public class GlobalExceptionHandler {
             PassportRequestTransitionException.class,
             NationalIdentityRequestConflictException.class,
             NationalIdentityRequestTransitionException.class,
-            BirthCertificateRequestConflictException.class,
-            BirthCertificateRequestTransitionException.class,
             AppointmentConflictException.class
     })
     public ResponseEntity<ErrorResponse> handlePassportRequestConflict(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value()));
+    }
+
+    @ExceptionHandler(BirthCertificateRequestConflictException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleBirthRequestConflict(
+            BirthCertificateRequestConflictException ex
+    ) {
+        return switch (ex.reason()) {
+            case OPEN_REQUEST_EXISTS -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_ALREADY_OPEN",
+                    "يوجد طلب مفتوح من النوع نفسه"
+            );
+            case ATTACHMENTS_CLOSED -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_ATTACHMENTS_CLOSED",
+                    "لا يمكن إضافة مرفقات بعد بدء مراجعة الطلب"
+            );
+            case SELF_REVIEW_NOT_ALLOWED -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_SELF_REVIEW_NOT_ALLOWED",
+                    "لا يمكن للموظف مراجعة طلبه الشخصي"
+            );
+        };
+    }
+
+    @ExceptionHandler(BirthCertificateRequestTransitionException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleBirthRequestTransition(
+            BirthCertificateRequestTransitionException ex
+    ) {
+        return switch (ex.reason()) {
+            case NOT_AWAITING_REVIEW -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_NOT_AWAITING_REVIEW",
+                    "الطلب ليس بانتظار بدء المراجعة"
+            );
+            case NOT_UNDER_REVIEW -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_NOT_UNDER_REVIEW",
+                    "يجب أن يكون الطلب قيد المراجعة قبل اتخاذ القرار"
+            );
+            case REVIEWER_MISMATCH -> enrollmentError(
+                    HttpStatus.CONFLICT,
+                    "BIRTH_REQUEST_REVIEWER_MISMATCH",
+                    "الموظف الذي بدأ المراجعة هو فقط من يستطيع اتخاذ القرار"
+            );
+            case REJECTION_REASON_REQUIRED -> enrollmentError(
+                    HttpStatus.BAD_REQUEST,
+                    "BIRTH_REQUEST_REJECTION_REASON_REQUIRED",
+                    "سبب الرفض مطلوب"
+            );
+        };
     }
 
     @ExceptionHandler(Exception.class)
@@ -189,7 +248,47 @@ public class GlobalExceptionHandler {
             case "password" -> "كلمة المرور يجب أن تتكون من 12 إلى 128 حرفًا";
             case "challengeId" -> "معرّف عملية التحقق مطلوب";
             case "code" -> "رمز التحقق يجب أن يتكون من 6 أرقام";
+            case "kind" -> "نوع الطلب مطلوب";
+            case "reason" -> "السبب يجب ألا يتجاوز 1000 حرف";
             default -> "القيمة غير صحيحة";
         };
+    }
+
+    private String attachmentMessage(String message) {
+        if (message == null) return "المرفق غير صالح";
+        if (message.contains("size")) return "حجم المرفق يجب أن يكون بين 1 بايت و5 ميجابايت";
+        if (message.contains("JPEG")) return "يسمح فقط بملفات JPEG وPNG وPDF";
+        if (message.contains("declared type")) return "محتوى الملف لا يطابق نوعه المعلن";
+        return "المرفق غير صالح";
+    }
+
+    private String invalidRequestMessage(String message) {
+        if (message == null) return "بيانات الطلب غير صحيحة";
+        if (message.contains("Newborn registration details are required")) return "بيانات المولود مطلوبة لطلب تسجيل مولود";
+        if (message.contains("Newborn details are only valid")) return "بيانات المولود مسموحة فقط لطلب تسجيل مولود";
+        if (message.contains("requires a reason")) return "سبب الطلب مطلوب لهذا النوع";
+        if (message.contains("reason must not exceed")) return "سبب الطلب يجب ألا يتجاوز 1000 حرف";
+        return "بيانات الطلب غير صحيحة";
+    }
+
+    private String rootCauseMessage(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null) current = current.getCause();
+        return current.getMessage();
+    }
+
+    private Map<String, String> newbornFieldErrors(String message) {
+        if (message == null) return Map.of();
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (message.startsWith("Child first name")) errors.put("newbornRegistration.childFirstName", "اسم الطفل الأول مطلوب وبحد أقصى 100 حرف");
+        else if (message.startsWith("Child last name")) errors.put("newbornRegistration.childLastName", "اسم عائلة الطفل مطلوب وبحد أقصى 100 حرف");
+        else if (message.startsWith("Date of birth")) errors.put("newbornRegistration.dateOfBirth", "تاريخ الميلاد مطلوب ولا يمكن أن يكون في المستقبل");
+        else if (message.startsWith("Place of birth")) errors.put("newbornRegistration.placeOfBirth", "مكان الميلاد مطلوب وبحد أقصى 200 حرف");
+        else if (message.startsWith("Gender")) errors.put("newbornRegistration.gender", "جنس المولود مطلوب");
+        else if (message.startsWith("Father full name")) errors.put("newbornRegistration.fatherFullName", "اسم الأب الكامل مطلوب وبحد أقصى 200 حرف");
+        else if (message.startsWith("Father national ID")) errors.put("newbornRegistration.fatherNationalId", "رقم هوية الأب يجب أن يتكون من 5 إلى 32 رقمًا");
+        else if (message.startsWith("Mother full name")) errors.put("newbornRegistration.motherFullName", "اسم الأم الكامل مطلوب وبحد أقصى 200 حرف");
+        else if (message.startsWith("Mother national ID")) errors.put("newbornRegistration.motherNationalId", "رقم هوية الأم يجب أن يتكون من 5 إلى 32 رقمًا");
+        return errors;
     }
 }

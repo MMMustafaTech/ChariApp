@@ -7,7 +7,7 @@ import java.util.*;
 @Repository public class JpaBirthCertificateRequestStore implements BirthCertificateRequestStore {
     private final SpringDataBirthCertificateRequestRepository repository;
     public JpaBirthCertificateRequestStore(SpringDataBirthCertificateRequestRepository repository){this.repository=repository;}
-    public boolean hasOpenRequest(CitizenId citizenId){return repository.hasOpen(citizenId.value().toString());}
+    public boolean hasOpenRequest(CitizenId citizenId, BirthCertificateRequestKind kind){return repository.hasOpen(citizenId.value().toString(), BirthCertificateRequestJpaEntity.openRequestType(kind));}
     public Optional<BirthCertificateRequest> findById(UUID id){return repository.findById(id.toString()).filter(BirthCertificateRequestJpaEntity::isBirthCertificateRequest).map(BirthCertificateRequestJpaEntity::toDomain);}
     public Optional<BirthCertificateRequest> findByIdForUpdate(UUID id){return repository.findForUpdate(id.toString()).filter(BirthCertificateRequestJpaEntity::isBirthCertificateRequest).map(BirthCertificateRequestJpaEntity::toDomain);}
     public BirthCertificateRequest save(BirthCertificateRequest request){return repository.findById(request.id().toString()).map(e->{e.apply(request);return repository.save(e);}).orElseGet(()->repository.save(BirthCertificateRequestJpaEntity.from(request))).toDomain();}
