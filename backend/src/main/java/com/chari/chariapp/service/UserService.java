@@ -1,13 +1,12 @@
 package com.chari.chariapp.service;
 
 import com.chari.chariapp.dto.UserResponse;
-import com.chari.chariapp.entity.Passport;
+import com.chari.chariapp.dto.PassportResponse;
 import com.chari.chariapp.entity.User;
 import com.chari.chariapp.exception.BadRequestException;
 import com.chari.chariapp.exception.NotFoundException;
-import com.chari.chariapp.repository.PassportRepository;
+import com.chari.chariapp.repository.NormalizedCitizenDocumentRepository;
 import com.chari.chariapp.repository.UserRepository;
-import com.chari.chariapp.repository.NationalIdRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,23 +14,21 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final NationalIdRepository nationalRepository;
+    private final NormalizedCitizenDocumentRepository documents;
     private final PasswordEncoder passwordEncoder;
-    private final PassportRepository passportRepository;
 
     public UserService(UserRepository userRepository,
-                       NationalIdRepository nationalRepository,
-                       PasswordEncoder passwordEncoder, PassportRepository passportRepository) {
+                       NormalizedCitizenDocumentRepository documents,
+                       PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
-        this.nationalRepository = nationalRepository;
+        this.documents = documents;
         this.passwordEncoder = passwordEncoder;
-        this.passportRepository = passportRepository;
     }
 
     public UserResponse register(String nationalId, String password, String email) {
 
-        if (!nationalRepository.existsByNationalIdNumber(nationalId)) {
+        if (!documents.nationalIdentityExists(nationalId)) {
             throw new NotFoundException("National ID does not exist");
         }
 
@@ -49,15 +46,15 @@ public class UserService {
 
         userRepository.save(user);
 
-        Passport passport = passportRepository
-                .findByNationalIdNumber(nationalId)
+        PassportResponse passport = documents
+                .passport(nationalId)
                 .orElseThrow(() -> new NotFoundException("Passport not found"));
 
         return new UserResponse(
                 user.getId(),
                 user.getNationalIdNumber(),
                 user.getEmail(),
-                passport.getName()
+                passport.getFirstName()
         );
     }
 
@@ -69,15 +66,15 @@ public class UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadRequestException("Invalid credentials");
         }
-        Passport passport = passportRepository
-                .findByNationalIdNumber(nationalId)
+        PassportResponse passport = documents
+                .passport(nationalId)
                 .orElseThrow(() -> new NotFoundException("Passport not found"));
 
         return new UserResponse(
                 user.getId(),
                 user.getNationalIdNumber(),
                 user.getEmail(),
-                passport.getName()
+                passport.getFirstName()
         );
     }
 }

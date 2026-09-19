@@ -18,7 +18,7 @@ class RefactorSchemaMigrationTests {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void createsTheRefactorSchemaWithoutRemovingLegacyTables() {
+    void createsTheThirdNormalFormSchemaWithoutRemovingLegacyTables() {
         List<String> tableNames = jdbcTemplate.queryForList(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'PUBLIC'",
                 String.class
@@ -33,7 +33,16 @@ class RefactorSchemaMigrationTests {
                 "PASSPORT_DOCUMENTS",
                 "BIRTH_CERTIFICATE_DOCUMENTS",
                 "SERVICE_REQUESTS",
-                "AUDIT_EVENTS"
+                "AUDIT_EVENTS",
+                "PERSON_RECORDS",
+                "PERSON_PARENT_RELATIONSHIPS",
+                "NORMALIZED_NATIONAL_IDENTITY_DOCUMENTS",
+                "NORMALIZED_PASSPORT_DOCUMENTS",
+                "NORMALIZED_BIRTH_CERTIFICATE_DOCUMENTS",
+                "CITIZENS_LEGACY",
+                "NATIONAL_IDENTITIES_LEGACY",
+                "PASSPORTS_LEGACY",
+                "BIRTH_CERTIFICATE_LEGACY"
         );
     }
 }

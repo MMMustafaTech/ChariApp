@@ -2,51 +2,24 @@ package com.chari.chariapp.service;
 
 import com.chari.chariapp.exception.NotFoundException;
 import com.chari.chariapp.dto.NationalIdResponse;
-import com.chari.chariapp.entity.NationalIdentity;
-import com.chari.chariapp.repository.NationalIdRepository;
+import com.chari.chariapp.repository.NormalizedCitizenDocumentRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 
 public class NationalIdService {
 
-    private final NationalIdRepository
+    private final NormalizedCitizenDocumentRepository
             repository;
 
-    public NationalIdService(NationalIdRepository repository) {
+    public NationalIdService(NormalizedCitizenDocumentRepository repository) {
         this.repository = repository;
 
     }
 
-    public List<NationalIdentity> getAll() {
-
-        return repository.findAll();
-    }
-
     public NationalIdResponse getByIdNumber(String nationalIdNumber) {
-        NationalIdentity identity = repository.findByNationalIdNumber(nationalIdNumber)
+        return repository.nationalIdentity(nationalIdNumber)
                 .orElseThrow(() -> new NotFoundException("National ID not found"));
-
-        NationalIdResponse response = new NationalIdResponse();
-        response.setNationalId(identity.getNationalIdNumber());
-        response.setFirstName(identity.getName());
-        response.setLastName(identity.getLastName());
-        response.setGender(identity.getGender());
-        response.setPlaceOfBirth(identity.getPlaceOfBirth());
-        response.setDateofBirth(identity.getDateOfBirth().toString());
-        response.setCardSerial(identity.getCardSerial());
-        response.setIssueDetails(identity.getPlaceOfIssue() + "/" + identity.getDateOfIssue().toString());
-        response.setDateOfExpiry(identity.getDateOfExpiry().toString());
-        response.setProfession(identity.getProfession());
-        response.setFatherName(identity.getFatherName());
-        response.setMotherName(identity.getMotherName());
-        response.setAddress(identity.getAddress());
-        response.setBloodGroup(identity.getBloodGroup());
-        return response;
-
-
     }
 
 }

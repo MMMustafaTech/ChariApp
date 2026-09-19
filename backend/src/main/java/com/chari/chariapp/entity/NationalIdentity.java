@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "national_identities")
+@Table(name = "national_identities_legacy")
 public class NationalIdentity {
 
     @Id
