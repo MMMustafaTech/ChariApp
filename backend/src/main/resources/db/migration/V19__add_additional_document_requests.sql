@@ -11,7 +11,7 @@ CREATE TABLE additional_document_requests (
     resolved_by CHAR(36),
     resolved_at TIMESTAMP,
     version BIGINT NOT NULL DEFAULT 0,
-    CONSTRAINT fk_additional_document_request_citizen FOREIGN KEY (citizen_id) REFERENCES citizens(id),
+    CONSTRAINT fk_additional_document_request_citizen FOREIGN KEY (citizen_id) REFERENCES citizen_registry(id),
     CONSTRAINT fk_additional_document_request_requested_by FOREIGN KEY (requested_by) REFERENCES accounts(id),
     CONSTRAINT fk_additional_document_request_resolved_by FOREIGN KEY (resolved_by) REFERENCES accounts(id)
 );
