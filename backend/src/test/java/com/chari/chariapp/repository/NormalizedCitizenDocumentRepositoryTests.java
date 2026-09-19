@@ -35,18 +35,18 @@ class NormalizedCitizenDocumentRepositoryTests {
         jdbc.update("INSERT INTO person_parent_relationships(child_person_id,parent_person_id,relationship_type) VALUES (?,?,?)",
                 child, mother, "MOTHER");
         jdbc.update("""
-                INSERT INTO normalized_national_identity_documents
+                INSERT INTO national_identities
                     (person_id,card_serial,place_of_issue,date_of_issue,date_of_expiry)
                 VALUES (?,?,?,?,?)
                 """, child, "CARD-1", "N'Djamena", Date.valueOf("2024-01-01"), Date.valueOf("2034-01-01"));
         jdbc.update("""
-                INSERT INTO normalized_passport_documents
+                INSERT INTO passports
                     (person_id,passport_number,place_of_issue,issuing_authority,date_of_issue,date_of_expiry)
                 VALUES (?,?,?,?,?,?)
                 """, child, "PASS-" + UUID.randomUUID(), "N'Djamena", "DG Police",
                 Date.valueOf("2025-01-01"), Date.valueOf("2035-01-01"));
         jdbc.update("""
-                INSERT INTO normalized_birth_certificate_documents
+                INSERT INTO birth_certificate
                     (person_id,certificate_number,declaration_date,created_at)
                 VALUES (?,?,?,CURRENT_TIMESTAMP)
                 """, child, "CERT-" + UUID.randomUUID(), Date.valueOf("2002-05-12"));

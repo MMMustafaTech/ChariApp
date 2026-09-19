@@ -19,7 +19,7 @@ public class NormalizedCitizenDocumentRepository {
 
     public boolean nationalIdentityExists(String nationalId) {
         return jdbc.sql("""
-                SELECT COUNT(*) FROM normalized_national_identity_documents document
+                SELECT COUNT(*) FROM national_identities document
                 JOIN person_records person ON person.id = document.person_id
                 WHERE person.national_id_number = :nationalId
                 """).param("nationalId", nationalId).query(Long.class).single() > 0;
@@ -32,7 +32,7 @@ public class NormalizedCitizenDocumentRepository {
                        document.place_of_issue, document.date_of_issue, document.date_of_expiry,
                        person.profession, father.first_name AS father_name,
                        mother.first_name AS mother_name, person.address, person.blood_group
-                FROM normalized_national_identity_documents document
+                FROM national_identities document
                 JOIN person_records person ON person.id = document.person_id
                 LEFT JOIN person_parent_relationships father_link
                        ON father_link.child_person_id = person.id AND father_link.relationship_type = 'FATHER'
@@ -67,7 +67,7 @@ public class NormalizedCitizenDocumentRepository {
                        person.date_of_birth, person.place_of_birth, document.date_of_issue,
                        document.date_of_expiry, document.place_of_issue, document.issuing_authority,
                        person.profession, person.nationality, person.gender
-                FROM normalized_passport_documents document
+                FROM passports document
                 JOIN person_records person ON person.id = document.person_id
                 WHERE person.national_id_number = :nationalId
                 """).param("nationalId", nationalId).query((rs, row) -> new PassportResponse(
@@ -88,7 +88,7 @@ public class NormalizedCitizenDocumentRepository {
                        mother.first_name AS mother_name, mother.date_of_birth AS mother_birth_date,
                        mother.place_of_birth AS mother_birth_place, mother.profession AS mother_profession,
                        document.declaration_date, person.address
-                FROM normalized_birth_certificate_documents document
+                FROM birth_certificate document
                 JOIN person_records person ON person.id = document.person_id
                 LEFT JOIN person_parent_relationships father_link
                        ON father_link.child_person_id = person.id AND father_link.relationship_type = 'FATHER'

@@ -25,7 +25,6 @@ class RefactorSchemaMigrationTests {
         );
 
         assertThat(tableNames).contains(
-                "CITIZENS",
                 "USERS",
                 "CITIZEN_REGISTRY",
                 "ACCOUNTS",
@@ -36,13 +35,38 @@ class RefactorSchemaMigrationTests {
                 "AUDIT_EVENTS",
                 "PERSON_RECORDS",
                 "PERSON_PARENT_RELATIONSHIPS",
-                "NORMALIZED_NATIONAL_IDENTITY_DOCUMENTS",
-                "NORMALIZED_PASSPORT_DOCUMENTS",
-                "NORMALIZED_BIRTH_CERTIFICATE_DOCUMENTS",
+                "NATIONAL_IDENTITIES",
+                "PASSPORTS",
+                "BIRTH_CERTIFICATE",
                 "CITIZENS_LEGACY",
                 "NATIONAL_IDENTITIES_LEGACY",
                 "PASSPORTS_LEGACY",
                 "BIRTH_CERTIFICATE_LEGACY"
+        );
+
+        assertThat(columnsOf("NATIONAL_IDENTITIES")).containsExactlyInAnyOrder(
+                "ID", "PERSON_ID", "CARD_SERIAL", "PLACE_OF_ISSUE", "DATE_OF_ISSUE", "DATE_OF_EXPIRY"
+        );
+        assertThat(columnsOf("PASSPORTS")).containsExactlyInAnyOrder(
+                "ID", "PERSON_ID", "PASSPORT_NUMBER", "PLACE_OF_ISSUE", "ISSUING_AUTHORITY",
+                "DATE_OF_ISSUE", "DATE_OF_EXPIRY"
+        );
+        assertThat(columnsOf("BIRTH_CERTIFICATE")).containsExactlyInAnyOrder(
+                "ID", "PERSON_ID", "CERTIFICATE_NUMBER", "DECLARATION_DATE", "CREATED_AT"
+        );
+        assertThat(tableNames).doesNotContain(
+                "NORMALIZED_NATIONAL_IDENTITY_DOCUMENTS",
+                "NORMALIZED_PASSPORT_DOCUMENTS",
+                "NORMALIZED_BIRTH_CERTIFICATE_DOCUMENTS"
+        );
+    }
+
+    private List<String> columnsOf(String tableName) {
+        return jdbcTemplate.queryForList(
+                "SELECT column_name FROM information_schema.columns " +
+                        "WHERE table_schema = 'PUBLIC' AND table_name = ?",
+                String.class,
+                tableName
         );
     }
 }
