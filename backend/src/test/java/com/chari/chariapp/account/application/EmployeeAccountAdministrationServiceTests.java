@@ -2,11 +2,15 @@ package com.chari.chariapp.account.application;
 
 import com.chari.chariapp.account.application.port.out.AccountStore;
 import com.chari.chariapp.account.application.port.out.PasswordHasher;
+import com.chari.chariapp.account.application.port.out.RefreshSessionStore;
+import com.chari.chariapp.account.application.port.out.StaffProfileStore;
 import com.chari.chariapp.account.domain.Account;
 import com.chari.chariapp.account.domain.AccountId;
 import com.chari.chariapp.account.domain.AccountRole;
 import com.chari.chariapp.account.domain.AccountStatus;
 import com.chari.chariapp.account.domain.EmailReference;
+import com.chari.chariapp.account.domain.RefreshSession;
+import com.chari.chariapp.account.domain.StaffProfile;
 import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import org.junit.jupiter.api.Test;
@@ -66,7 +70,18 @@ class EmployeeAccountAdministrationServiceTests {
             public String hash(String password) { return "hash:" + password; }
             public boolean matches(String password, String hash) { return hash(password).equals(hash); }
         };
-        return new EmployeeAccountAdministrationService(accounts, passwordHasher, audit, CLOCK);
+        StaffProfileStore profiles = new StaffProfileStore() {
+            private final Map<AccountId, StaffProfile> values = new HashMap<>();
+            public Optional<StaffProfile> findByAccountId(AccountId id) { return Optional.ofNullable(values.get(id)); }
+            public java.util.List<StaffProfile> findAll() { return java.util.List.copyOf(values.values()); }
+            public StaffProfile save(StaffProfile profile) { values.put(profile.accountId(), profile); return profile; }
+        };
+        RefreshSessionStore sessions = new RefreshSessionStore() {
+            public RefreshSession save(RefreshSession session) { return session; }
+            public Optional<RefreshSession> findByTokenHashForUpdate(String hash) { return Optional.empty(); }
+            public int revokeAllForAccount(AccountId id, Instant revokedAt) { return 0; }
+        };
+        return new EmployeeAccountAdministrationService(accounts, passwordHasher, profiles, sessions, audit, CLOCK);
     }
 
     private static Account account(Set<AccountRole> roles, AccountStatus status) {
@@ -82,7 +97,8 @@ class EmployeeAccountAdministrationServiceTests {
         public Optional<Account> findById(AccountId accountId) { return Optional.ofNullable(accounts.get(accountId)); }
         public Account updateStatus(AccountId accountId, AccountStatus status) {
             Account account = findById(accountId).orElseThrow();
-            Account updated = new Account(account.id(), account.citizenId(), account.email(), account.passwordHash(), status, account.roles(), account.createdAt());
+            Account updated = new Account(account.id(), account.citizenId(), account.email(), account.passwordHash(), status,
+                    account.roles(), account.permissions(), account.authorizationVersion() + 1, account.createdAt());
             accounts.put(accountId, updated);
             return updated;
         }

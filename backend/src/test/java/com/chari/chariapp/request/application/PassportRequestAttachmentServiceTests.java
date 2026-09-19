@@ -12,6 +12,7 @@ import com.chari.chariapp.request.application.port.out.PassportRequestAttachment
 import com.chari.chariapp.request.application.port.out.PassportRequestStore;
 import com.chari.chariapp.request.domain.PassportRequest;
 import com.chari.chariapp.request.domain.PassportRequestAttachment;
+import com.chari.chariapp.request.domain.AttachmentDocumentType;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +56,7 @@ class PassportRequestAttachmentServiceTests {
         );
 
         byte[] png = new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00};
-        PassportRequestAttachment saved = service.upload(citizenAccountId, request.id(),
+        PassportRequestAttachment saved = service.upload(citizenAccountId, request.id(), AttachmentDocumentType.PERSONAL_PHOTO,
                 new AttachmentUpload("../passport-photo.png", "image/png", png.length, new ByteArrayInputStream(png)));
 
         assertThat(saved.originalFileName()).isEqualTo("passport-photo.png");
@@ -85,7 +86,7 @@ class PassportRequestAttachmentServiceTests {
         );
 
         byte[] executableLookingData = new byte[]{0x4D, 0x5A, 0x00, 0x00, 0x00};
-        assertThatThrownBy(() -> service.upload(citizenAccountId, request.id(),
+        assertThatThrownBy(() -> service.upload(citizenAccountId, request.id(), AttachmentDocumentType.PERSONAL_PHOTO,
                 new AttachmentUpload("photo.png", "image/png", executableLookingData.length,
                         new ByteArrayInputStream(executableLookingData))))
                 .isInstanceOf(AttachmentUploadException.class)

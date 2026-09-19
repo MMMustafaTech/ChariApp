@@ -5,28 +5,33 @@ import com.chari.chariapp.document.application.port.out.CitizenDocumentReadStore
 import com.chari.chariapp.document.domain.MyBirthCertificate;
 import com.chari.chariapp.document.domain.MyNationalIdentity;
 import com.chari.chariapp.document.domain.MyPassport;
+import com.chari.chariapp.document.domain.DependentBirthCertificate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public class JpaCitizenDocumentReadStore implements CitizenDocumentReadStore {
     private final SpringDataPassportDocumentRepository passportDocuments;
     private final SpringDataNationalIdentityDocumentRepository nationalIdentityDocuments;
     private final SpringDataBirthCertificateDocumentRepository birthCertificateDocuments;
+    private final SpringDataDependentBirthCertificateDocumentRepository dependentBirthCertificates;
     private final EncryptedDocumentPayloadCodec payloadCodec;
 
     public JpaCitizenDocumentReadStore(
             SpringDataPassportDocumentRepository passportDocuments,
             SpringDataNationalIdentityDocumentRepository nationalIdentityDocuments,
             SpringDataBirthCertificateDocumentRepository birthCertificateDocuments,
+            SpringDataDependentBirthCertificateDocumentRepository dependentBirthCertificates,
             EncryptedDocumentPayloadCodec payloadCodec
     ) {
         this.passportDocuments = passportDocuments;
         this.nationalIdentityDocuments = nationalIdentityDocuments;
         this.birthCertificateDocuments = birthCertificateDocuments;
+        this.dependentBirthCertificates = dependentBirthCertificates;
         this.payloadCodec = payloadCodec;
     }
 
@@ -46,6 +51,22 @@ public class JpaCitizenDocumentReadStore implements CitizenDocumentReadStore {
     public Optional<MyBirthCertificate> findBirthCertificateByCitizenId(CitizenId citizenId) {
         return birthCertificateDocuments.findFirstByCitizenIdOrderByRevisionDesc(citizenId.value().toString())
                 .map(value -> birthCertificate(payloadCodec.decrypt(value.encryptedPayload())));
+    }
+
+    @Override
+    public List<DependentBirthCertificate> findDependentBirthCertificatesByCitizenId(CitizenId citizenId) {
+        return dependentBirthCertificates.findByParentCitizenIdOrderByCreatedAtDesc(citizenId.value().toString())
+                .stream()
+                .map(value -> new DependentBirthCertificate(value.id(), value.requestId(), value.parentCitizenId(),
+                        birthCertificate(payloadCodec.decrypt(value.encryptedPayload())), value.createdAt()))
+                .toList();
+    }
+
+    @Override
+    public Optional<DependentBirthCertificate> findDependentBirthCertificateById(java.util.UUID id) {
+        return dependentBirthCertificates.findById(id.toString())
+                .map(value -> new DependentBirthCertificate(value.id(), value.requestId(), value.parentCitizenId(),
+                        birthCertificate(payloadCodec.decrypt(value.encryptedPayload())), value.createdAt()));
     }
 
     private MyPassport passport(Map<String, String> p) {

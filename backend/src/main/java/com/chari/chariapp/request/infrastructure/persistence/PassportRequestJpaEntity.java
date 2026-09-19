@@ -39,6 +39,9 @@ public class PassportRequestJpaEntity {
     @Column(name = "request_reason", length = 1000)
     private String requestReason;
 
+    @Column(name = "request_payload", columnDefinition = "TEXT")
+    private String requestPayload;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     private PassportRequestStatus status;
@@ -67,20 +70,21 @@ public class PassportRequestJpaEntity {
     protected PassportRequestJpaEntity() {
     }
 
-    private PassportRequestJpaEntity(PassportRequest request) {
-        apply(request);
+    private PassportRequestJpaEntity(PassportRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) {
+        apply(request, payloadCodec);
     }
 
-    static PassportRequestJpaEntity from(PassportRequest request) {
-        return new PassportRequestJpaEntity(request);
+    static PassportRequestJpaEntity from(PassportRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) {
+        return new PassportRequestJpaEntity(request, payloadCodec);
     }
 
-    void apply(PassportRequest request) {
+    void apply(PassportRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) {
         id = request.id().toString();
         citizenId = request.citizenId().value().toString();
         type = PASSPORT_TYPE;
         requestKind = request.kind();
         requestReason = request.requestReason();
+        requestPayload = payloadCodec.encrypt(request.submissionDetails());
         status = request.status();
         submittedAt = request.submittedAt();
         reviewedBy = request.reviewedBy() == null ? null : request.reviewedBy().value().toString();
@@ -90,12 +94,13 @@ public class PassportRequestJpaEntity {
         openRequestType = request.status().isOpen() ? PASSPORT_TYPE : null;
     }
 
-    PassportRequest toDomain() {
+    PassportRequest toDomain(EncryptedServiceRequestPayloadCodec payloadCodec) {
         return new PassportRequest(
                 UUID.fromString(id),
                 new CitizenId(UUID.fromString(citizenId)),
                 requestKind,
                 requestReason,
+                payloadCodec.decrypt(requestPayload),
                 status,
                 reviewedBy == null ? null : new AccountId(UUID.fromString(reviewedBy)),
                 submittedAt,

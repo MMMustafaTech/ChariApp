@@ -9,6 +9,7 @@ import java.util.UUID;
 public record PassportRequestAttachment(
         UUID id,
         UUID requestId,
+        AttachmentDocumentType documentType,
         String storageKey,
         String originalFileName,
         String contentType,
@@ -17,6 +18,9 @@ public record PassportRequestAttachment(
         Instant uploadedAt
 ) {
     public PassportRequestAttachment {
+        if (documentType == null) {
+            throw new IllegalArgumentException("Attachment document type is required");
+        }
         if (sizeBytes < 1) {
             throw new IllegalArgumentException("Attachment must not be empty");
         }

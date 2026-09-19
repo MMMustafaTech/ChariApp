@@ -7,4 +7,5 @@ import com.chari.chariapp.appointment.application.port.out.AppointmentStore; imp
  public Appointment save(Appointment appointment){return repository.findById(appointment.id().toString()).map(e->{e.apply(appointment);return repository.save(e);}).orElseGet(()->repository.save(AppointmentJpaEntity.from(appointment))).toDomain();}
  public List<Appointment> findByCitizenId(CitizenId citizen){return repository.findByCitizenIdOrderByBookedAtDesc(citizen.value().toString()).stream().map(AppointmentJpaEntity::toDomain).toList();}
  public List<Appointment> findByStatus(AppointmentStatus status){return repository.findByStatusOrderByStartsAtAsc(status).stream().map(AppointmentJpaEntity::toDomain).toList();}
+ public List<Appointment> findAll(){return repository.findAll().stream().map(AppointmentJpaEntity::toDomain).toList();}
 }

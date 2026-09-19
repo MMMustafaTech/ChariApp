@@ -16,9 +16,12 @@ public class JpaPassportRequestStore implements PassportRequestStore {
     private static final String PASSPORT_TYPE = "PASSPORT";
 
     private final SpringDataPassportRequestRepository repository;
+    private final EncryptedServiceRequestPayloadCodec payloadCodec;
 
-    public JpaPassportRequestStore(SpringDataPassportRequestRepository repository) {
+    public JpaPassportRequestStore(SpringDataPassportRequestRepository repository,
+                                   EncryptedServiceRequestPayloadCodec payloadCodec) {
         this.repository = repository;
+        this.payloadCodec = payloadCodec;
     }
 
     @Override
@@ -28,36 +31,36 @@ public class JpaPassportRequestStore implements PassportRequestStore {
 
     @Override
     public Optional<PassportRequest> findById(UUID requestId) {
-        return repository.findById(requestId.toString()).map(PassportRequestJpaEntity::toDomain);
+        return repository.findById(requestId.toString()).map(value -> value.toDomain(payloadCodec));
     }
 
     @Override
     public Optional<PassportRequest> findByIdForUpdate(UUID requestId) {
-        return repository.findForUpdate(requestId.toString()).map(PassportRequestJpaEntity::toDomain);
+        return repository.findForUpdate(requestId.toString()).map(value -> value.toDomain(payloadCodec));
     }
 
     @Override
     public PassportRequest save(PassportRequest request) {
         return repository.findById(request.id().toString())
                 .map(entity -> {
-                    entity.apply(request);
+                    entity.apply(request, payloadCodec);
                     return repository.save(entity);
                 })
-                .orElseGet(() -> repository.save(PassportRequestJpaEntity.from(request)))
-                .toDomain();
+                .orElseGet(() -> repository.save(PassportRequestJpaEntity.from(request, payloadCodec)))
+                .toDomain(payloadCodec);
     }
 
     @Override
     public List<PassportRequest> findByStatus(PassportRequestStatus status) {
         return repository.findByTypeAndStatusOrderBySubmittedAtAsc(PASSPORT_TYPE, status).stream()
-                .map(PassportRequestJpaEntity::toDomain)
+                .map(value -> value.toDomain(payloadCodec))
                 .toList();
     }
 
     @Override
     public List<PassportRequest> findByCitizenId(CitizenId citizenId) {
         return repository.findByTypeAndCitizenIdOrderBySubmittedAtDesc(PASSPORT_TYPE, citizenId.value().toString()).stream()
-                .map(PassportRequestJpaEntity::toDomain)
+                .map(value -> value.toDomain(payloadCodec))
                 .toList();
     }
 }

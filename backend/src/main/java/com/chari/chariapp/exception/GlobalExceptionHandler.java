@@ -1,6 +1,7 @@
 package com.chari.chariapp.exception;
 
 import com.chari.chariapp.account.application.AccountAlreadyExistsException;
+import com.chari.chariapp.additionaldocument.domain.AdditionalDocumentRequestConflictException;
 import com.chari.chariapp.account.application.EnrollmentProofUnavailableException;
 import com.chari.chariapp.account.application.EnrollmentUnavailableException;
 import com.chari.chariapp.account.application.InvalidEnrollmentOtpException;
@@ -16,6 +17,10 @@ import com.chari.chariapp.identityrequest.domain.NationalIdentityRequestTransiti
 import com.chari.chariapp.birthrequest.application.BirthCertificateRequestConflictException;
 import com.chari.chariapp.birthrequest.domain.BirthCertificateRequestTransitionException;
 import com.chari.chariapp.appointment.application.AppointmentConflictException;
+import com.chari.chariapp.document.application.DocumentAlreadyExistsException;
+import com.chari.chariapp.document.application.DocumentNotFoundException;
+import com.chari.chariapp.document.application.DocumentIssuanceException;
+import org.springframework.security.access.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -38,11 +43,25 @@ public class GlobalExceptionHandler {
         return enrollmentError(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", "الطلب أو المورد غير موجود");
     }
 
+    @ExceptionHandler(DocumentNotFoundException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleDocumentNotFound(DocumentNotFoundException ex) {
+        return enrollmentError(HttpStatus.NOT_FOUND, "DOCUMENT_NOT_FOUND", "الوثيقة غير موجودة");
+    }
+
+    @ExceptionHandler(DocumentAlreadyExistsException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleDocumentAlreadyExists(DocumentAlreadyExistsException ex) {
+        return enrollmentError(HttpStatus.CONFLICT, "DOCUMENT_ALREADY_EXISTS", "الوثيقة موجودة مسبقًا");
+    }
+
+    @ExceptionHandler(DocumentIssuanceException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleDocumentIssuance(DocumentIssuanceException ex) {
+        return enrollmentError(HttpStatus.CONFLICT, ex.code(),
+                "لا تتوفر بيانات رسمية كافية لإصدار الوثيقة");
+    }
+
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(ex.getMessage(), 400));
+    public ResponseEntity<EnrollmentErrorResponse> handleBadRequest(BadRequestException ex) {
+        return enrollmentError(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "بيانات الطلب غير صحيحة");
     }
 
     @ExceptionHandler(EnrollmentUnavailableException.class)
@@ -151,79 +170,72 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({InvalidCredentialsException.class, InvalidRefreshTokenException.class})
-    public ResponseEntity<ErrorResponse> handleAuthenticationFailure(Exception ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse("Authentication failed", HttpStatus.UNAUTHORIZED.value()));
+    public ResponseEntity<EnrollmentErrorResponse> handleAuthenticationFailure(Exception ex) {
+        return enrollmentError(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "بيانات تسجيل الدخول غير صحيحة أو انتهت الجلسة");
     }
 
-    @ExceptionHandler({
-            PassportRequestConflictException.class,
-            PassportRequestTransitionException.class,
-            NationalIdentityRequestConflictException.class,
-            NationalIdentityRequestTransitionException.class,
-            AppointmentConflictException.class
-    })
-    public ResponseEntity<ErrorResponse> handlePassportRequestConflict(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value()));
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return enrollmentError(HttpStatus.FORBIDDEN, "FORBIDDEN", "لا تملك صلاحية تنفيذ هذه العملية");
+    }
+
+    @ExceptionHandler(AppointmentConflictException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleAppointmentConflict(AppointmentConflictException ex) {
+        return enrollmentError(HttpStatus.CONFLICT, "APPOINTMENT_CONFLICT", "يوجد تعارض مع الموعد المطلوب");
+    }
+
+    @ExceptionHandler(AdditionalDocumentRequestConflictException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleAdditionalDocumentConflict(AdditionalDocumentRequestConflictException ex) {
+        String message = switch (ex.code()) {
+            case "ADDITIONAL_DOCUMENTS_ALREADY_REQUESTED" -> "يوجد طلب مستندات إضافية مفتوح مسبقًا";
+            case "ADDITIONAL_DOCUMENTS_INCOMPLETE" -> "يجب رفع ملف واحد على الأقل لكل مستند مطلوب";
+            case "ADDITIONAL_DOCUMENTS_UPLOAD_CLOSED" -> "تم إرسال المستندات ولا يمكن إضافة ملفات جديدة";
+            case "ADDITIONAL_DOCUMENTS_NOT_SUBMITTED" -> "لم يرسل المواطن المستندات المطلوبة بعد";
+            case "ADDITIONAL_DOCUMENTS_UNRESOLVED" -> "يجب مراجعة المستندات الإضافية وإغلاقها قبل اتخاذ القرار";
+            case "ADDITIONAL_DOCUMENTS_REVIEWER_MISMATCH" -> "الموظف الذي يراجع الطلب هو فقط من يستطيع إدارة المستندات المطلوبة";
+            default -> "لا تسمح حالة طلب المستندات الحالية بهذه العملية";
+        };
+        return enrollmentError(HttpStatus.CONFLICT, ex.code(), message);
+    }
+
+    @ExceptionHandler(PassportRequestConflictException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handlePassportRequestConflict(PassportRequestConflictException ex) {
+        return requestConflict(ex.reason().name());
+    }
+
+    @ExceptionHandler(NationalIdentityRequestConflictException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleIdentityRequestConflict(NationalIdentityRequestConflictException ex) {
+        return requestConflict(ex.reason().name());
     }
 
     @ExceptionHandler(BirthCertificateRequestConflictException.class)
     public ResponseEntity<EnrollmentErrorResponse> handleBirthRequestConflict(
             BirthCertificateRequestConflictException ex
     ) {
-        return switch (ex.reason()) {
-            case OPEN_REQUEST_EXISTS -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_ALREADY_OPEN",
-                    "يوجد طلب مفتوح من النوع نفسه"
-            );
-            case ATTACHMENTS_CLOSED -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_ATTACHMENTS_CLOSED",
-                    "لا يمكن إضافة مرفقات بعد بدء مراجعة الطلب"
-            );
-            case SELF_REVIEW_NOT_ALLOWED -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_SELF_REVIEW_NOT_ALLOWED",
-                    "لا يمكن للموظف مراجعة طلبه الشخصي"
-            );
-        };
+        return requestConflict(ex.reason().name());
+    }
+
+    @ExceptionHandler(PassportRequestTransitionException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handlePassportRequestTransition(PassportRequestTransitionException ex) {
+        return requestTransition(ex.reason().name());
+    }
+
+    @ExceptionHandler(NationalIdentityRequestTransitionException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleIdentityRequestTransition(NationalIdentityRequestTransitionException ex) {
+        return requestTransition(ex.reason().name());
     }
 
     @ExceptionHandler(BirthCertificateRequestTransitionException.class)
     public ResponseEntity<EnrollmentErrorResponse> handleBirthRequestTransition(
             BirthCertificateRequestTransitionException ex
     ) {
-        return switch (ex.reason()) {
-            case NOT_AWAITING_REVIEW -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_NOT_AWAITING_REVIEW",
-                    "الطلب ليس بانتظار بدء المراجعة"
-            );
-            case NOT_UNDER_REVIEW -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_NOT_UNDER_REVIEW",
-                    "يجب أن يكون الطلب قيد المراجعة قبل اتخاذ القرار"
-            );
-            case REVIEWER_MISMATCH -> enrollmentError(
-                    HttpStatus.CONFLICT,
-                    "BIRTH_REQUEST_REVIEWER_MISMATCH",
-                    "الموظف الذي بدأ المراجعة هو فقط من يستطيع اتخاذ القرار"
-            );
-            case REJECTION_REASON_REQUIRED -> enrollmentError(
-                    HttpStatus.BAD_REQUEST,
-                    "BIRTH_REQUEST_REJECTION_REASON_REQUIRED",
-                    "سبب الرفض مطلوب"
-            );
-        };
+        return requestTransition(ex.reason().name());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGeneric(Exception ex) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Something went wrong", 500));
+    public ResponseEntity<EnrollmentErrorResponse> handleGeneric(Exception ex) {
+        log.error("Unhandled request failure", ex);
+        return enrollmentError(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "حدث خطأ داخلي؛ حاول مرة أخرى لاحقًا");
     }
 
     private ResponseEntity<EnrollmentErrorResponse> enrollmentError(String code, String message) {
@@ -238,6 +250,42 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(new EnrollmentErrorResponse(
                 code, message, status.value()
         ));
+    }
+
+    private ResponseEntity<EnrollmentErrorResponse> requestConflict(String reason) {
+        return switch (reason) {
+            case "OPEN_REQUEST_EXISTS" -> enrollmentError(
+                    HttpStatus.CONFLICT, "OPEN_REQUEST_EXISTS", "يوجد طلب مفتوح مسبقًا"
+            );
+            case "ATTACHMENTS_CLOSED" -> enrollmentError(
+                    HttpStatus.CONFLICT, "REQUEST_ATTACHMENTS_CLOSED", "لا يمكن إضافة مرفقات بعد بدء مراجعة الطلب"
+            );
+            case "SELF_REVIEW_NOT_ALLOWED" -> enrollmentError(
+                    HttpStatus.CONFLICT, "SELF_REVIEW_NOT_ALLOWED", "لا يمكن للموظف مراجعة طلبه الشخصي"
+            );
+            case "MISSING_REQUIRED_ATTACHMENTS" -> enrollmentError(
+                    HttpStatus.CONFLICT, "MISSING_REQUIRED_ATTACHMENTS", "لا يمكن بدء المراجعة قبل رفع كل المستندات المطلوبة"
+            );
+            default -> enrollmentError(HttpStatus.CONFLICT, "REQUEST_CONFLICT", "تتعارض العملية مع حالة الطلب الحالية");
+        };
+    }
+
+    private ResponseEntity<EnrollmentErrorResponse> requestTransition(String reason) {
+        return switch (reason) {
+            case "NOT_AWAITING_REVIEW" -> enrollmentError(
+                    HttpStatus.CONFLICT, "REQUEST_NOT_AWAITING_REVIEW", "الطلب ليس بانتظار بدء المراجعة"
+            );
+            case "NOT_UNDER_REVIEW" -> enrollmentError(
+                    HttpStatus.CONFLICT, "REQUEST_NOT_UNDER_REVIEW", "يجب أن يكون الطلب قيد المراجعة قبل اتخاذ القرار"
+            );
+            case "REVIEWER_MISMATCH" -> enrollmentError(
+                    HttpStatus.CONFLICT, "REQUEST_REVIEWER_MISMATCH", "الموظف الذي بدأ المراجعة هو فقط من يستطيع اتخاذ القرار"
+            );
+            case "REJECTION_REASON_REQUIRED" -> enrollmentError(
+                    HttpStatus.BAD_REQUEST, "REJECTION_REASON_REQUIRED", "سبب الرفض مطلوب"
+            );
+            default -> enrollmentError(HttpStatus.CONFLICT, "INVALID_REQUEST_TRANSITION", "لا تسمح حالة الطلب الحالية بهذه العملية");
+        };
     }
 
     private String validationMessage(String field) {

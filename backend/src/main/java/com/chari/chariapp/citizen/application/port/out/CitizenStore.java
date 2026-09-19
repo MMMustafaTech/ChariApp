@@ -5,6 +5,7 @@ import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.citizen.domain.PhoneReference;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface CitizenStore {
@@ -14,6 +15,10 @@ public interface CitizenStore {
     Optional<Citizen> findByNationalIdLookup(String nationalIdLookup);
 
     Optional<Citizen> findById(CitizenId citizenId);
+
+    default List<Citizen> findAll() {
+        return List.of();
+    }
 
     Citizen updateVerifiedPhone(CitizenId citizenId, PhoneReference verifiedPhone, Instant verifiedAt);
 

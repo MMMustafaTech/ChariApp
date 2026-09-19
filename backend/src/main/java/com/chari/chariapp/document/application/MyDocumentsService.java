@@ -10,9 +10,11 @@ import com.chari.chariapp.document.application.port.out.CitizenDocumentReadStore
 import com.chari.chariapp.document.domain.MyBirthCertificate;
 import com.chari.chariapp.document.domain.MyNationalIdentity;
 import com.chari.chariapp.document.domain.MyPassport;
+import com.chari.chariapp.document.domain.DependentBirthCertificate;
 import com.chari.chariapp.exception.NotFoundException;
 
 import java.util.Objects;
+import java.util.List;
 
 /** Ownership is resolved from the JWT account, never from a request path parameter. */
 public class MyDocumentsService implements MyDocumentsUseCase {
@@ -34,19 +36,24 @@ public class MyDocumentsService implements MyDocumentsUseCase {
     @Override
     public MyPassport getPassport(AccountId accountId) {
         return documentStore.findPassportByCitizenId(citizenIdFor(accountId))
-                .orElseThrow(() -> new NotFoundException("Passport not found"));
+                .orElseThrow(DocumentNotFoundException::new);
     }
 
     @Override
     public MyNationalIdentity getNationalIdentity(AccountId accountId) {
         return documentStore.findNationalIdentityByCitizenId(citizenIdFor(accountId))
-                .orElseThrow(() -> new NotFoundException("National identity not found"));
+                .orElseThrow(DocumentNotFoundException::new);
     }
 
     @Override
     public MyBirthCertificate getBirthCertificate(AccountId accountId) {
         return documentStore.findBirthCertificateByCitizenId(citizenIdFor(accountId))
-                .orElseThrow(() -> new NotFoundException("Birth certificate not found"));
+                .orElseThrow(DocumentNotFoundException::new);
+    }
+
+    @Override
+    public List<DependentBirthCertificate> getDependentBirthCertificates(AccountId accountId) {
+        return documentStore.findDependentBirthCertificatesByCitizenId(citizenIdFor(accountId));
     }
 
     private CitizenId citizenIdFor(AccountId accountId) {

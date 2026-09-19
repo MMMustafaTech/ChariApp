@@ -12,7 +12,13 @@ import com.chari.chariapp.request.domain.PassportRequestStatus;
 import com.chari.chariapp.request.domain.PassportRequestKind;
 import com.chari.chariapp.request.domain.PassportRequestStatusChange;
 import com.chari.chariapp.request.domain.PassportRequestAttachment;
+import com.chari.chariapp.request.domain.RequestBeneficiaryType;
+import com.chari.chariapp.request.domain.ServiceRequestSubmissionDetails;
+import com.chari.chariapp.request.domain.AttachmentDocumentType;
+import com.chari.chariapp.request.application.AttachmentRequirements;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.core.io.InputStreamResource;
@@ -20,6 +26,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,12 +62,11 @@ public class PassportRequestController {
 
     @PostMapping("/api/v1/me/passport-requests")
     ResponseEntity<PassportRequest> submit(
-            @Valid @RequestBody(required = false) Submission body,
+            @Valid @RequestBody Submission body,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        PassportRequestKind kind = body == null || body.kind() == null ? PassportRequestKind.ISSUANCE : body.kind();
-        String reason = body == null ? null : body.reason();
-        return ResponseEntity.status(HttpStatus.CREATED).body(submitService.submit(accountId(jwt), kind, reason));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(submitService.submit(accountId(jwt), body.kind(), body.reason(), body.toDetails()));
     }
 
     @GetMapping("/api/v1/me/passport-requests")
@@ -76,10 +82,11 @@ public class PassportRequestController {
     @PostMapping(value = "/api/v1/me/passport-requests/{requestId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<AttachmentResponse> uploadAttachment(
             @PathVariable UUID requestId,
+            @RequestParam AttachmentDocumentType documentType,
             @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        PassportRequestAttachment attachment = attachmentService.upload(accountId(jwt), requestId,
+        PassportRequestAttachment attachment = attachmentService.upload(accountId(jwt), requestId, documentType,
                 new AttachmentUpload(file.getOriginalFilename(), file.getContentType(), file.getSize(), inputStream(file)));
         return ResponseEntity.status(HttpStatus.CREATED).body(AttachmentResponse.from(attachment));
     }
@@ -87,6 +94,12 @@ public class PassportRequestController {
     @GetMapping("/api/v1/me/passport-requests/{requestId}/attachments")
     List<AttachmentResponse> myAttachments(@PathVariable UUID requestId, @AuthenticationPrincipal Jwt jwt) {
         return attachmentService.listMine(accountId(jwt), requestId).stream().map(AttachmentResponse::from).toList();
+    }
+
+    @GetMapping("/api/v1/me/passport-requests/{requestId}/attachment-requirements")
+    AttachmentRequirements myAttachmentRequirements(@PathVariable UUID requestId,
+                                                     @AuthenticationPrincipal Jwt jwt) {
+        return attachmentService.requirementsMine(accountId(jwt), requestId);
     }
 
     @GetMapping("/api/v1/me/passport-requests/{requestId}/attachments/{attachmentId}/content")
@@ -99,6 +112,7 @@ public class PassportRequestController {
     }
 
     @GetMapping("/api/v1/operations/passport-requests")
+    @PreAuthorize("hasAuthority('PERM_REQUEST_VIEW')")
     List<PassportRequest> list(
             @RequestParam(defaultValue = "SUBMITTED") PassportRequestStatus status,
             @AuthenticationPrincipal Jwt jwt
@@ -107,11 +121,20 @@ public class PassportRequestController {
     }
 
     @GetMapping("/api/v1/operations/passport-requests/{requestId}/attachments")
+    @PreAuthorize("hasAuthority('PERM_REQUEST_VIEW')")
     List<AttachmentResponse> operationAttachments(@PathVariable UUID requestId, @AuthenticationPrincipal Jwt jwt) {
         return attachmentService.listForOperations(accountId(jwt), requestId).stream().map(AttachmentResponse::from).toList();
     }
 
+    @GetMapping("/api/v1/operations/passport-requests/{requestId}/attachment-requirements")
+    @PreAuthorize("hasAuthority('PERM_REQUEST_VIEW')")
+    AttachmentRequirements operationAttachmentRequirements(@PathVariable UUID requestId,
+                                                            @AuthenticationPrincipal Jwt jwt) {
+        return attachmentService.requirementsForOperations(accountId(jwt), requestId);
+    }
+
     @GetMapping("/api/v1/operations/passport-requests/{requestId}/attachments/{attachmentId}/content")
+    @PreAuthorize("hasAuthority('PERM_REQUEST_VIEW')")
     ResponseEntity<InputStreamResource> operationAttachmentContent(
             @PathVariable UUID requestId,
             @PathVariable UUID attachmentId,
@@ -121,11 +144,13 @@ public class PassportRequestController {
     }
 
     @PostMapping("/api/v1/operations/passport-requests/{requestId}/review")
+    @PreAuthorize("hasAuthority('PERM_REQUEST_REVIEW')")
     PassportRequest review(@PathVariable UUID requestId, @AuthenticationPrincipal Jwt jwt) {
         return reviewService.startReview(accountId(jwt), requestId);
     }
 
     @PostMapping("/api/v1/operations/passport-requests/{requestId}/decision")
+    @PreAuthorize("(#body.approved and hasAuthority('PERM_REQUEST_APPROVE')) or (!#body.approved and hasAuthority('PERM_REQUEST_REJECT'))")
     PassportRequest decide(
             @PathVariable UUID requestId,
             @Valid @RequestBody Decision body,
@@ -159,13 +184,14 @@ public class PassportRequestController {
 
     public record AttachmentResponse(
             UUID id,
+            AttachmentDocumentType documentType,
             String fileName,
             String contentType,
             long sizeBytes,
             java.time.Instant uploadedAt
     ) {
         static AttachmentResponse from(PassportRequestAttachment attachment) {
-            return new AttachmentResponse(attachment.id(), attachment.originalFileName(), attachment.contentType(),
+            return new AttachmentResponse(attachment.id(), attachment.documentType(), attachment.originalFileName(), attachment.contentType(),
                     attachment.sizeBytes(), attachment.uploadedAt());
         }
     }
@@ -173,6 +199,17 @@ public class PassportRequestController {
     public record Decision(boolean approved, @Size(max = 1000) String reason) {
     }
 
-    public record Submission(PassportRequestKind kind, @Size(max = 1000) String reason) {
+    public record Submission(
+            @NotNull PassportRequestKind kind,
+            @Size(max = 1000) String reason,
+            @NotNull RequestBeneficiaryType beneficiaryType,
+            UUID dependentBirthCertificateId,
+            @NotBlank @Size(max = 128) String paymentReference,
+            @Size(max = 128) String lossReportNumber
+    ) {
+        ServiceRequestSubmissionDetails toDetails() {
+            return new ServiceRequestSubmissionDetails(beneficiaryType, dependentBirthCertificateId,
+                    paymentReference, lossReportNumber);
+        }
     }
 }

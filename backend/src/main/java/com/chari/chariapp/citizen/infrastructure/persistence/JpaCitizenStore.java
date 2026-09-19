@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.NoSuchElementException;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,6 +33,11 @@ public class JpaCitizenStore implements CitizenStore {
     @Override
     public Optional<Citizen> findById(com.chari.chariapp.citizen.domain.CitizenId citizenId) {
         return repository.findById(citizenId.value().toString()).map(CitizenJpaEntity::toDomain);
+    }
+
+    @Override
+    public List<Citizen> findAll() {
+        return repository.findAll().stream().map(CitizenJpaEntity::toDomain).toList();
     }
 
     @Override

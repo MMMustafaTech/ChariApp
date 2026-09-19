@@ -5,6 +5,7 @@ import com.chari.chariapp.account.domain.AccountId;
 import com.chari.chariapp.account.domain.AccountRole;
 import com.chari.chariapp.account.domain.AccountStatus;
 import com.chari.chariapp.account.domain.EmailReference;
+import com.chari.chariapp.account.domain.StaffPermission;
 import com.chari.chariapp.citizen.domain.CitizenId;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,6 +61,14 @@ public class AccountJpaEntity {
     )
     private Set<RoleJpaEntity> roles = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "account_permissions",
+            joinColumns = @JoinColumn(name = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    private Set<PermissionJpaEntity> permissions = new HashSet<>();
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -72,7 +81,7 @@ public class AccountJpaEntity {
     protected AccountJpaEntity() {
     }
 
-    private AccountJpaEntity(Account account, Set<RoleJpaEntity> roles) {
+    private AccountJpaEntity(Account account, Set<RoleJpaEntity> roles, Set<PermissionJpaEntity> permissions) {
         this.id = account.id().value().toString();
         this.citizenId = account.citizenIdOptional().map(value -> value.value().toString()).orElse(null);
         this.emailLookup = account.email().lookup();
@@ -81,16 +90,19 @@ public class AccountJpaEntity {
         this.status = account.status();
         this.authorizationVersion = account.authorizationVersion();
         this.roles = new HashSet<>(roles);
+        this.permissions = new HashSet<>(permissions);
         this.createdAt = account.createdAt();
         this.updatedAt = account.createdAt();
     }
 
-    public static AccountJpaEntity fromDomain(Account account, Set<RoleJpaEntity> roles) {
-        return new AccountJpaEntity(account, roles);
+    public static AccountJpaEntity fromDomain(Account account, Set<RoleJpaEntity> roles, Set<PermissionJpaEntity> permissions) {
+        return new AccountJpaEntity(account, roles, permissions);
     }
 
     public Account toDomain() {
         Set<AccountRole> accountRoles = roles.stream().map(RoleJpaEntity::getCode).collect(java.util.stream.Collectors.toUnmodifiableSet());
+        Set<StaffPermission> accountPermissions = permissions.stream().map(PermissionJpaEntity::getCode)
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
         CitizenId domainCitizenId = citizenId == null ? null : new CitizenId(UUID.fromString(citizenId));
         return new Account(
                 new AccountId(UUID.fromString(id)),
@@ -99,6 +111,7 @@ public class AccountJpaEntity {
                 passwordHash,
                 status,
                 accountRoles,
+                accountPermissions,
                 authorizationVersion,
                 createdAt
         );
@@ -120,6 +133,16 @@ public class AccountJpaEntity {
     }
 
     void invalidateAuthorization() {
+        this.authorizationVersion++;
+    }
+
+    void updatePermissions(Set<PermissionJpaEntity> permissions) {
+        Set<StaffPermission> currentCodes = this.permissions.stream().map(PermissionJpaEntity::getCode)
+                .collect(java.util.stream.Collectors.toSet());
+        Set<StaffPermission> requestedCodes = permissions.stream().map(PermissionJpaEntity::getCode)
+                .collect(java.util.stream.Collectors.toSet());
+        if (currentCodes.equals(requestedCodes)) return;
+        this.permissions = new HashSet<>(permissions);
         this.authorizationVersion++;
     }
 

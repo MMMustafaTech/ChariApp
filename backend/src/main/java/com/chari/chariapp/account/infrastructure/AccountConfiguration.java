@@ -23,6 +23,7 @@ import com.chari.chariapp.account.application.port.out.PasswordHasher;
 import com.chari.chariapp.account.application.port.out.RefreshSessionStore;
 import com.chari.chariapp.account.application.port.out.RefreshTokenGenerator;
 import com.chari.chariapp.account.application.port.out.RefreshTokenHasher;
+import com.chari.chariapp.account.application.port.out.StaffProfileStore;
 import com.chari.chariapp.account.application.port.out.VerificationCodeHasher;
 import com.chari.chariapp.citizen.application.port.out.CitizenStore;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
@@ -75,10 +76,13 @@ public class AccountConfiguration {
     public EmployeeAccountAdministrationUseCase employeeAccountAdministrationUseCase(
             AccountStore accountStore,
             PasswordHasher passwordHasher,
+            StaffProfileStore staffProfileStore,
+            RefreshSessionStore refreshSessionStore,
             OperationalAuditStore auditStore,
             Clock clock
     ) {
-        return new EmployeeAccountAdministrationService(accountStore, passwordHasher, auditStore, clock);
+        return new EmployeeAccountAdministrationService(accountStore, passwordHasher, staffProfileStore,
+                refreshSessionStore, auditStore, clock);
     }
 
     @Bean

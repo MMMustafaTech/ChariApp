@@ -5,6 +5,7 @@ import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.identityrequest.domain.NationalIdentityRequest;
 import com.chari.chariapp.identityrequest.domain.NationalIdentityRequestKind;
 import com.chari.chariapp.identityrequest.domain.NationalIdentityRequestStatus;
+import com.chari.chariapp.request.infrastructure.persistence.EncryptedServiceRequestPayloadCodec;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +26,7 @@ public class NationalIdentityRequestJpaEntity {
     @Column(nullable = false, length = 64) private String type;
     @Enumerated(EnumType.STRING) @Column(name = "request_kind", nullable = false, length = 32) private NationalIdentityRequestKind requestKind;
     @Column(name = "request_reason", length = 1000) private String requestReason;
+    @Column(name = "request_payload", columnDefinition = "TEXT") private String requestPayload;
     @Enumerated(EnumType.STRING) @Column(nullable = false, length = 32) private NationalIdentityRequestStatus status;
     @Column(name = "submitted_at", nullable = false) private Instant submittedAt;
     @Column(name = "reviewed_by", length = 36, columnDefinition = "CHAR(36)") private String reviewedBy;
@@ -35,20 +37,20 @@ public class NationalIdentityRequestJpaEntity {
     @Version private Long version;
 
     protected NationalIdentityRequestJpaEntity() { }
-    private NationalIdentityRequestJpaEntity(NationalIdentityRequest request) { apply(request); }
-    static NationalIdentityRequestJpaEntity from(NationalIdentityRequest request) { return new NationalIdentityRequestJpaEntity(request); }
+    private NationalIdentityRequestJpaEntity(NationalIdentityRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) { apply(request, payloadCodec); }
+    static NationalIdentityRequestJpaEntity from(NationalIdentityRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) { return new NationalIdentityRequestJpaEntity(request, payloadCodec); }
 
-    void apply(NationalIdentityRequest request) {
+    void apply(NationalIdentityRequest request, EncryptedServiceRequestPayloadCodec payloadCodec) {
         id = request.id().toString(); citizenId = request.citizenId().value().toString(); type = TYPE;
-        requestKind = request.kind(); requestReason = request.requestReason(); status = request.status(); submittedAt = request.submittedAt();
+        requestKind = request.kind(); requestReason = request.requestReason(); requestPayload = payloadCodec.encrypt(request.submissionDetails()); status = request.status(); submittedAt = request.submittedAt();
         reviewedBy = request.reviewedBy() == null ? null : request.reviewedBy().value().toString(); reviewedAt = request.reviewedAt();
         decisionReason = request.decisionReason(); openRequestKey = request.status().isOpen() ? citizenId : null;
         openRequestType = request.status().isOpen() ? TYPE : null;
     }
 
-    NationalIdentityRequest toDomain() {
+    NationalIdentityRequest toDomain(EncryptedServiceRequestPayloadCodec payloadCodec) {
         return new NationalIdentityRequest(UUID.fromString(id), new CitizenId(UUID.fromString(citizenId)), requestKind,
-                requestReason, status, reviewedBy == null ? null : new AccountId(UUID.fromString(reviewedBy)),
+                requestReason, payloadCodec.decrypt(requestPayload), status, reviewedBy == null ? null : new AccountId(UUID.fromString(reviewedBy)),
                 submittedAt, reviewedAt, decisionReason);
     }
 

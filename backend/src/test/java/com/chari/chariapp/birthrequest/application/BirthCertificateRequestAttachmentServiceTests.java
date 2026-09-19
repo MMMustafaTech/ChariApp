@@ -14,6 +14,7 @@ import com.chari.chariapp.birthrequest.domain.BirthCertificateRequestKind;
 import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.request.application.AttachmentUpload;
 import com.chari.chariapp.request.application.PassportRequestActorAccess;
+import com.chari.chariapp.request.domain.AttachmentDocumentType;
 import com.chari.chariapp.request.application.port.out.AttachmentContentStore;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import java.io.ByteArrayInputStream;
@@ -44,7 +45,7 @@ class BirthCertificateRequestAttachmentServiceTests {
         when(attachments.save(any(BirthCertificateRequestAttachment.class))).thenAnswer(invocation -> invocation.getArgument(0));
         BirthCertificateRequestAttachmentService service = new BirthCertificateRequestAttachmentService(new PassportRequestActorAccess(accounts), requests, attachments, content, audit, Clock.fixed(NOW, ZoneOffset.UTC));
         byte[] pdf = new byte[]{'%', 'P', 'D', 'F', '-', '1'};
-        BirthCertificateRequestAttachment saved = service.upload(citizenAccountId, request.id(), new AttachmentUpload("birth-report.pdf", "application/pdf", pdf.length, new ByteArrayInputStream(pdf)));
+        BirthCertificateRequestAttachment saved = service.upload(citizenAccountId, request.id(), AttachmentDocumentType.BIRTH_CERTIFICATE_COPY, new AttachmentUpload("birth-report.pdf", "application/pdf", pdf.length, new ByteArrayInputStream(pdf)));
         assertThat(saved.contentType()).isEqualTo("application/pdf");
         verify(content).store(eq(saved.storageKey()), any());
         verify(audit).record(citizenAccountId.value().toString(), "BIRTH_CERTIFICATE_REQUEST_ATTACHMENT_UPLOADED", "SERVICE_REQUEST", request.id().toString(), null, NOW);

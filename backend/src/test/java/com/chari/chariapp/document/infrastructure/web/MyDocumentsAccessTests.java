@@ -32,6 +32,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -85,7 +86,13 @@ class MyDocumentsAccessTests {
 
         mockMvc.perform(get("/api/v1/me/documents/passport").header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString(passport.getPassportNumber())));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(passport.getPassportNumber())))
+                .andExpect(jsonPath("$.birthDate").value("2000-01-01"))
+                .andExpect(jsonPath("$.issueDate").value("2025-01-01"))
+                .andExpect(jsonPath("$.expiryDate").value("2030-01-01"))
+                .andExpect(jsonPath("$.issuePlace").value("N'Djamena"))
+                .andExpect(jsonPath("$.issuingAuthority").value("Authority"))
+                .andExpect(jsonPath("$.issueingAuthority").value("Authority"));
 
         mockMvc.perform(get("/passport/" + nationalId).header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isForbidden());

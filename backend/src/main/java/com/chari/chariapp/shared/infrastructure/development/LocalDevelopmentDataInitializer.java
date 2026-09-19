@@ -2,11 +2,14 @@ package com.chari.chariapp.shared.infrastructure.development;
 
 import com.chari.chariapp.account.application.port.out.AccountStore;
 import com.chari.chariapp.account.application.port.out.PasswordHasher;
+import com.chari.chariapp.account.application.port.out.StaffProfileStore;
 import com.chari.chariapp.account.domain.Account;
 import com.chari.chariapp.account.domain.AccountId;
 import com.chari.chariapp.account.domain.AccountRole;
 import com.chari.chariapp.account.domain.AccountStatus;
 import com.chari.chariapp.account.domain.EmailReference;
+import com.chari.chariapp.account.domain.StaffPermission;
+import com.chari.chariapp.account.domain.StaffProfile;
 import com.chari.chariapp.citizen.application.port.out.CitizenStore;
 import com.chari.chariapp.citizen.domain.Citizen;
 import com.chari.chariapp.citizen.domain.CitizenId;
@@ -47,6 +50,7 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     private final AccountStore accountStore;
     private final PasswordHasher passwordHasher;
     private final PersonalDataProtector dataProtector;
+    private final StaffProfileStore staffProfileStore;
     private final Clock clock;
 
     public LocalDevelopmentDataInitializer(
@@ -54,12 +58,14 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
             AccountStore accountStore,
             PasswordHasher passwordHasher,
             PersonalDataProtector dataProtector,
+            StaffProfileStore staffProfileStore,
             Clock clock
     ) {
         this.citizenStore = citizenStore;
         this.accountStore = accountStore;
         this.passwordHasher = passwordHasher;
         this.dataProtector = dataProtector;
+        this.staffProfileStore = staffProfileStore;
         this.clock = clock;
     }
 
@@ -96,18 +102,40 @@ public class LocalDevelopmentDataInitializer implements ApplicationRunner {
     private void ensureAccount(String email, CitizenId citizenId, AccountRole role) {
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
         String emailLookup = dataProtector.lookup(normalizedEmail);
-        if (accountStore.existsByEmailLookup(emailLookup)) {
+        var existing = accountStore.findByEmailLookup(emailLookup);
+        if (existing.isPresent()) {
+            if (role == AccountRole.ADMIN || role == AccountRole.EMPLOYEE) {
+                accountStore.updatePermissions(existing.get().id(), permissions(role));
+                ensureStaffProfile(existing.get().id(), role);
+            }
             return;
         }
 
-        accountStore.save(new Account(
+        Account saved = accountStore.save(new Account(
                 AccountId.newId(),
                 citizenId,
                 new EmailReference(emailLookup, dataProtector.encrypt(normalizedEmail)),
                 passwordHasher.hash(PASSWORD),
                 AccountStatus.ACTIVE,
                 Set.of(role),
+                permissions(role),
                 Instant.now(clock)
         ));
+        if (role == AccountRole.ADMIN || role == AccountRole.EMPLOYEE) ensureStaffProfile(saved.id(), role);
+    }
+
+    private static Set<StaffPermission> permissions(AccountRole role) {
+        return role == AccountRole.ADMIN ? StaffPermission.administratorDefaults()
+                : role == AccountRole.EMPLOYEE ? StaffPermission.employeeDefaults() : Set.of();
+    }
+
+    private void ensureStaffProfile(AccountId accountId, AccountRole role) {
+        if (staffProfileStore.findByAccountId(accountId).isPresent()) return;
+        Instant now = Instant.now(clock);
+        String prefix = role == AccountRole.ADMIN ? "ADM-" : "EMP-";
+        staffProfileStore.save(new StaffProfile(accountId,
+                prefix + accountId.value().toString().replace("-", "").substring(0, 8).toUpperCase(Locale.ROOT),
+                "Local", role == AccountRole.ADMIN ? "Administrator" : "Employee", null,
+                role == AccountRole.ADMIN ? "Administrator" : "Employee", now, now));
     }
 }

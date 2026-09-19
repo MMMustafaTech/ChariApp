@@ -11,6 +11,7 @@ public record PassportRequest(
         CitizenId citizenId,
         PassportRequestKind kind,
         String requestReason,
+        ServiceRequestSubmissionDetails submissionDetails,
         PassportRequestStatus status,
         AccountId reviewedBy,
         Instant submittedAt,
@@ -51,13 +52,27 @@ public record PassportRequest(
     public PassportRequest(
             UUID id,
             CitizenId citizenId,
+            PassportRequestKind kind,
+            String requestReason,
             PassportRequestStatus status,
             AccountId reviewedBy,
             Instant submittedAt,
             Instant reviewedAt,
             String decisionReason
     ) {
-        this(id, citizenId, PassportRequestKind.ISSUANCE, null, status, reviewedBy, submittedAt, reviewedAt, decisionReason);
+        this(id, citizenId, kind, requestReason, null, status, reviewedBy, submittedAt, reviewedAt, decisionReason);
+    }
+
+    public PassportRequest(
+            UUID id,
+            CitizenId citizenId,
+            PassportRequestStatus status,
+            AccountId reviewedBy,
+            Instant submittedAt,
+            Instant reviewedAt,
+            String decisionReason
+    ) {
+        this(id, citizenId, PassportRequestKind.ISSUANCE, null, null, status, reviewedBy, submittedAt, reviewedAt, decisionReason);
     }
 
     public static PassportRequest submitted(CitizenId citizenId, Instant now) {
@@ -65,27 +80,36 @@ public record PassportRequest(
     }
 
     public static PassportRequest submitted(CitizenId citizenId, PassportRequestKind kind, String requestReason, Instant now) {
-        return new PassportRequest(UUID.randomUUID(), citizenId, kind, requestReason, PassportRequestStatus.SUBMITTED, null, now, null, null);
+        return submitted(citizenId, kind, requestReason, null, now);
+    }
+
+    public static PassportRequest submitted(CitizenId citizenId, PassportRequestKind kind, String requestReason,
+                                             ServiceRequestSubmissionDetails submissionDetails, Instant now) {
+        return new PassportRequest(UUID.randomUUID(), citizenId, kind, requestReason, submissionDetails,
+                PassportRequestStatus.SUBMITTED, null, now, null, null);
     }
 
     public PassportRequest startReview(AccountId operator, Instant now) {
         if (status != PassportRequestStatus.SUBMITTED) {
-            throw new PassportRequestTransitionException("Request is not awaiting review");
+            throw new PassportRequestTransitionException(PassportRequestTransitionException.Reason.NOT_AWAITING_REVIEW);
         }
-        return new PassportRequest(id, citizenId, kind, requestReason, PassportRequestStatus.UNDER_REVIEW, operator, submittedAt, now, null);
+        return new PassportRequest(id, citizenId, kind, requestReason, submissionDetails,
+                PassportRequestStatus.UNDER_REVIEW, operator, submittedAt, now, null);
     }
 
     public PassportRequest decide(AccountId operator, boolean approved, String reason, Instant now) {
         if (status != PassportRequestStatus.UNDER_REVIEW) {
-            throw new PassportRequestTransitionException("Request is not under review");
+            throw new PassportRequestTransitionException(PassportRequestTransitionException.Reason.NOT_UNDER_REVIEW);
         }
         if (!operator.equals(reviewedBy)) {
-            throw new PassportRequestTransitionException("Only the reviewing employee may decide this request");
+            throw new PassportRequestTransitionException(PassportRequestTransitionException.Reason.REVIEWER_MISMATCH);
         }
         if (!approved && normalizeReason(reason) == null) {
-            throw new PassportRequestTransitionException("A rejection reason is required");
+            throw new PassportRequestTransitionException(PassportRequestTransitionException.Reason.REJECTION_REASON_REQUIRED);
         }
-        return new PassportRequest(id, citizenId, kind, requestReason, approved ? PassportRequestStatus.APPROVED : PassportRequestStatus.REJECTED, operator, submittedAt, now, reason);
+        return new PassportRequest(id, citizenId, kind, requestReason, submissionDetails,
+                approved ? PassportRequestStatus.APPROVED : PassportRequestStatus.REJECTED,
+                operator, submittedAt, now, reason);
     }
 
     public boolean belongsTo(CitizenId candidateCitizenId) {

@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,7 @@ public class CitizenPhoneVerificationController {
     }
 
     @PostMapping("/{citizenId}/phone-verifications")
+    @PreAuthorize("hasAuthority('PERM_CITIZEN_EDIT')")
     public ResponseEntity<PhoneVerificationRequestResponse> request(
             @PathVariable UUID citizenId,
             @Valid @RequestBody PhoneVerificationRequest request,
@@ -57,6 +59,7 @@ public class CitizenPhoneVerificationController {
     }
 
     @PostMapping("/{citizenId}/phone-verifications/{challengeId}/confirm")
+    @PreAuthorize("hasAuthority('PERM_CITIZEN_EDIT')")
     public ResponseEntity<Void> confirm(
             @PathVariable UUID citizenId,
             @PathVariable UUID challengeId,

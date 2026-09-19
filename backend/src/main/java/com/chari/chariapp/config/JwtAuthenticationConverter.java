@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.server.resource.InvalidBearerTokenExc
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Component
@@ -36,9 +36,10 @@ public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthen
                 .filter(candidate -> candidate.status() == AccountStatus.ACTIVE)
                 .filter(candidate -> candidate.authorizationVersion() == tokenAuthorizationVersion)
                 .orElseThrow(() -> new InvalidBearerTokenException("Token is no longer authorized"));
-        List<SimpleGrantedAuthority> authorities = account.roles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .toList();
+        var authorities = new ArrayList<SimpleGrantedAuthority>();
+        account.roles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).forEach(authorities::add);
+        account.permissions().stream().map(permission -> new SimpleGrantedAuthority("PERM_" + permission))
+                .forEach(authorities::add);
         return new JwtAuthenticationToken(jwt, authorities, jwt.getSubject());
     }
 

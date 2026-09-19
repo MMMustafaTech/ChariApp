@@ -10,6 +10,8 @@ import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.exception.NotFoundException;
 import com.chari.chariapp.request.application.AttachmentUpload;
 import com.chari.chariapp.request.application.AttachmentUploadPolicy;
+import com.chari.chariapp.request.application.AttachmentRequirements;
+import com.chari.chariapp.request.domain.AttachmentDocumentType;
 import com.chari.chariapp.request.application.PassportRequestActorAccess;
 import com.chari.chariapp.request.application.port.out.AttachmentContentStore;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
@@ -35,14 +37,14 @@ public class BirthCertificateRequestAttachmentService {
         this.access = access; this.requests = requests; this.attachments = attachments; this.contentStore = contentStore; this.audit = audit; this.clock = clock;
     }
 
-    public BirthCertificateRequestAttachment upload(AccountId actor, UUID requestId, AttachmentUpload upload) {
+    public BirthCertificateRequestAttachment upload(AccountId actor, UUID requestId, AttachmentDocumentType documentType, AttachmentUpload upload) {
         CitizenId citizen = access.requireActiveCitizen(actor);
         BirthCertificateRequest request = ownedRequest(citizen, requestId);
         if (request.status() != BirthCertificateRequestStatus.SUBMITTED) throw new BirthCertificateRequestConflictException(BirthCertificateRequestConflictException.Reason.ATTACHMENTS_CLOSED);
         String contentType = AttachmentUploadPolicy.validateMetadata(upload);
         String storageKey = UUID.randomUUID().toString();
         Instant now = Instant.now(clock);
-        BirthCertificateRequestAttachment attachment = new BirthCertificateRequestAttachment(UUID.randomUUID(), requestId, storageKey,
+        BirthCertificateRequestAttachment attachment = new BirthCertificateRequestAttachment(UUID.randomUUID(), requestId, documentType, storageKey,
                 AttachmentUploadPolicy.safeFileName(upload.originalFileName()), contentType, upload.sizeBytes(), actor, now);
         try (BufferedInputStream content = new BufferedInputStream(upload.content())) {
             AttachmentUploadPolicy.validateSignature(content, contentType);
@@ -64,6 +66,12 @@ public class BirthCertificateRequestAttachmentService {
     public BirthCertificateAttachmentContent downloadMine(AccountId actor, UUID requestId, UUID attachmentId) { ownedRequest(access.requireActiveCitizen(actor), requestId); return content(requestId, attachmentId); }
     public List<BirthCertificateRequestAttachment> listForOperations(AccountId actor, UUID requestId) { access.requireActiveOperator(actor); requireRequest(requestId); return attachments.findByRequestId(requestId); }
     public BirthCertificateAttachmentContent downloadForOperations(AccountId actor, UUID requestId, UUID attachmentId) { access.requireActiveOperator(actor); requireRequest(requestId); return content(requestId, attachmentId); }
+    public AttachmentRequirements requirementsMine(AccountId actor, UUID requestId) { ownedRequest(access.requireActiveCitizen(actor), requestId); return requirements(requestId); }
+    public AttachmentRequirements requirementsForOperations(AccountId actor, UUID requestId) { access.requireActiveOperator(actor); requireRequest(requestId); return requirements(requestId); }
+    private AttachmentRequirements requirements(UUID requestId) {
+        java.util.Set<AttachmentDocumentType> uploaded=attachments.findByRequestId(requestId).stream().map(BirthCertificateRequestAttachment::documentType).collect(java.util.stream.Collectors.toSet());
+        return AttachmentRequirements.from(java.util.Set.of(),uploaded);
+    }
 
     private BirthCertificateRequest ownedRequest(CitizenId citizen, UUID requestId) { BirthCertificateRequest request = requireRequest(requestId); if (!request.belongsTo(citizen)) throw new NotFoundException("Request not found"); return request; }
     private BirthCertificateRequest requireRequest(UUID requestId) { return requests.findById(requestId).orElseThrow(() -> new NotFoundException("Request not found")); }

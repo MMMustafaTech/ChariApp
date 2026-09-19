@@ -10,16 +10,21 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Set;
 import java.util.Optional;
+import java.util.List;
+import com.chari.chariapp.account.domain.StaffPermission;
 
 @Repository
 public class JpaAccountStore implements AccountStore {
 
     private final SpringDataAccountRepository accountRepository;
     private final SpringDataRoleRepository roleRepository;
+    private final SpringDataPermissionRepository permissionRepository;
 
-    public JpaAccountStore(SpringDataAccountRepository accountRepository, SpringDataRoleRepository roleRepository) {
+    public JpaAccountStore(SpringDataAccountRepository accountRepository, SpringDataRoleRepository roleRepository,
+                           SpringDataPermissionRepository permissionRepository) {
         this.accountRepository = accountRepository;
         this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
     }
 
     @Override
@@ -45,6 +50,11 @@ public class JpaAccountStore implements AccountStore {
     @Override
     public Optional<Account> findById(com.chari.chariapp.account.domain.AccountId accountId) {
         return accountRepository.findById(accountId.value().toString()).map(AccountJpaEntity::toDomain);
+    }
+
+    @Override
+    public Optional<Account> findByCitizenId(CitizenId citizenId) {
+        return accountRepository.findByCitizenId(citizenId.value().toString()).map(AccountJpaEntity::toDomain);
     }
 
     @Override
@@ -78,6 +88,30 @@ public class JpaAccountStore implements AccountStore {
         if (roles.size() != requestedRoles.size()) {
             throw new IllegalStateException("One or more requested account roles are not configured");
         }
-        return accountRepository.save(AccountJpaEntity.fromDomain(account, roles)).toDomain();
+        Set<StaffPermission> requestedPermissions = account.permissions();
+        Set<PermissionJpaEntity> permissions = Set.copyOf(permissionRepository.findByCodeIn(requestedPermissions));
+        if (permissions.size() != requestedPermissions.size()) {
+            throw new IllegalStateException("One or more requested staff permissions are not configured");
+        }
+        return accountRepository.save(AccountJpaEntity.fromDomain(account, roles, permissions)).toDomain();
+    }
+
+    @Override
+    public Account updatePermissions(AccountId accountId, Set<StaffPermission> permissions) {
+        AccountJpaEntity entity = accountRepository.findById(accountId.value().toString())
+                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+        Set<PermissionJpaEntity> configured = Set.copyOf(permissionRepository.findByCodeIn(permissions));
+        if (configured.size() != permissions.size()) {
+            throw new IllegalStateException("One or more requested staff permissions are not configured");
+        }
+        entity.updatePermissions(configured);
+        return accountRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public List<Account> findStaffAccounts() {
+        return accountRepository.findByRoleCodes(Set.of(AccountRole.ADMIN, AccountRole.EMPLOYEE)).stream()
+                .map(AccountJpaEntity::toDomain)
+                .toList();
     }
 }

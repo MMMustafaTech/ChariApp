@@ -1,6 +1,7 @@
 package com.chari.chariapp.request.infrastructure;
 
 import com.chari.chariapp.account.application.port.out.AccountStore;
+import com.chari.chariapp.additionaldocument.application.port.out.AdditionalDocumentRequestStore;
 import com.chari.chariapp.request.application.PassportRequestActorAccess;
 import com.chari.chariapp.request.application.PassportRequestAttachmentService;
 import com.chari.chariapp.request.application.PassportRequestQueryService;
@@ -12,6 +13,8 @@ import com.chari.chariapp.request.application.port.out.AttachmentContentStore;
 import com.chari.chariapp.request.application.port.out.PassportRequestAttachmentStore;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import com.chari.chariapp.notification.application.NotificationService;
+import com.chari.chariapp.document.application.port.out.CitizenDocumentReadStore;
+import com.chari.chariapp.document.application.DocumentIssuanceService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,10 +33,11 @@ public class RequestConfiguration {
             PassportRequestActorAccess actorAccess,
             PassportRequestStore requestStore,
             PassportRequestStatusHistoryStore historyStore,
+            CitizenDocumentReadStore documentStore,
             OperationalAuditStore auditStore,
             Clock clock
     ) {
-        return new SubmitPassportRequestService(actorAccess, requestStore, historyStore, auditStore, clock);
+        return new SubmitPassportRequestService(actorAccess, requestStore, historyStore, documentStore, auditStore, clock);
     }
 
     @Bean
@@ -43,9 +47,13 @@ public class RequestConfiguration {
             PassportRequestStatusHistoryStore historyStore,
             OperationalAuditStore auditStore,
             NotificationService notifications,
+            AdditionalDocumentRequestStore additionalDocuments,
+            DocumentIssuanceService documentIssuance,
+            PassportRequestAttachmentService attachments,
             Clock clock
     ) {
-        return new ReviewPassportRequestService(actorAccess, requestStore, historyStore, auditStore, notifications, clock);
+        return new ReviewPassportRequestService(actorAccess, requestStore, historyStore, auditStore, notifications,
+                additionalDocuments, documentIssuance, attachments, clock);
     }
 
     @Bean

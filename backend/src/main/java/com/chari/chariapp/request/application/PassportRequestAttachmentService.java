@@ -9,6 +9,8 @@ import com.chari.chariapp.request.application.port.out.PassportRequestStore;
 import com.chari.chariapp.request.domain.PassportRequest;
 import com.chari.chariapp.request.domain.PassportRequestAttachment;
 import com.chari.chariapp.request.domain.PassportRequestStatus;
+import com.chari.chariapp.request.domain.AttachmentDocumentType;
+import com.chari.chariapp.request.domain.RequestBeneficiaryType;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 
 import java.io.BufferedInputStream;
@@ -46,18 +48,20 @@ public class PassportRequestAttachmentService {
         this.clock = clock;
     }
 
-    public PassportRequestAttachment upload(AccountId actorId, UUID requestId, AttachmentUpload upload) {
+    public PassportRequestAttachment upload(AccountId actorId, UUID requestId,
+                                              AttachmentDocumentType documentType, AttachmentUpload upload) {
         CitizenId citizenId = actorAccess.requireActiveCitizen(actorId);
         PassportRequest request = citizenOwnedRequest(citizenId, requestId);
         if (request.status() != PassportRequestStatus.SUBMITTED) {
-            throw new PassportRequestConflictException("Attachments can only be added before review starts");
+            throw new PassportRequestConflictException(PassportRequestConflictException.Reason.ATTACHMENTS_CLOSED);
         }
 
         String contentType = AttachmentUploadPolicy.validateMetadata(upload);
         String storageKey = UUID.randomUUID().toString();
         Instant uploadedAt = Instant.now(clock);
         PassportRequestAttachment attachment = new PassportRequestAttachment(
-                UUID.randomUUID(), requestId, storageKey, AttachmentUploadPolicy.safeFileName(upload.originalFileName()),
+                UUID.randomUUID(), requestId, documentType, storageKey,
+                AttachmentUploadPolicy.safeFileName(upload.originalFileName()),
                 contentType, upload.sizeBytes(), actorId, uploadedAt
         );
 
@@ -101,6 +105,34 @@ public class PassportRequestAttachmentService {
         actorAccess.requireActiveOperator(actorId);
         requireRequest(requestId);
         return content(requestId, attachmentId);
+    }
+
+    public AttachmentRequirements requirementsMine(AccountId actorId, UUID requestId) {
+        CitizenId citizenId = actorAccess.requireActiveCitizen(actorId);
+        return requirements(citizenOwnedRequest(citizenId, requestId));
+    }
+
+    public AttachmentRequirements requirementsForOperations(AccountId actorId, UUID requestId) {
+        actorAccess.requireActiveOperator(actorId);
+        return requirements(requireRequest(requestId));
+    }
+
+    public void requireComplete(PassportRequest request) {
+        if (!requirements(request).complete()) {
+            throw new PassportRequestConflictException(
+                    PassportRequestConflictException.Reason.MISSING_REQUIRED_ATTACHMENTS);
+        }
+    }
+
+    private AttachmentRequirements requirements(PassportRequest request) {
+        RequestBeneficiaryType beneficiaryType = request.submissionDetails() == null
+                ? RequestBeneficiaryType.SELF
+                : request.submissionDetails().beneficiaryType();
+        java.util.Set<AttachmentDocumentType> uploaded = attachmentStore.findByRequestId(request.id()).stream()
+                .map(PassportRequestAttachment::documentType)
+                .collect(java.util.stream.Collectors.toSet());
+        return AttachmentRequirements.from(
+                AttachmentRequirementPolicy.forPassport(request.kind(), beneficiaryType), uploaded);
     }
 
     private PassportRequest citizenOwnedRequest(CitizenId citizenId, UUID requestId) {

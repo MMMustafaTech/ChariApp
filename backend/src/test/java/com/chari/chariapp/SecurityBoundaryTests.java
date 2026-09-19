@@ -29,7 +29,9 @@ class SecurityBoundaryTests {
     @Test
     void passportDataRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/passport/1234567890"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                .andExpect(jsonPath("$.status").value(401));
     }
 
     @Test

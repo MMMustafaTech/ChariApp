@@ -1,0 +1,3 @@
+package com.chari.chariapp.additionaldocument.infrastructure.persistence;
+import org.springframework.data.jpa.repository.JpaRepository; import java.util.*;
+interface SpringDataAdditionalDocumentAttachmentRepository extends JpaRepository<AdditionalDocumentAttachmentJpaEntity,String>{List<AdditionalDocumentAttachmentJpaEntity> findByAdditionalRequestIdOrderByUploadedAtAsc(String requestId);Optional<AdditionalDocumentAttachmentJpaEntity> findByIdAndAdditionalRequestId(String id,String requestId);}

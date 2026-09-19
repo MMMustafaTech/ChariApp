@@ -2,6 +2,9 @@ package com.chari.chariapp.request.application;
 
 import com.chari.chariapp.account.domain.Account;
 import com.chari.chariapp.account.domain.AccountId;
+import com.chari.chariapp.additionaldocument.application.port.out.AdditionalDocumentRequestStore;
+import com.chari.chariapp.additionaldocument.domain.AdditionalDocumentRequestConflictException;
+import com.chari.chariapp.operations.domain.ServiceRequestType;
 import com.chari.chariapp.request.application.port.out.PassportRequestStatusHistoryStore;
 import com.chari.chariapp.request.application.port.out.PassportRequestStore;
 import com.chari.chariapp.request.domain.PassportRequest;
@@ -9,6 +12,7 @@ import com.chari.chariapp.request.domain.PassportRequestStatusChange;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import com.chari.chariapp.notification.application.NotificationService;
 import com.chari.chariapp.notification.domain.NotificationType;
+import com.chari.chariapp.document.application.DocumentIssuanceService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -23,6 +27,9 @@ public class ReviewPassportRequestService {
     private final PassportRequestStatusHistoryStore historyStore;
     private final OperationalAuditStore auditStore;
     private final NotificationService notifications;
+    private final AdditionalDocumentRequestStore additionalDocuments;
+    private final DocumentIssuanceService documentIssuance;
+    private final PassportRequestAttachmentService attachments;
     private final Clock clock;
 
     public ReviewPassportRequestService(
@@ -31,6 +38,9 @@ public class ReviewPassportRequestService {
             PassportRequestStatusHistoryStore historyStore,
             OperationalAuditStore auditStore,
             NotificationService notifications,
+            AdditionalDocumentRequestStore additionalDocuments,
+            DocumentIssuanceService documentIssuance,
+            PassportRequestAttachmentService attachments,
             Clock clock
     ) {
         this.actorAccess = actorAccess;
@@ -38,6 +48,9 @@ public class ReviewPassportRequestService {
         this.historyStore = historyStore;
         this.auditStore = auditStore;
         this.notifications = notifications;
+        this.additionalDocuments = additionalDocuments;
+        this.documentIssuance = documentIssuance;
+        this.attachments = attachments;
         this.clock = clock;
     }
 
@@ -46,7 +59,7 @@ public class ReviewPassportRequestService {
         Account operator = actorAccess.requireActiveOperator(actorId);
         PassportRequest current = findForUpdate(requestId);
         rejectSelfReview(operator, current);
-
+        attachments.requireComplete(current);
         Instant reviewedAt = Instant.now(clock);
         PassportRequest updated = current.startReview(actorId, reviewedAt);
         requestStore.save(updated);
@@ -63,9 +76,15 @@ public class ReviewPassportRequestService {
         Account operator = actorAccess.requireActiveOperator(actorId);
         PassportRequest current = findForUpdate(requestId);
         rejectSelfReview(operator, current);
+        if (additionalDocuments.hasOpenRequest(ServiceRequestType.PASSPORT, requestId)) {
+            throw new AdditionalDocumentRequestConflictException("ADDITIONAL_DOCUMENTS_UNRESOLVED");
+        }
 
         Instant decidedAt = Instant.now(clock);
         PassportRequest updated = current.decide(actorId, approved, reason, decidedAt);
+        if (approved) {
+            documentIssuance.issue(current, actorId, decidedAt);
+        }
         requestStore.save(updated);
         appendHistory(updated, current, updated.decisionReason(), actorId, decidedAt);
         auditStore.record(
@@ -86,7 +105,7 @@ public class ReviewPassportRequestService {
 
     private void rejectSelfReview(Account operator, PassportRequest request) {
         if (operator.citizenIdOptional().filter(request.citizenId()::equals).isPresent()) {
-            throw new PassportRequestConflictException("An operator cannot review their own passport request");
+            throw new PassportRequestConflictException(PassportRequestConflictException.Reason.SELF_REVIEW_NOT_ALLOWED);
         }
     }
 

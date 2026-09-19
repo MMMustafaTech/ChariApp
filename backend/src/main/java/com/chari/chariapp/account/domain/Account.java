@@ -14,6 +14,7 @@ public record Account(
         String passwordHash,
         AccountStatus status,
         Set<AccountRole> roles,
+        Set<StaffPermission> permissions,
         long authorizationVersion,
         Instant createdAt
 ) {
@@ -26,7 +27,33 @@ public record Account(
             Set<AccountRole> roles,
             Instant createdAt
     ) {
-        this(id, citizenId, email, passwordHash, status, roles, 0, createdAt);
+        this(id, citizenId, email, passwordHash, status, roles, Set.of(), 0, createdAt);
+    }
+
+    public Account(
+            AccountId id,
+            CitizenId citizenId,
+            EmailReference email,
+            String passwordHash,
+            AccountStatus status,
+            Set<AccountRole> roles,
+            long authorizationVersion,
+            Instant createdAt
+    ) {
+        this(id, citizenId, email, passwordHash, status, roles, Set.of(), authorizationVersion, createdAt);
+    }
+
+    public Account(
+            AccountId id,
+            CitizenId citizenId,
+            EmailReference email,
+            String passwordHash,
+            AccountStatus status,
+            Set<AccountRole> roles,
+            Set<StaffPermission> permissions,
+            Instant createdAt
+    ) {
+        this(id, citizenId, email, passwordHash, status, roles, permissions, 0, createdAt);
     }
 
     public Account {
@@ -35,6 +62,7 @@ public record Account(
         Objects.requireNonNull(passwordHash, "Password hash is required");
         Objects.requireNonNull(status, "Account status is required");
         Objects.requireNonNull(roles, "Account roles are required");
+        Objects.requireNonNull(permissions, "Account permissions are required");
         Objects.requireNonNull(createdAt, "Creation time is required");
 
         if (passwordHash.isBlank()) {
@@ -47,6 +75,7 @@ public record Account(
             throw new IllegalArgumentException("Authorization version must not be negative");
         }
         roles = Set.copyOf(roles);
+        permissions = Set.copyOf(permissions);
     }
 
     public Optional<CitizenId> citizenIdOptional() {

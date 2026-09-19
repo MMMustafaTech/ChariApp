@@ -1,5 +1,6 @@
 package com.chari.chariapp.shared.infrastructure.persistence;
 
+import com.chari.chariapp.shared.application.OperationalAuditEventView;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -35,5 +36,10 @@ public class OperationalAuditEventJpaEntity {
         event.metadata = metadata;
         event.occurredAt = occurredAt;
         return event;
+    }
+
+    OperationalAuditEventView toView() {
+        return new OperationalAuditEventView(id, actorAccountId, action, targetType, targetId,
+                result, metadata, occurredAt);
     }
 }
