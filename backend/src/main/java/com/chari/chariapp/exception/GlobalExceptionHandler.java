@@ -59,6 +59,16 @@ public class GlobalExceptionHandler {
                 "لا تتوفر بيانات رسمية كافية لإصدار الوثيقة");
     }
 
+    @ExceptionHandler(FeatureDisabledException.class)
+    public ResponseEntity<EnrollmentErrorResponse> handleFeatureDisabled(FeatureDisabledException ex) {
+        String message = switch (ex.code()) {
+            case "REQUEST_SUBMISSIONS_DISABLED" -> "استقبال الطلبات متوقف مؤقتًا";
+            case "NOTIFICATIONS_DISABLED" -> "إرسال الإشعارات متوقف مؤقتًا";
+            default -> "الخدمة متوقفة مؤقتًا";
+        };
+        return enrollmentError(HttpStatus.SERVICE_UNAVAILABLE, ex.code(), message);
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<EnrollmentErrorResponse> handleBadRequest(BadRequestException ex) {
         return enrollmentError(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "بيانات الطلب غير صحيحة");

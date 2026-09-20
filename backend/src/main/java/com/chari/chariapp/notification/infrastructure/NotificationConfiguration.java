@@ -1,3 +1,3 @@
 package com.chari.chariapp.notification.infrastructure;
-import com.chari.chariapp.notification.application.*; import com.chari.chariapp.notification.application.port.out.NotificationStore; import com.chari.chariapp.request.application.PassportRequestActorAccess; import java.time.Clock; import org.springframework.context.annotation.*;
-@Configuration public class NotificationConfiguration { @Bean NotificationService notificationService(NotificationStore s,PassportRequestActorAccess a,Clock c){return new NotificationService(s,a,c);} }
+import com.chari.chariapp.notification.application.*; import com.chari.chariapp.notification.application.port.out.NotificationStore; import com.chari.chariapp.request.application.PassportRequestActorAccess; import com.chari.chariapp.settings.application.SystemSettingsService; import java.time.Clock; import org.springframework.context.annotation.*;
+@Configuration public class NotificationConfiguration { @Bean NotificationService notificationService(NotificationStore s,PassportRequestActorAccess a,SystemSettingsService settings,Clock c){return new NotificationService(s,a,settings,c);} }

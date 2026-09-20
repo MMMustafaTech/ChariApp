@@ -16,6 +16,7 @@ import com.chari.chariapp.request.domain.RequestBeneficiaryType;
 import com.chari.chariapp.request.domain.ServiceRequestSubmissionDetails;
 import com.chari.chariapp.exception.NotFoundException;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
+import com.chari.chariapp.settings.application.SystemSettingsService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,17 +30,20 @@ public class SubmitNationalIdentityRequestService {
     private final NationalIdentityRequestStatusHistoryStore historyStore;
     private final CitizenDocumentReadStore documentStore;
     private final OperationalAuditStore auditStore;
+    private final SystemSettingsService settings;
     private final Clock clock;
 
     public SubmitNationalIdentityRequestService(PassportRequestActorAccess actorAccess, NationalIdentityRequestStore requestStore,
                                                 NationalIdentityRequestStatusHistoryStore historyStore, CitizenDocumentReadStore documentStore,
                                                 OperationalAuditStore auditStore,
+                                                SystemSettingsService settings,
                                                 Clock clock) {
         this.actorAccess = actorAccess;
         this.requestStore = requestStore;
         this.historyStore = historyStore;
         this.documentStore = documentStore;
         this.auditStore = auditStore;
+        this.settings = settings;
         this.clock = clock;
     }
 
@@ -57,6 +61,7 @@ public class SubmitNationalIdentityRequestService {
 
     private NationalIdentityRequest submitInternal(AccountId actorId, NationalIdentityRequestKind kind, String reason,
                                                    ServiceRequestSubmissionDetails details) {
+        settings.requireRequestSubmissionsEnabled();
         CitizenId citizenId = actorAccess.requireActiveCitizen(actorId);
         validateDetails(citizenId, kind, details);
         boolean dependentChild = details != null

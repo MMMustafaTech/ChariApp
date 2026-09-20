@@ -8,6 +8,7 @@ import com.chari.chariapp.document.application.DocumentNotFoundException;
 import com.chari.chariapp.document.application.port.out.CitizenDocumentReadStore;
 import com.chari.chariapp.request.application.PassportRequestActorAccess;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
+import com.chari.chariapp.settings.application.SystemSettingsService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
@@ -17,8 +18,10 @@ public class SubmitBirthCertificateRequestService {
     private final PassportRequestActorAccess access; private final BirthCertificateRequestStore requests; private final BirthCertificateRequestStatusHistoryStore history; private final OperationalAuditStore audit; private final Clock clock;
     private final NewbornRegistrationDetailsStore newbornDetails;
     private final CitizenDocumentReadStore documentStore;
-    public SubmitBirthCertificateRequestService(PassportRequestActorAccess access, BirthCertificateRequestStore requests, BirthCertificateRequestStatusHistoryStore history, NewbornRegistrationDetailsStore newbornDetails, CitizenDocumentReadStore documentStore, OperationalAuditStore audit, Clock clock) { this.access = access; this.requests = requests; this.history = history; this.newbornDetails = newbornDetails; this.documentStore = documentStore; this.audit = audit; this.clock = clock; }
+    private final SystemSettingsService settings;
+    public SubmitBirthCertificateRequestService(PassportRequestActorAccess access, BirthCertificateRequestStore requests, BirthCertificateRequestStatusHistoryStore history, NewbornRegistrationDetailsStore newbornDetails, CitizenDocumentReadStore documentStore, OperationalAuditStore audit, SystemSettingsService settings, Clock clock) { this.access = access; this.requests = requests; this.history = history; this.newbornDetails = newbornDetails; this.documentStore = documentStore; this.audit = audit; this.settings = settings; this.clock = clock; }
     @Transactional public BirthCertificateRequest submit(AccountId actorId, BirthCertificateRequestKind kind, String reason, NewbornRegistrationDetails details) {
+        settings.requireRequestSubmissionsEnabled();
         if (kind == BirthCertificateRequestKind.NEWBORN_REGISTRATION && details == null) throw new IllegalArgumentException("Newborn registration details are required");
         if (kind != BirthCertificateRequestKind.NEWBORN_REGISTRATION && details != null) throw new IllegalArgumentException("Newborn details are only valid for a newborn registration");
         CitizenId citizenId = access.requireActiveCitizen(actorId);

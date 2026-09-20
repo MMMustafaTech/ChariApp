@@ -36,4 +36,8 @@ public class BirthCertificateDocumentJpaEntity {
     public CitizenId citizenId() { return new CitizenId(java.util.UUID.fromString(citizenId)); }
     public String encryptedPayload() { return encryptedPayload; }
     public int revision() { return revision; }
+    void update(String lookup, String payload) {
+        this.documentNumberLookup = lookup;
+        this.encryptedPayload = payload;
+    }
 }

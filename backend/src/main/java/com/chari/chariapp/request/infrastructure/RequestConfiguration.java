@@ -15,6 +15,7 @@ import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
 import com.chari.chariapp.notification.application.NotificationService;
 import com.chari.chariapp.document.application.port.out.CitizenDocumentReadStore;
 import com.chari.chariapp.document.application.DocumentIssuanceService;
+import com.chari.chariapp.settings.application.SystemSettingsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,9 +36,10 @@ public class RequestConfiguration {
             PassportRequestStatusHistoryStore historyStore,
             CitizenDocumentReadStore documentStore,
             OperationalAuditStore auditStore,
+            SystemSettingsService settings,
             Clock clock
     ) {
-        return new SubmitPassportRequestService(actorAccess, requestStore, historyStore, documentStore, auditStore, clock);
+        return new SubmitPassportRequestService(actorAccess, requestStore, historyStore, documentStore, auditStore, settings, clock);
     }
 
     @Bean

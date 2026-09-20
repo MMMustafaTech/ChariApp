@@ -15,6 +15,7 @@ import com.chari.chariapp.request.domain.RequestBeneficiaryType;
 import com.chari.chariapp.request.domain.ServiceRequestSubmissionDetails;
 import com.chari.chariapp.exception.NotFoundException;
 import com.chari.chariapp.shared.application.port.out.OperationalAuditStore;
+import com.chari.chariapp.settings.application.SystemSettingsService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class SubmitPassportRequestService {
     private final PassportRequestStatusHistoryStore historyStore;
     private final CitizenDocumentReadStore documentStore;
     private final OperationalAuditStore auditStore;
+    private final SystemSettingsService settings;
     private final Clock clock;
 
     public SubmitPassportRequestService(
@@ -38,6 +40,7 @@ public class SubmitPassportRequestService {
             PassportRequestStatusHistoryStore historyStore,
             CitizenDocumentReadStore documentStore,
             OperationalAuditStore auditStore,
+            SystemSettingsService settings,
             Clock clock
     ) {
         this.actorAccess = actorAccess;
@@ -45,6 +48,7 @@ public class SubmitPassportRequestService {
         this.historyStore = historyStore;
         this.documentStore = documentStore;
         this.auditStore = auditStore;
+        this.settings = settings;
         this.clock = clock;
     }
 
@@ -67,6 +71,7 @@ public class SubmitPassportRequestService {
 
     private PassportRequest submitInternal(AccountId actorId, PassportRequestKind kind, String requestReason,
                                            ServiceRequestSubmissionDetails details) {
+        settings.requireRequestSubmissionsEnabled();
         CitizenId citizenId = actorAccess.requireActiveCitizen(actorId);
         validateDetails(citizenId, kind, details);
         boolean dependentChild = details != null
