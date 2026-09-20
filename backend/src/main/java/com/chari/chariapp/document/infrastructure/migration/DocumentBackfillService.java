@@ -2,6 +2,9 @@ package com.chari.chariapp.document.infrastructure.migration;
 
 import com.chari.chariapp.citizen.domain.Citizen;
 import com.chari.chariapp.citizen.infrastructure.persistence.SpringDataCitizenRepository;
+import com.chari.chariapp.dto.BirthCertificateResponse;
+import com.chari.chariapp.dto.NationalIdResponse;
+import com.chari.chariapp.dto.PassportResponse;
 import com.chari.chariapp.document.infrastructure.persistence.BirthCertificateDocumentJpaEntity;
 import com.chari.chariapp.document.infrastructure.persistence.EncryptedDocumentPayloadCodec;
 import com.chari.chariapp.document.infrastructure.persistence.NationalIdentityDocumentJpaEntity;
@@ -9,12 +12,7 @@ import com.chari.chariapp.document.infrastructure.persistence.PassportDocumentJp
 import com.chari.chariapp.document.infrastructure.persistence.SpringDataBirthCertificateDocumentRepository;
 import com.chari.chariapp.document.infrastructure.persistence.SpringDataNationalIdentityDocumentRepository;
 import com.chari.chariapp.document.infrastructure.persistence.SpringDataPassportDocumentRepository;
-import com.chari.chariapp.entity.BirthCertificate;
-import com.chari.chariapp.entity.NationalIdentity;
-import com.chari.chariapp.entity.Passport;
-import com.chari.chariapp.repository.BirthCertificateRepository;
-import com.chari.chariapp.repository.NationalIdRepository;
-import com.chari.chariapp.repository.PassportRepository;
+import com.chari.chariapp.repository.NormalizedCitizenDocumentRepository;
 import com.chari.chariapp.shared.security.PersonalDataProtector;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** Explicit, idempotent migration from legacy plaintext document tables to encrypted document tables. */
+/** Idempotent migration from the normalized import model to the encrypted document source of truth. */
 @Service
 public class DocumentBackfillService {
     private final SpringDataCitizenRepository citizenRepository;
-    private final PassportRepository legacyPassports;
-    private final NationalIdRepository legacyNationalIdentities;
-    private final BirthCertificateRepository legacyBirthCertificates;
+    private final NormalizedCitizenDocumentRepository normalizedDocuments;
     private final SpringDataPassportDocumentRepository passports;
     private final SpringDataNationalIdentityDocumentRepository nationalIdentities;
     private final SpringDataBirthCertificateDocumentRepository birthCertificates;
@@ -40,9 +36,7 @@ public class DocumentBackfillService {
 
     public DocumentBackfillService(
             SpringDataCitizenRepository citizenRepository,
-            PassportRepository legacyPassports,
-            NationalIdRepository legacyNationalIdentities,
-            BirthCertificateRepository legacyBirthCertificates,
+            NormalizedCitizenDocumentRepository normalizedDocuments,
             SpringDataPassportDocumentRepository passports,
             SpringDataNationalIdentityDocumentRepository nationalIdentities,
             SpringDataBirthCertificateDocumentRepository birthCertificates,
@@ -50,9 +44,7 @@ public class DocumentBackfillService {
             PersonalDataProtector dataProtector
     ) {
         this.citizenRepository = citizenRepository;
-        this.legacyPassports = legacyPassports;
-        this.legacyNationalIdentities = legacyNationalIdentities;
-        this.legacyBirthCertificates = legacyBirthCertificates;
+        this.normalizedDocuments = normalizedDocuments;
         this.passports = passports;
         this.nationalIdentities = nationalIdentities;
         this.birthCertificates = birthCertificates;
@@ -81,67 +73,70 @@ public class DocumentBackfillService {
         int skipped = 0;
         Instant now = Instant.now();
 
-        var passport = legacyPassports.findByNationalIdNumber(nationalId);
+        var passport = normalizedDocuments.passport(nationalId);
         if (passport.isPresent()) {
             if (isBlank(passport.get().getPassportNumber())) skipped++; else if (copyPassport(citizen, passport.get(), now)) created++;
         }
-        var identity = legacyNationalIdentities.findByNationalIdNumber(nationalId);
+        var identity = normalizedDocuments.nationalIdentity(nationalId);
         if (identity.isPresent()) {
-            if (isBlank(identity.get().getNationalIdNumber())) skipped++; else if (copyNationalIdentity(citizen, identity.get(), now)) created++;
+            if (isBlank(identity.get().getNationalId())) skipped++; else if (copyNationalIdentity(citizen, identity.get(), now)) created++;
         }
-        var certificate = legacyBirthCertificates.findByNationalId(nationalId);
+        var certificate = normalizedDocuments.birthCertificate(nationalId);
         if (certificate.isPresent()) {
             if (isBlank(certificate.get().getCertificateNumber())) skipped++; else if (copyBirthCertificate(citizen, certificate.get(), now)) created++;
         }
         return new BackfillReport(1, created, skipped);
     }
 
-    private boolean copyPassport(Citizen citizen, Passport value, Instant now) {
+    private boolean copyPassport(Citizen citizen, PassportResponse value, Instant now) {
         String lookup = dataProtector.lookup(value.getPassportNumber());
-        if (passports.existsByDocumentNumberLookup(lookup)) return false;
+        if (passports.findFirstByCitizenIdOrderByRevisionDesc(citizen.id().value().toString()).isPresent()
+                || passports.existsByDocumentNumberLookup(lookup)) return false;
         passports.save(new PassportDocumentJpaEntity(UUID.randomUUID().toString(), citizen.id(), lookup,
-                payloadCodec.encrypt(passportPayload(value)), "ACTIVE", value.getDateOfIssue(), value.getDateOfExpiry(), 1, now));
+                payloadCodec.encrypt(passportPayload(value)), "ACTIVE", parseDate(value.getIssueDate()), parseDate(value.getExpiryDate()), 1, now));
         return true;
     }
 
-    private boolean copyNationalIdentity(Citizen citizen, NationalIdentity value, Instant now) {
-        String lookup = dataProtector.lookup(value.getNationalIdNumber());
-        if (nationalIdentities.existsByDocumentNumberLookup(lookup)) return false;
+    private boolean copyNationalIdentity(Citizen citizen, NationalIdResponse value, Instant now) {
+        String lookup = dataProtector.lookup(value.getNationalId());
+        if (nationalIdentities.findFirstByCitizenIdOrderByRevisionDesc(citizen.id().value().toString()).isPresent()
+                || nationalIdentities.existsByDocumentNumberLookup(lookup)) return false;
         nationalIdentities.save(new NationalIdentityDocumentJpaEntity(UUID.randomUUID().toString(), citizen.id(), lookup,
-                payloadCodec.encrypt(nationalIdentityPayload(value)), "ACTIVE", value.getDateOfIssue(), value.getDateOfExpiry(), 1, now));
+                payloadCodec.encrypt(nationalIdentityPayload(value)), "ACTIVE", issueDate(value.getIssueDetails()), parseDate(value.getDateOfExpiry()), 1, now));
         return true;
     }
 
-    private boolean copyBirthCertificate(Citizen citizen, BirthCertificate value, Instant now) {
+    private boolean copyBirthCertificate(Citizen citizen, BirthCertificateResponse value, Instant now) {
         String lookup = dataProtector.lookup(value.getCertificateNumber());
-        if (birthCertificates.existsByDocumentNumberLookup(lookup)) return false;
+        if (birthCertificates.findFirstByCitizenIdOrderByRevisionDesc(citizen.id().value().toString()).isPresent()
+                || birthCertificates.existsByDocumentNumberLookup(lookup)) return false;
         birthCertificates.save(new BirthCertificateDocumentJpaEntity(UUID.randomUUID().toString(), citizen.id(), lookup,
                 payloadCodec.encrypt(birthCertificatePayload(value)), 1, now));
         return true;
     }
 
-    private static Map<String, String> passportPayload(Passport v) {
-        return payload("passportNumber", v.getPassportNumber(), "firstName", v.getName(), "lastName", v.getLastName(),
-                "dateOfBirth", date(v.getDateOfBirth()), "placeOfBirth", v.getPlaceOfBirth(), "issuedOn", date(v.getDateOfIssue()),
-                "expiresOn", date(v.getDateOfExpiry()), "placeOfIssue", v.getPlaceOfIssue(), "issuingAuthority", v.getIssuingAuthority(),
-                "profession", v.getJob(), "nationality", v.getNationality(), "sex", v.getSex());
+    private static Map<String, String> passportPayload(PassportResponse v) {
+        return payload("passportNumber", v.getPassportNumber(), "firstName", v.getFirstName(), "lastName", v.getLastName(),
+                "dateOfBirth", v.getBirthDate(), "placeOfBirth", v.getBirthPlace(), "issuedOn", v.getIssueDate(),
+                "expiresOn", v.getExpiryDate(), "placeOfIssue", v.getIssuePlace(), "issuingAuthority", v.getIssueingAuthority(),
+                "profession", v.getProfession(), "nationality", v.getNationality(), "sex", v.getGender());
     }
 
-    private static Map<String, String> nationalIdentityPayload(NationalIdentity v) {
-        return payload("nationalId", v.getNationalIdNumber(), "firstName", v.getName(), "lastName", v.getLastName(),
-                "gender", v.getGender(), "placeOfBirth", v.getPlaceOfBirth(), "dateOfBirth", date(v.getDateOfBirth()),
-                "cardSerial", v.getCardSerial(), "placeOfIssue", v.getPlaceOfIssue(), "issuedOn", date(v.getDateOfIssue()),
-                "expiresOn", date(v.getDateOfExpiry()), "profession", v.getProfession(), "fatherName", v.getFatherName(),
+    private static Map<String, String> nationalIdentityPayload(NationalIdResponse v) {
+        return payload("nationalId", v.getNationalId(), "firstName", v.getFirstName(), "lastName", v.getLastName(),
+                "gender", v.getGender(), "placeOfBirth", v.getPlaceOfBirth(), "dateOfBirth", v.getDateofBirth(),
+                "cardSerial", v.getCardSerial(), "placeOfIssue", issuePlace(v.getIssueDetails()), "issuedOn", date(issueDate(v.getIssueDetails())),
+                "expiresOn", v.getDateOfExpiry(), "profession", v.getProfession(), "fatherName", v.getFatherName(),
                 "motherName", v.getMotherName(), "address", v.getAddress(), "bloodGroup", v.getBloodGroup());
     }
 
-    private static Map<String, String> birthCertificatePayload(BirthCertificate v) {
+    private static Map<String, String> birthCertificatePayload(BirthCertificateResponse v) {
         return payload("certificateNumber", v.getCertificateNumber(), "fullName", v.getFullName(), "gender", v.getGender(),
-                "birthDate", date(v.getBirthDate()), "birthPlace", v.getBirthPlace(), "fatherName", v.getFatherName(),
-                "fatherBirthDate", date(v.getFatherBirthDate()), "fatherBirthPlace", v.getFatherBirthPlace(),
-                "fatherProfession", v.getFatherProfession(), "motherName", v.getMotherName(), "motherBirthDate", date(v.getMotherBirthDate()),
+                "birthDate", v.getBirthDate(), "birthPlace", v.getBirthPlace(), "fatherName", v.getFatherName(),
+                "fatherBirthDate", v.getFatherBirthDate(), "fatherBirthPlace", v.getFatherBirthPlace(),
+                "fatherProfession", v.getFatherProfession(), "motherName", v.getMotherName(), "motherBirthDate", v.getMotherBirthDate(),
                 "motherBirthPlace", v.getMotherBirthPlace(), "motherProfession", v.getMotherProfession(),
-                "declarationDate", date(v.getDeclarationDate()), "address", v.getAddress());
+                "declarationDate", v.getDeclarationDate(), "address", v.getAddress());
     }
 
     private static Map<String, String> payload(String... entries) {
@@ -151,6 +146,24 @@ public class DocumentBackfillService {
     }
 
     private static String date(LocalDate value) { return value == null ? "" : value.toString(); }
+    private static LocalDate parseDate(String value) {
+        return value == null || value.isBlank() ? null : LocalDate.parse(value);
+    }
+    private static LocalDate issueDate(String issueDetails) {
+        if (issueDetails == null || issueDetails.isBlank()) return null;
+        int separator = issueDetails.lastIndexOf('/');
+        String candidate = separator < 0 ? issueDetails : issueDetails.substring(separator + 1);
+        try {
+            return LocalDate.parse(candidate);
+        } catch (java.time.format.DateTimeParseException ignored) {
+            return null;
+        }
+    }
+    private static String issuePlace(String issueDetails) {
+        if (issueDetails == null) return "";
+        int separator = issueDetails.lastIndexOf('/');
+        return separator < 0 ? issueDetails : issueDetails.substring(0, separator);
+    }
     private static boolean isBlank(String value) { return value == null || value.isBlank(); }
 
     public record BackfillReport(int citizensVisited, int documentsCreated, int documentsSkipped) { }

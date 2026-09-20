@@ -6,16 +6,16 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 
-/** Runs only when both the document-backfill profile and the explicit enable flag are supplied. */
+/** Runs after citizen migration and copies missing documents into the encrypted source of truth. */
 @Configuration
-@Profile("document-backfill")
 public class DocumentBackfillRunner {
     private static final Logger log = LoggerFactory.getLogger(DocumentBackfillRunner.class);
 
     @Bean
     @ConditionalOnProperty(name = "app.documents.backfill.enabled", havingValue = "true")
+    @Order(110)
     ApplicationRunner documentBackfillApplicationRunner(DocumentBackfillService service) {
         return arguments -> {
             DocumentBackfillService.BackfillReport report = service.backfillAll();

@@ -13,7 +13,6 @@ import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.citizen.domain.NationalIdReference;
 import com.chari.chariapp.citizen.domain.PhoneReference;
 import com.chari.chariapp.entity.Passport;
-import com.chari.chariapp.repository.PassportRepository;
 import com.chari.chariapp.document.infrastructure.migration.DocumentBackfillService;
 import com.chari.chariapp.document.infrastructure.persistence.SpringDataPassportDocumentRepository;
 import com.chari.chariapp.shared.security.PersonalDataProtector;
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -43,7 +43,7 @@ class MyDocumentsAccessTests {
     @Autowired private MockMvc mockMvc;
     @Autowired private AccountStore accountStore;
     @Autowired private CitizenStore citizenStore;
-    @Autowired private PassportRepository passportRepository;
+    @Autowired private JdbcTemplate jdbc;
     @Autowired private PersonalDataProtector dataProtector;
     @Autowired private JwtAccessTokenIssuer jwtAccessTokenIssuer;
     @Autowired private DocumentBackfillService documentBackfillService;
@@ -75,7 +75,21 @@ class MyDocumentsAccessTests {
         passport.setDateOfExpiry(LocalDate.of(2030, 1, 1));
         passport.setPlaceOfIssue("N'Djamena");
         passport.setIssuingAuthority("Authority");
-        passportRepository.save(passport);
+        jdbc.update("""
+                INSERT INTO person_records
+                    (national_id_number, first_name, last_name, date_of_birth, place_of_birth,
+                     legacy_source_key)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, nationalId, passport.getName(), passport.getLastName(), passport.getDateOfBirth(),
+                passport.getPlaceOfBirth(), "TEST:" + UUID.randomUUID());
+        Long personId = jdbc.queryForObject(
+                "SELECT id FROM person_records WHERE national_id_number = ?", Long.class, nationalId);
+        jdbc.update("""
+                INSERT INTO passports
+                    (person_id, passport_number, place_of_issue, issuing_authority, date_of_issue, date_of_expiry)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, personId, passport.getPassportNumber(), passport.getPlaceOfIssue(),
+                passport.getIssuingAuthority(), passport.getDateOfIssue(), passport.getDateOfExpiry());
         var firstBackfill = documentBackfillService.backfillCitizen(citizenStore.findById(citizenId).orElseThrow());
         var secondBackfill = documentBackfillService.backfillCitizen(citizenStore.findById(citizenId).orElseThrow());
         assertThat(firstBackfill.documentsCreated()).isEqualTo(1);

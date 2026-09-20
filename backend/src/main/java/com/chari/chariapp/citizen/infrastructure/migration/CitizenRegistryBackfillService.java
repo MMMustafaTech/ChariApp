@@ -4,8 +4,7 @@ import com.chari.chariapp.citizen.application.port.out.CitizenStore;
 import com.chari.chariapp.citizen.domain.Citizen;
 import com.chari.chariapp.citizen.domain.CitizenId;
 import com.chari.chariapp.citizen.domain.NationalIdReference;
-import com.chari.chariapp.entity.NationalIdentity;
-import com.chari.chariapp.repository.NationalIdRepository;
+import com.chari.chariapp.repository.NormalizedCitizenDocumentRepository;
 import com.chari.chariapp.shared.security.PersonalDataNormalizer;
 import com.chari.chariapp.shared.security.PersonalDataProtector;
 import org.springframework.stereotype.Service;
@@ -15,24 +14,24 @@ import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Explicit, idempotent migration from legacy national identities to the protected citizen registry.
- * Legacy tables do not contain phone numbers, so this migration deliberately creates no verified phone.
+ * Idempotent migration from normalized person records to the protected citizen registry.
+ * The imported data does not contain phone numbers, so this deliberately creates no verified phone.
  */
 @Service
 public class CitizenRegistryBackfillService {
 
-    private final NationalIdRepository legacyNationalIdentities;
+    private final NormalizedCitizenDocumentRepository normalizedDocuments;
     private final CitizenStore citizenStore;
     private final PersonalDataProtector dataProtector;
     private final Clock clock;
 
     public CitizenRegistryBackfillService(
-            NationalIdRepository legacyNationalIdentities,
+            NormalizedCitizenDocumentRepository normalizedDocuments,
             CitizenStore citizenStore,
             PersonalDataProtector dataProtector,
             Clock clock
     ) {
-        this.legacyNationalIdentities = legacyNationalIdentities;
+        this.normalizedDocuments = normalizedDocuments;
         this.citizenStore = citizenStore;
         this.dataProtector = dataProtector;
         this.clock = clock;
@@ -45,9 +44,9 @@ public class CitizenRegistryBackfillService {
         int existing = 0;
         int skipped = 0;
 
-        for (NationalIdentity legacyIdentity : legacyNationalIdentities.findAll()) {
+        for (String sourceNationalId : normalizedDocuments.nationalIds()) {
             sourceRecords++;
-            String legacyNationalId = legacyIdentity.getNationalIdNumber();
+            String legacyNationalId = sourceNationalId;
             if (legacyNationalId == null || legacyNationalId.isBlank()) {
                 skipped++;
                 continue;

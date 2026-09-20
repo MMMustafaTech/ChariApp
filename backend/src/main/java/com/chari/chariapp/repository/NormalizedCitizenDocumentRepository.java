@@ -6,6 +6,7 @@ import com.chari.chariapp.dto.PassportResponse;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /** Read model for normalized legacy lookup endpoints. */
@@ -15,6 +16,15 @@ public class NormalizedCitizenDocumentRepository {
 
     public NormalizedCitizenDocumentRepository(JdbcClient jdbc) {
         this.jdbc = jdbc;
+    }
+
+    public List<String> nationalIds() {
+        return jdbc.sql("""
+                SELECT national_id_number
+                FROM person_records
+                WHERE national_id_number IS NOT NULL AND national_id_number <> ''
+                ORDER BY id
+                """).query(String.class).list();
     }
 
     public boolean nationalIdentityExists(String nationalId) {

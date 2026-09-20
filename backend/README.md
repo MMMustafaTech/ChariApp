@@ -426,3 +426,11 @@ switch (body['code']) {
 - لا ترسل `nationalId` أو `citizenId` في المسارات المحمية؛ الـBackend يحدد المستخدم من الـJWT.
 - خزّن الـtokens في Secure Storage، وليس SharedPreferences أو logs.
 - لا تفترض نجاح إصدار الوثيقة من مجرد أن الطلب `APPROVED`.
+
+## مصدر بيانات المواطنين والوثائق
+
+- جداول `person_records` و`national_identities` و`passports` و`birth_certificate` هي نموذج الاستيراد المطبّع 3NF، ولا تقرأ منها واجهات المستخدم مباشرة.
+- عند تشغيل بيئة الإنتاج يُنشئ الترحيل أولًا سجلات `citizen_registry` المشفّرة للـCID الناقصة، ثم ينسخ الوثائق الناقصة إلى جداول `*_documents` المشفّرة.
+- الترحيل idempotent: إعادة تشغيله لا تنشئ مواطنًا أو وثيقة مكررة.
+- واجهات `/api/v1/me/documents/**` ومسار إصدار الوثائق بعد الموافقة يقرآن ويكتبان جداول `*_documents` فقط، وهي مصدر التشغيل المعتمد.
+- يمكن تعطيل الترحيل بعد التأكد من اكتمال النقل عبر `APP_CITIZENS_BACKFILL_ENABLED=false` و`APP_DOCUMENTS_BACKFILL_ENABLED=false`.
