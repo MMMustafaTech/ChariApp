@@ -1,9 +1,15 @@
 # README لوحة الأدمن والموظفين (الويب)
 
+> للقراءة المنسقة داخل VS Code افتح معاينة Markdown بهذا الاختصار:
+
+```text
+Ctrl + Shift + V
+```
+
 هذا الملف هو المرجع المستقل لصاحب واجهة الويب الإدارية. يحتوي تسجيل دخول الموظف، الصلاحيات،
 إدارة الموظفين والطلبات والمواطنين والمواعيد والإشعارات والإعدادات والوثائق وسجل التدقيق.
 
-> هذا الملف خاص بلوحة الويب. تطبيق المواطن موثق في `README_USER_APP_AR.md`.
+> هذا الملف خاص بلوحة الويب. تطبيق المواطن موثق في ‎`README_USER_APP_AR.md`‎.
 
 يغطي هذا الدليل الدخول الآمن، إدارة الموظفين والصلاحيات، لوحة التحكم والطلبات الموحدة ودورة الوثائق الإضافية.
 
@@ -19,7 +25,7 @@ APP_BOOTSTRAP_ADMIN_FIRST_NAME=Admin
 APP_BOOTSTRAP_ADMIN_LAST_NAME=User
 ```
 
-بعد تشغيل التطبيق ونجاح تسجيل دخول الأدمن، غيّر `APP_BOOTSTRAP_ADMIN_ENABLED` إلى `false`. لا تضع كلمة المرور داخل Git أو ملفات المشروع.
+بعد تشغيل التطبيق ونجاح تسجيل دخول الأدمن، غيّر ‎`APP_BOOTSTRAP_ADMIN_ENABLED`‎ إلى ‎`false`‎. لا تضع كلمة المرور داخل Git أو ملفات المشروع.
 
 الأدمن والموظف يسجلان الدخول من نفس endpoint الحالي:
 
@@ -32,19 +38,19 @@ Content-Type: application/json
 
 ## صلاحيات الموظف
 
-الصلاحيات ترجع في `permissions` داخل بيانات الموظف وتُطبق فعلياً في الباك إند. أهمها:
+الصلاحيات ترجع في ‎`permissions`‎ داخل بيانات الموظف وتُطبق فعلياً في الباك إند. أهمها:
 
-- `REQUEST_VIEW`, `REQUEST_REVIEW`, `REQUEST_APPROVE`, `REQUEST_REJECT`
-- `CITIZEN_VIEW`, `CITIZEN_EDIT`
-- `APPOINTMENT_VIEW`, `APPOINTMENT_MANAGE`
-- `STAFF_VIEW`, `STAFF_MANAGE`
+- ‎`REQUEST_VIEW`‎, ‎`REQUEST_REVIEW`‎, ‎`REQUEST_APPROVE`‎, ‎`REQUEST_REJECT`‎
+- ‎`CITIZEN_VIEW`‎, ‎`CITIZEN_EDIT`‎
+- ‎`APPOINTMENT_VIEW`‎, ‎`APPOINTMENT_MANAGE`‎
+- ‎`STAFF_VIEW`‎, ‎`STAFF_MANAGE`‎
 - صلاحيات وثائق الهوية والجواز وشهادة الميلاد، والإشعارات والتقارير والتدقيق والإعدادات
 
 إذا عدّل الأدمن صلاحيات موظف، تُلغى صلاحية access tokens والجلسات القديمة لذلك الموظف ويجب أن يسجل دخوله من جديد.
 
 ## إدارة الموظفين — للأدمن
 
-كل المسارات التالية تحتاج `Authorization: Bearer <accessToken>` ودور `ADMIN`.
+كل المسارات التالية تحتاج ‎`Authorization: Bearer <accessToken>`‎ ودور ‎`ADMIN`‎.
 
 ### إنشاء موظف
 
@@ -64,7 +70,7 @@ POST /api/v1/admin/staff-accounts
 }
 ```
 
-النجاح `201 Created`. إذا حُذف حقل `permissions` يحصل الموظف على صلاحيات الموظف الافتراضية. لا يمكن لهذا المسار إنشاء أدمن.
+النجاح ‎`201 Created`‎. إذا حُذف حقل ‎`permissions`‎ يحصل الموظف على صلاحيات الموظف الافتراضية. لا يمكن لهذا المسار إنشاء أدمن.
 
 ### القائمة والتفاصيل
 
@@ -89,7 +95,7 @@ PATCH /api/v1/admin/staff-accounts/{accountId}
 }
 ```
 
-النجاح `204 No Content`، ويجب أن يعيد الموظف تسجيل الدخول.
+النجاح ‎`204 No Content`‎، ويجب أن يعيد الموظف تسجيل الدخول.
 
 ### تفعيل أو تعطيل الموظف
 
@@ -101,7 +107,7 @@ PATCH /api/v1/admin/staff-accounts/{accountId}/status
 {"status":"DISABLED"}
 ```
 
-القيم المقبولة هنا `ACTIVE` أو `DISABLED` فقط. النجاح `204`.
+القيم المقبولة هنا ‎`ACTIVE`‎ أو ‎`DISABLED`‎ فقط. النجاح ‎`204`‎.
 
 ### إعادة تعيين كلمة المرور
 
@@ -113,7 +119,7 @@ POST /api/v1/admin/staff-accounts/{accountId}/password-reset
 {"temporaryPassword":"NewTemporaryPassword123!"}
 ```
 
-النجاح `204` ويلغي كل جلسات الموظف القديمة.
+النجاح ‎`204`‎ ويلغي كل جلسات الموظف القديمة.
 
 ## ملف الموظف الحالي
 
@@ -140,9 +146,9 @@ Body تغيير كلمة المرور:
 
 ## ملاحظات للفرونت إند
 
-- أخفِ الزر عندما لا تحتوي `permissions` على الصلاحية المطلوبة، لكن لا تعتمد على الإخفاء كحماية؛ الباك إند يعيد `403 FORBIDDEN` أيضاً.
-- اعتبر كل status من `200` إلى `299` نجاحاً، خصوصاً `201` و`204`.
-- عند `401` جرّب refresh مرة واحدة، وعند `403` اعرض رسالة عدم امتلاك الصلاحية.
+- أخفِ الزر عندما لا تحتوي ‎`permissions`‎ على الصلاحية المطلوبة، لكن لا تعتمد على الإخفاء كحماية؛ الباك إند يعيد ‎`403 FORBIDDEN`‎ أيضاً.
+- اعتبر كل status من ‎`200`‎ إلى ‎`299`‎ نجاحاً، خصوصاً ‎`201`‎ و‎`204`‎.
+- عند ‎`401`‎ جرّب refresh مرة واحدة، وعند ‎`403`‎ اعرض رسالة عدم امتلاك الصلاحية.
 - لا تسجل access token أو refresh token أو كلمات المرور في logs.
 
 ## Dashboard والطلبات الموحدة
@@ -153,7 +159,7 @@ Body تغيير كلمة المرور:
 GET /api/v1/operations/dashboard
 ```
 
-تحتاج صلاحية `DASHBOARD_VIEW`. مثال مختصر للاستجابة:
+تحتاج صلاحية ‎`DASHBOARD_VIEW`‎. مثال مختصر للاستجابة:
 
 ```json
 {
@@ -178,7 +184,7 @@ GET /api/v1/operations/dashboard
 }
 ```
 
-`recentRequests` تحتوي آخر 10 طلبات من كل الخدمات.
+‎`recentRequests`‎ تحتوي آخر 10 طلبات من كل الخدمات.
 
 ### قائمة كل الطلبات
 
@@ -186,14 +192,14 @@ GET /api/v1/operations/dashboard
 GET /api/v1/operations/requests?page=0&size=20
 ```
 
-تحتاج صلاحية `REQUEST_VIEW`. معاملات التصفية اختيارية:
+تحتاج صلاحية ‎`REQUEST_VIEW`‎. معاملات التصفية اختيارية:
 
-- `serviceType`: إحدى `PASSPORT`, `NATIONAL_IDENTITY`, `BIRTH_CERTIFICATE`.
-- `status`: إحدى `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`.
-- `query`: بحث برقم الطلب أو الرقم الوطني أو نوع الخدمة أو نوع الطلب أو الحالة.
-- `submittedFrom` و`submittedTo`: تاريخ ووقت ISO-8601، مثل `2026-09-01T00:00:00Z`.
-- `page`: يبدأ من صفر.
-- `size`: من 1 إلى 100.
+- ‎`serviceType`‎: إحدى ‎`PASSPORT`‎, ‎`NATIONAL_IDENTITY`‎, ‎`BIRTH_CERTIFICATE`‎.
+- ‎`status`‎: إحدى ‎`SUBMITTED`‎, ‎`UNDER_REVIEW`‎, ‎`APPROVED`‎, ‎`REJECTED`‎.
+- ‎`query`‎: بحث برقم الطلب أو الرقم الوطني أو نوع الخدمة أو نوع الطلب أو الحالة.
+- ‎`submittedFrom`‎ و‎`submittedTo`‎: تاريخ ووقت ISO-8601، مثل ‎`2026-09-01T00:00:00Z`‎.
+- ‎`page`‎: يبدأ من صفر.
+- ‎`size`‎: من 1 إلى 100.
 
 مثال:
 
@@ -233,9 +239,9 @@ GET /api/v1/operations/requests?serviceType=PASSPORT&status=SUBMITTED&query=CID0
 }
 ```
 
-طلبات الجواز والهوية الجديدة ترجع `submissionDetails`، وتشمل المستفيد ومرجع الدفع ورقم بلاغ الفقد عند الحاجة. الطلبات القديمة قد ترجع `submissionDetails: null`. تُخزّن هذه التفاصيل مشفّرة ولا يُكتب مرجع الدفع في سجل التدقيق.
+طلبات الجواز والهوية الجديدة ترجع ‎`submissionDetails`‎، وتشمل المستفيد ومرجع الدفع ورقم بلاغ الفقد عند الحاجة. الطلبات القديمة قد ترجع ‎`submissionDetails: null`‎. تُخزّن هذه التفاصيل مشفّرة ولا يُكتب مرجع الدفع في سجل التدقيق.
 
-إذا كان `beneficiaryType` يساوي `DEPENDENT_CHILD` فترجع `dependentBirthCertificateId` لشهادة المولود التابعة لولي الأمر. إصدار وثيقة الطفل عند الموافقة مؤجل حالياً؛ يمنع الباك إند الموافقة النهائية بدل إصدار الوثيقة باسم ولي الأمر بالخطأ.
+إذا كان ‎`beneficiaryType`‎ يساوي ‎`DEPENDENT_CHILD`‎ فترجع ‎`dependentBirthCertificateId`‎ لشهادة المولود التابعة لولي الأمر. إصدار وثيقة الطفل عند الموافقة مؤجل حالياً؛ يمنع الباك إند الموافقة النهائية بدل إصدار الوثيقة باسم ولي الأمر بالخطأ.
 
 ### تفاصيل طلب واحد
 
@@ -249,7 +255,7 @@ GET /api/v1/operations/requests/{serviceType}/{requestId}
 GET /api/v1/operations/requests/PASSPORT/550e8400-e29b-41d4-a716-446655440000
 ```
 
-يرجع نفس نموذج العنصر الموجود في `content` مع سبب الطلب، الموظف المراجع، وقت المراجعة وسبب القرار عند وجودها.
+يرجع نفس نموذج العنصر الموجود في ‎`content`‎ مع سبب الطلب، الموظف المراجع، وقت المراجعة وسبب القرار عند وجودها.
 
 ولعرض التسلسل الكامل لتغيّر حالة الطلب:
 
@@ -257,7 +263,7 @@ GET /api/v1/operations/requests/PASSPORT/550e8400-e29b-41d4-a716-446655440000
 GET /api/v1/operations/requests/{serviceType}/{requestId}/history
 ```
 
-يرجع قائمة تحتوي `fromStatus`, `toStatus`, `reason`, `changedBy`, و`changedAt` مرتبة حسب التخزين التاريخي للطلب.
+يرجع قائمة تحتوي ‎`fromStatus`‎, ‎`toStatus`‎, ‎`reason`‎, ‎`changedBy`‎, و‎`changedAt`‎ مرتبة حسب التخزين التاريخي للطلب.
 
 ### اكتمال المرفقات قبل المراجعة
 
@@ -280,12 +286,12 @@ GET /api/v1/operations/birth-certificate-requests/{requestId}/attachment-require
 }
 ```
 
-قائمة المرفقات ترجع `documentType` مع بيانات الملف. لا يمكن بدء مراجعة طلب جواز أو هوية عندما تكون `complete=false`، ويرجع الباك إند `409` و`code: MISSING_REQUIRED_ATTACHMENTS`. شهادة الميلاد تدعم تصنيف الملفات، لكن لا توجد لها قائمة إلزامية حتى اعتماد متطلباتها الرسمية.
+قائمة المرفقات ترجع ‎`documentType`‎ مع بيانات الملف. لا يمكن بدء مراجعة طلب جواز أو هوية عندما تكون ‎`complete=false`‎، ويرجع الباك إند ‎`409`‎ و‎`code: MISSING_REQUIRED_ATTACHMENTS`‎. شهادة الميلاد تدعم تصنيف الملفات، لكن لا توجد لها قائمة إلزامية حتى اعتماد متطلباتها الرسمية.
 
 ## طلب وثائق إضافية من المواطن
 
 تُستخدم هذه الدورة عندما يبدأ الموظف مراجعة الطلب ثم يكتشف أن بعض الوثائق ناقصة. تعمل مع الخدمات الثلاث:
-`PASSPORT` و`NATIONAL_IDENTITY` و`BIRTH_CERTIFICATE`.
+‎`PASSPORT`‎ و‎`NATIONAL_IDENTITY`‎ و‎`BIRTH_CERTIFICATE`‎.
 
 ### 1. الموظف يحدد الوثائق الناقصة
 
@@ -294,7 +300,7 @@ POST /api/v1/operations/requests/{serviceType}/{requestId}/additional-documents
 Content-Type: application/json
 ```
 
-تحتاج صلاحية `REQUEST_ADDITIONAL_DOCUMENTS`. يجب أن يكون الطلب الأصلي بحالة `UNDER_REVIEW` وأن يكون الموظف الحالي هو الموظف الذي بدأ مراجعته.
+تحتاج صلاحية ‎`REQUEST_ADDITIONAL_DOCUMENTS`‎. يجب أن يكون الطلب الأصلي بحالة ‎`UNDER_REVIEW`‎ وأن يكون الموظف الحالي هو الموظف الذي بدأ مراجعته.
 
 ```json
 {
@@ -306,7 +312,7 @@ Content-Type: application/json
 }
 ```
 
-النجاح `201 Created`، ويُنشأ إشعار للمواطن. أسماء الوثائق هنا هي القيم نفسها التي يجب أن يرسلها تطبيق المواطن في `documentName`.
+النجاح ‎`201 Created`‎، ويُنشأ إشعار للمواطن. أسماء الوثائق هنا هي القيم نفسها التي يجب أن يرسلها تطبيق المواطن في ‎`documentName`‎.
 
 ### 2. المواطن يعرض الطلب ويرفع الملفات
 
@@ -316,11 +322,11 @@ GET /api/v1/me/additional-document-requests
 
 حالات طلب الوثائق:
 
-- `REQUESTED`: ينتظر رفع المواطن.
-- `SUBMITTED`: أرسل المواطن كل الوثائق وينتظر الموظف.
-- `RESOLVED`: راجع الموظف الوثائق وأغلق الطلب.
+- ‎`REQUESTED`‎: ينتظر رفع المواطن.
+- ‎`SUBMITTED`‎: أرسل المواطن كل الوثائق وينتظر الموظف.
+- ‎`RESOLVED`‎: راجع الموظف الوثائق وأغلق الطلب.
 
-رفع كل ملف يكون بصيغة `multipart/form-data`:
+رفع كل ملف يكون بصيغة ‎`multipart/form-data`‎:
 
 ```http
 POST /api/v1/me/additional-document-requests/{additionalRequestId}/attachments
@@ -328,8 +334,8 @@ POST /api/v1/me/additional-document-requests/{additionalRequestId}/attachments
 
 الحقول:
 
-- `documentName`: اسم مطابق تمامًا لعنصر من `requiredDocuments`.
-- `file`: ملف JPEG أو PNG أو PDF، وبحد أقصى 5MB.
+- ‎`documentName`‎: اسم مطابق تمامًا لعنصر من ‎`requiredDocuments`‎.
+- ‎`file`‎: ملف JPEG أو PNG أو PDF، وبحد أقصى 5MB.
 
 بعد رفع ملف واحد على الأقل لكل اسم مطلوب:
 
@@ -337,7 +343,7 @@ POST /api/v1/me/additional-document-requests/{additionalRequestId}/attachments
 POST /api/v1/me/additional-document-requests/{additionalRequestId}/submit
 ```
 
-يرجع `200 OK` وحالة `SUBMITTED`. إذا بقيت وثيقة بلا ملف يرجع `409 ADDITIONAL_DOCUMENTS_INCOMPLETE`.
+يرجع ‎`200 OK`‎ وحالة ‎`SUBMITTED`‎. إذا بقيت وثيقة بلا ملف يرجع ‎`409 ADDITIONAL_DOCUMENTS_INCOMPLETE`‎.
 
 يمكن للمواطن عرض الملفات أو تنزيلها:
 
@@ -360,26 +366,26 @@ GET /api/v1/operations/additional-document-requests/{additionalRequestId}/attach
 POST /api/v1/operations/additional-document-requests/{additionalRequestId}/resolve
 ```
 
-النجاح `200 OK` وحالة `RESOLVED`. لا يمكن قبول أو رفض الطلب الأصلي قبل إغلاق كل طلب وثائق إضافية مفتوح؛ محاولة ذلك ترجع `409 ADDITIONAL_DOCUMENTS_UNRESOLVED`.
+النجاح ‎`200 OK`‎ وحالة ‎`RESOLVED`‎. لا يمكن قبول أو رفض الطلب الأصلي قبل إغلاق كل طلب وثائق إضافية مفتوح؛ محاولة ذلك ترجع ‎`409 ADDITIONAL_DOCUMENTS_UNRESOLVED`‎.
 
 ### أخطاء دورة الوثائق الإضافية
 
-كلها ترجع بالشكل الموحد `{code, message, status, timestamp}`:
+كلها ترجع بالشكل الموحد ‎`{code, message, status, timestamp}`‎:
 
-| HTTP | `code` | المعنى |
+| HTTP | ‎`code`‎ | المعنى |
 |---:|---|---|
-| `400` | `VALIDATION_ERROR` | `requiredDocuments` فارغة أو أحد الحقول يتجاوز الحد |
-| `400` | `INVALID_REQUEST` | اسم الوثيقة غير مطلوب أو بيانات الرفع غير صحيحة |
-| `400` | `ATTACHMENT_INVALID` | نوع الملف أو حجمه أو توقيعه غير مسموح |
-| `403` | `FORBIDDEN` | الموظف لا يملك الصلاحية |
-| `404` | `NOT_FOUND` | الطلب أو الملف غير موجود/لا يخص المواطن |
-| `409` | `ADDITIONAL_DOCUMENTS_ALREADY_REQUESTED` | يوجد طلب وثائق مفتوح لنفس الطلب |
-| `409` | `ADDITIONAL_DOCUMENTS_INCOMPLETE` | لم يُرفع ملف لكل وثيقة مطلوبة |
-| `409` | `ADDITIONAL_DOCUMENTS_UPLOAD_CLOSED` | انتهت مرحلة الرفع |
-| `409` | `ADDITIONAL_DOCUMENTS_NOT_AWAITING_UPLOAD` | طلب الوثائق ليس بحالة `REQUESTED` |
-| `409` | `ADDITIONAL_DOCUMENTS_NOT_SUBMITTED` | المواطن لم يرسل الوثائق بعد |
-| `409` | `ADDITIONAL_DOCUMENTS_UNRESOLVED` | لا يمكن اتخاذ القرار قبل إغلاق الوثائق |
-| `409` | `ADDITIONAL_DOCUMENTS_REVIEWER_MISMATCH` | الموظف الحالي ليس مراجع الطلب |
+| ‎`400`‎ | ‎`VALIDATION_ERROR`‎ | ‎`requiredDocuments`‎ فارغة أو أحد الحقول يتجاوز الحد |
+| ‎`400`‎ | ‎`INVALID_REQUEST`‎ | اسم الوثيقة غير مطلوب أو بيانات الرفع غير صحيحة |
+| ‎`400`‎ | ‎`ATTACHMENT_INVALID`‎ | نوع الملف أو حجمه أو توقيعه غير مسموح |
+| ‎`403`‎ | ‎`FORBIDDEN`‎ | الموظف لا يملك الصلاحية |
+| ‎`404`‎ | ‎`NOT_FOUND`‎ | الطلب أو الملف غير موجود/لا يخص المواطن |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_ALREADY_REQUESTED`‎ | يوجد طلب وثائق مفتوح لنفس الطلب |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_INCOMPLETE`‎ | لم يُرفع ملف لكل وثيقة مطلوبة |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_UPLOAD_CLOSED`‎ | انتهت مرحلة الرفع |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_NOT_AWAITING_UPLOAD`‎ | طلب الوثائق ليس بحالة ‎`REQUESTED`‎ |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_NOT_SUBMITTED`‎ | المواطن لم يرسل الوثائق بعد |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_UNRESOLVED`‎ | لا يمكن اتخاذ القرار قبل إغلاق الوثائق |
+| ‎`409`‎ | ‎`ADDITIONAL_DOCUMENTS_REVIEWER_MISMATCH`‎ | الموظف الحالي ليس مراجع الطلب |
 
 ## دليل المواطنين
 
@@ -389,12 +395,12 @@ POST /api/v1/operations/additional-document-requests/{additionalRequestId}/resol
 GET /api/v1/operations/citizens?page=0&size=20
 ```
 
-تحتاج صلاحية `CITIZEN_VIEW`. معاملات التصفية:
+تحتاج صلاحية ‎`CITIZEN_VIEW`‎. معاملات التصفية:
 
-- `query`: يبحث في الاسم، الرقم الوطني، البريد، الهاتف أو UUID الخاص بالمواطن.
-- `status`: حالة حساب المواطن مثل `ACTIVE` أو `DISABLED`.
-- `page`: يبدأ من صفر.
-- `size`: من 1 إلى 100.
+- ‎`query`‎: يبحث في الاسم، الرقم الوطني، البريد، الهاتف أو UUID الخاص بالمواطن.
+- ‎`status`‎: حالة حساب المواطن مثل ‎`ACTIVE`‎ أو ‎`DISABLED`‎.
+- ‎`page`‎: يبدأ من صفر.
+- ‎`size`‎: من 1 إلى 100.
 
 مثال:
 
@@ -424,7 +430,7 @@ GET /api/v1/operations/citizens?query=CID002&status=ACTIVE&page=0&size=20
 }
 ```
 
-قد تكون `accountId` أو معلومات الحساب فارغة للمواطنين المرحّلين الذين لا يملكون حساب تطبيق بعد. الاسم يُؤخذ من الهوية، ثم الجواز، ثم شهادة الميلاد حسب المتاح.
+قد تكون ‎`accountId`‎ أو معلومات الحساب فارغة للمواطنين المرحّلين الذين لا يملكون حساب تطبيق بعد. الاسم يُؤخذ من الهوية، ثم الجواز، ثم شهادة الميلاد حسب المتاح.
 
 ### ملف المواطن الكامل
 
@@ -432,12 +438,12 @@ GET /api/v1/operations/citizens?query=CID002&status=ACTIVE&page=0&size=20
 GET /api/v1/operations/citizens/{citizenId}
 ```
 
-تحتاج صلاحية `CITIZEN_VIEW`. الاستجابة تجمع في طلب واحد:
+تحتاج صلاحية ‎`CITIZEN_VIEW`‎. الاستجابة تجمع في طلب واحد:
 
 - بيانات المواطن والحساب.
-- `nationalIdentity` و`passport` و`birthCertificate`، وتكون قيمة الوثيقة `null` إذا لم توجد.
-- `requests` لكل خدماته مرتبة من الأحدث.
-- `appointments` مرتبة حسب وقت الموعد.
+- ‎`nationalIdentity`‎ و‎`passport`‎ و‎`birthCertificate`‎، وتكون قيمة الوثيقة ‎`null`‎ إذا لم توجد.
+- ‎`requests`‎ لكل خدماته مرتبة من الأحدث.
+- ‎`appointments`‎ مرتبة حسب وقت الموعد.
 
 ### تفعيل أو تعطيل حساب المواطن
 
@@ -448,7 +454,7 @@ Content-Type: application/json
 {"status":"DISABLED"}
 ```
 
-تحتاج صلاحية `CITIZEN_EDIT`. القيم المقبولة `ACTIVE` أو `DISABLED` فقط، والنجاح `200 OK`. تعطيل الحساب يمنع المواطن من استخدام توكناته السابقة لأن نسخة الصلاحية تتغير، وتُسجّل العملية في سجل التدقيق.
+تحتاج صلاحية ‎`CITIZEN_EDIT`‎. القيم المقبولة ‎`ACTIVE`‎ أو ‎`DISABLED`‎ فقط، والنجاح ‎`200 OK`‎. تعطيل الحساب يمنع المواطن من استخدام توكناته السابقة لأن نسخة الصلاحية تتغير، وتُسجّل العملية في سجل التدقيق.
 
 لا يسمح هذا المسار بتعديل الرقم الوطني أو الوثائق الرسمية أو وضع رقم هاتف غير متحقق؛ هذه البيانات تحتاج إجراءات تحقق منفصلة.
 
@@ -460,7 +466,7 @@ Content-Type: application/json
 GET /api/v1/operations/reports/requests?from=2026-09-01T00:00:00Z&to=2026-09-30T23:59:59Z
 ```
 
-يحتاج صلاحية `REPORT_VIEW`. التاريخان اختياريان ويحددان فترة حسب وقت تقديم الطلب. ترجع الاستجابة:
+يحتاج صلاحية ‎`REPORT_VIEW`‎. التاريخان اختياريان ويحددان فترة حسب وقت تقديم الطلب. ترجع الاستجابة:
 
 ```json
 {
@@ -486,7 +492,7 @@ GET /api/v1/operations/reports/requests?from=2026-09-01T00:00:00Z&to=2026-09-30T
 }
 ```
 
-`averageReviewHours` يحسب الطلبات التي بدأت مراجعتها فقط، ويكون صفرًا إذا لم توجد طلبات تمت مراجعتها.
+‎`averageReviewHours`‎ يحسب الطلبات التي بدأت مراجعتها فقط، ويكون صفرًا إذا لم توجد طلبات تمت مراجعتها.
 
 ### سجل التدقيق
 
@@ -494,19 +500,19 @@ GET /api/v1/operations/reports/requests?from=2026-09-01T00:00:00Z&to=2026-09-30T
 GET /api/v1/operations/audit-events?action=APPROVED&targetType=SERVICE_REQUEST&occurredFrom=2026-09-01T00:00:00Z&page=0&size=20
 ```
 
-يحتاج صلاحية `AUDIT_VIEW`. الفلاتر الاختيارية:
+يحتاج صلاحية ‎`AUDIT_VIEW`‎. الفلاتر الاختيارية:
 
-- `actorAccountId`: معرف حساب منفذ العملية.
-- `action`: بحث جزئي باسم العملية، مثل `APPROVED` أو `APPOINTMENT`.
-- `targetType` و`targetId`: نوع ومعرف العنصر المتأثر.
-- `occurredFrom` و`occurredTo`: الفترة الزمنية.
-- `page` و`size`: تقسيم الصفحات، والحد الأقصى للحجم 100.
+- ‎`actorAccountId`‎: معرف حساب منفذ العملية.
+- ‎`action`‎: بحث جزئي باسم العملية، مثل ‎`APPROVED`‎ أو ‎`APPOINTMENT`‎.
+- ‎`targetType`‎ و‎`targetId`‎: نوع ومعرف العنصر المتأثر.
+- ‎`occurredFrom`‎ و‎`occurredTo`‎: الفترة الزمنية.
+- ‎`page`‎ و‎`size`‎: تقسيم الصفحات، والحد الأقصى للحجم 100.
 
-النتيجة صفحة موحدة، وكل عنصر يحتوي: `id`, `actorAccountId`, `action`, `targetType`, `targetId`, `result`, `metadata`, `occurredAt`. السجل للقراءة فقط ولا يوجد مسار لتعديله أو حذفه.
+النتيجة صفحة موحدة، وكل عنصر يحتوي: ‎`id`‎, ‎`actorAccountId`‎, ‎`action`‎, ‎`targetType`‎, ‎`targetId`‎, ‎`result`‎, ‎`metadata`‎, ‎`occurredAt`‎. السجل للقراءة فقط ولا يوجد مسار لتعديله أو حذفه.
 
 ## إدارة المواعيد
 
-عرض المواعيد يحتاج `APPOINTMENT_VIEW`، أما الإنشاء والتعديل والإلغاء والإكمال فتحتاج `APPOINTMENT_MANAGE`.
+عرض المواعيد يحتاج ‎`APPOINTMENT_VIEW`‎، أما الإنشاء والتعديل والإلغاء والإكمال فتحتاج ‎`APPOINTMENT_MANAGE`‎.
 
 ### إنشاء خانة موعد
 
@@ -523,7 +529,7 @@ Content-Type: application/json
 }
 ```
 
-قيم `serviceType`: `PASSPORT`, `NATIONAL_IDENTITY`, `BIRTH_CERTIFICATE`. النجاح `201 Created`.
+قيم ‎`serviceType`‎: ‎`PASSPORT`‎, ‎`NATIONAL_IDENTITY`‎, ‎`BIRTH_CERTIFICATE`‎. النجاح ‎`201 Created`‎.
 
 ### قائمة خانات المواعيد
 
@@ -531,7 +537,7 @@ Content-Type: application/json
 GET /api/v1/operations/appointment-slots?serviceType=PASSPORT&active=true&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&office=Main&page=0&size=20
 ```
 
-كل الفلاتر اختيارية. ترجع الاستجابة صفحة موحدة فيها `content`, `page`, `size`, `totalElements`, `totalPages`.
+كل الفلاتر اختيارية. ترجع الاستجابة صفحة موحدة فيها ‎`content`‎, ‎`page`‎, ‎`size`‎, ‎`totalElements`‎, ‎`totalPages`‎.
 
 ### تعديل خانة موعد
 
@@ -548,7 +554,7 @@ Content-Type: application/json
 }
 ```
 
-إذا كان في الخانة حجوزات، يمكن تغيير السعة فقط بشرط ألا تصبح أقل من `reservedCount`. لا يمكن تغيير الخدمة أو المكتب أو الوقت حتى تُلغى الحجوزات. كما يجب أن يبقى وقت البداية في المستقبل.
+إذا كان في الخانة حجوزات، يمكن تغيير السعة فقط بشرط ألا تصبح أقل من ‎`reservedCount`‎. لا يمكن تغيير الخدمة أو المكتب أو الوقت حتى تُلغى الحجوزات. كما يجب أن يبقى وقت البداية في المستقبل.
 
 ### تعطيل خانة موعد
 
@@ -564,13 +570,13 @@ POST /api/v1/operations/appointment-slots/{slotId}/deactivate
 GET /api/v1/operations/appointments/search?status=BOOKED&serviceType=PASSPORT&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&query=CID002&page=0&size=20
 ```
 
-كل الفلاتر اختيارية. `query` يبحث بالرقم الوطني أو معرف المواطن أو معرف الموعد أو اسم المكتب. حالات الموعد: `BOOKED`, `CANCELLED`, `COMPLETED`.
+كل الفلاتر اختيارية. ‎`query`‎ يبحث بالرقم الوطني أو معرف المواطن أو معرف الموعد أو اسم المكتب. حالات الموعد: ‎`BOOKED`‎, ‎`CANCELLED`‎, ‎`COMPLETED`‎.
 
 كل عنصر يرجع:
 
-- معرف الموعد والمواطن والخانة: `id`, `citizenId`, `slotId`.
-- `citizenNationalId`, `serviceType`, `officeName`, `startsAt`, `endsAt`.
-- `status`, `bookedAt`, `cancelledAt`, `completedAt`, `completedBy`.
+- معرف الموعد والمواطن والخانة: ‎`id`‎, ‎`citizenId`‎, ‎`slotId`‎.
+- ‎`citizenNationalId`‎, ‎`serviceType`‎, ‎`officeName`‎, ‎`startsAt`‎, ‎`endsAt`‎.
+- ‎`status`‎, ‎`bookedAt`‎, ‎`cancelledAt`‎, ‎`completedAt`‎, ‎`completedBy`‎.
 
 المسار القديم التالي ما زال متاحًا للتوافق، لكنه يرجع قائمة غير مقسمة إلى صفحات لحالة واحدة:
 
@@ -585,7 +591,7 @@ POST /api/v1/operations/appointments/{appointmentId}/cancel
 POST /api/v1/operations/appointments/{appointmentId}/complete
 ```
 
-إلغاء الموظف يعيد المقعد إلى الخانة ويرسل إشعارًا للمواطن. الإكمال يغيّر الحالة إلى `COMPLETED` ويسجل الموظف المنفذ. لا يمكن تنفيذ انتقال غير صالح، مثل إلغاء موعد ملغى أو مكتمل.
+إلغاء الموظف يعيد المقعد إلى الخانة ويرسل إشعارًا للمواطن. الإكمال يغيّر الحالة إلى ‎`COMPLETED`‎ ويسجل الموظف المنفذ. لا يمكن تنفيذ انتقال غير صالح، مثل إلغاء موعد ملغى أو مكتمل.
 
 تعارضات المواعيد ترجع:
 
@@ -614,14 +620,14 @@ Content-Type: application/json
 ينفذ الباك إند الآن عمليتين داخل معاملة واحدة:
 
 1. ينشئ نسخة مشفرة جديدة من الوثيقة برقم جديد وتاريخ إصدار جديد.
-2. يغيّر حالة الطلب إلى `APPROVED` ويسجل السجل والإشعار.
+2. يغيّر حالة الطلب إلى ‎`APPROVED`‎ ويسجل السجل والإشعار.
 
-إذا فشل إنشاء الوثيقة تتراجع العملية كلها ويبقى الطلب `UNDER_REVIEW`.
+إذا فشل إنشاء الوثيقة تتراجع العملية كلها ويبقى الطلب ‎`UNDER_REVIEW`‎.
 
 - الإصدار الأول للجواز يعتمد على بيانات الهوية، ثم شهادة الميلاد عند عدم وجود الهوية.
 - تجديد/استبدال الجواز أو الهوية ينسخ البيانات الرسمية الموجودة ويولّد رقم نسخة وتواريخ صلاحية جديدة.
 - مستخرج أو تصحيح شهادة الميلاد ينشئ نسخة جديدة من شهادة المواطن.
-- `NEWBORN_REGISTRATION` ينشئ شهادة مولود تابعة مرتبطة بولي الأمر والطلب، ولا يستبدل شهادة ميلاد ولي الأمر.
+- ‎`NEWBORN_REGISTRATION`‎ ينشئ شهادة مولود تابعة مرتبطة بولي الأمر والطلب، ولا يستبدل شهادة ميلاد ولي الأمر.
 
 يستطيع تطبيق المواطن عرض شهادات المواليد التابعة من:
 
@@ -629,7 +635,7 @@ Content-Type: application/json
 GET /api/v1/me/documents/dependent-birth-certificates
 ```
 
-وتظهر أيضًا في حقل `dependentBirthCertificates` عند طلب ملف المواطن الكامل:
+وتظهر أيضًا في حقل ‎`dependentBirthCertificates`‎ عند طلب ملف المواطن الكامل:
 
 ```http
 GET /api/v1/operations/citizens/{citizenId}
@@ -648,7 +654,7 @@ GET /api/v1/operations/citizens/{citizenId}
 
 ## إدارة الإشعارات
 
-هذه المسارات مخصصة للويب الإداري، وتحتاج `Bearer token` لموظف أو أدمن فعال.
+هذه المسارات مخصصة للويب الإداري، وتحتاج ‎`Bearer token`‎ لموظف أو أدمن فعال.
 
 ### عرض سجل الإشعارات
 
@@ -656,8 +662,8 @@ GET /api/v1/operations/citizens/{citizenId}
 GET /api/v1/operations/notifications?citizenId={citizenId}&type=GENERAL&read=false&page=0&size=20
 ```
 
-كل الفلاتر اختيارية، والحد الأقصى لـ`size` هو `100`. يحتاج المستخدم صلاحية `NOTIFICATION_VIEW`.
-الاستجابة صفحة موحدة تحتوي `content`, `page`, `size`, `totalElements`, `totalPages`.
+كل الفلاتر اختيارية، والحد الأقصى لـ‎`size`‎ هو ‎`100`‎. يحتاج المستخدم صلاحية ‎`NOTIFICATION_VIEW`‎.
+الاستجابة صفحة موحدة تحتوي ‎`content`‎, ‎`page`‎, ‎`size`‎, ‎`totalElements`‎, ‎`totalPages`‎.
 
 ### إرسال إشعار يدوي
 
@@ -673,12 +679,12 @@ Content-Type: application/json
 }
 ```
 
-يحتاج المستخدم صلاحية `NOTIFICATION_SEND`، ويرجع `201 Created`. `title` بحد أقصى 160 حرفًا
-و`message` بحد أقصى 1000 حرف. يُسجل الإرسال في سجل التدقيق دون تخزين نص الرسالة داخله.
+يحتاج المستخدم صلاحية ‎`NOTIFICATION_SEND`‎، ويرجع ‎`201 Created`‎. ‎`title`‎ بحد أقصى 160 حرفًا
+و‎`message`‎ بحد أقصى 1000 حرف. يُسجل الإرسال في سجل التدقيق دون تخزين نص الرسالة داخله.
 
-الأنواع المتاحة تشمل `GENERAL`، وأنواع تحديثات الطلبات والمواعيد والمستندات الإضافية الموجودة في `NotificationType`.
+الأنواع المتاحة تشمل ‎`GENERAL`‎، وأنواع تحديثات الطلبات والمواعيد والمستندات الإضافية الموجودة في ‎`NotificationType`‎.
 
-إذا كان المواطن غير موجود يرجع `404 RESOURCE_NOT_FOUND`. وإذا أوقف الأدمن الإشعارات يرجع:
+إذا كان المواطن غير موجود يرجع ‎`404 RESOURCE_NOT_FOUND`‎. وإذا أوقف الأدمن الإشعارات يرجع:
 
 ```json
 {
@@ -691,7 +697,7 @@ Content-Type: application/json
 
 ## إعدادات النظام
 
-هذه المسارات للأدمن فقط، لأنها تحتاج صلاحية `SETTINGS_MANAGE`:
+هذه المسارات للأدمن فقط، لأنها تحتاج صلاحية ‎`SETTINGS_MANAGE`‎:
 
 ```http
 GET /api/v1/operations/settings
@@ -708,9 +714,9 @@ Content-Type: application/json
 }
 ```
 
-- `requestSubmissionsEnabled`: عند إيقافه تُرفض طلبات الجواز والهوية وشهادة الميلاد الجديدة مؤقتًا.
-- `notificationsEnabled`: عند إيقافه لا تُنشأ إشعارات آلية جديدة، كما يُمنع الإرسال اليدوي من لوحة الموظف.
-- `maintenanceMessage`: رسالة اختيارية للواجهة، وبحد أقصى 500 حرف. أرسل `null` لمسحها.
+- ‎`requestSubmissionsEnabled`‎: عند إيقافه تُرفض طلبات الجواز والهوية وشهادة الميلاد الجديدة مؤقتًا.
+- ‎`notificationsEnabled`‎: عند إيقافه لا تُنشأ إشعارات آلية جديدة، كما يُمنع الإرسال اليدوي من لوحة الموظف.
+- ‎`maintenanceMessage`‎: رسالة اختيارية للواجهة، وبحد أقصى 500 حرف. أرسل ‎`null`‎ لمسحها.
 
 تعديل الإعدادات يُسجل في سجل التدقيق مع القيم السابقة والجديدة، دون نسخ نص رسالة الصيانة إلى السجل.
 عند إيقاف استقبال الطلبات يرجع الباك إند:
@@ -726,8 +732,8 @@ Content-Type: application/json
 
 ## إدارة وثائق المواطن يدويًا
 
-المسارات التالية للويب الإداري، ويستبدل `{citizenId}` بمعرف المواطن UUID من دليل المواطنين.
-`GET` يحتاج صلاحية العرض، و`POST` يحتاج صلاحية الإنشاء، و`PUT` يحتاج صلاحية التعديل الخاصة بنوع الوثيقة.
+المسارات التالية للويب الإداري، ويستبدل ‎`{citizenId}`‎ بمعرف المواطن UUID من دليل المواطنين.
+‎`GET`‎ يحتاج صلاحية العرض، و‎`POST`‎ يحتاج صلاحية الإنشاء، و‎`PUT`‎ يحتاج صلاحية التعديل الخاصة بنوع الوثيقة.
 
 ```http
 GET|POST|PUT /api/v1/operations/citizens/{citizenId}/documents/passport
@@ -735,10 +741,10 @@ GET|POST|PUT /api/v1/operations/citizens/{citizenId}/documents/national-identity
 GET|POST|PUT /api/v1/operations/citizens/{citizenId}/documents/birth-certificate
 ```
 
-- `POST` يرجع `201 Created`، ويُرفض بـ`409 DOCUMENT_ALREADY_EXISTS` إذا كانت الوثيقة موجودة.
-- `PUT` يعدّل أحدث نسخة مشفرة ويحافظ على رقمها إذا أرسل الفرونت نفس الرقم.
-- `GET` و`PUT` يرجعان `404 DOCUMENT_NOT_FOUND` عندما لا توجد الوثيقة.
-- تكرار رقم وثيقة تابع لمواطن آخر يرجع `409 DOCUMENT_ALREADY_EXISTS`.
+- ‎`POST`‎ يرجع ‎`201 Created`‎، ويُرفض بـ‎`409 DOCUMENT_ALREADY_EXISTS`‎ إذا كانت الوثيقة موجودة.
+- ‎`PUT`‎ يعدّل أحدث نسخة مشفرة ويحافظ على رقمها إذا أرسل الفرونت نفس الرقم.
+- ‎`GET`‎ و‎`PUT`‎ يرجعان ‎`404 DOCUMENT_NOT_FOUND`‎ عندما لا توجد الوثيقة.
+- تكرار رقم وثيقة تابع لمواطن آخر يرجع ‎`409 DOCUMENT_ALREADY_EXISTS`‎.
 - كل إنشاء أو تعديل يسجل الموظف والعملية في سجل التدقيق، دون نسخ البيانات الشخصية إلى سجل التدقيق.
 
 Body الجواز:
@@ -782,7 +788,7 @@ Body الهوية:
 }
 ```
 
-`nationalId` يجب أن يطابق رقم المواطن الموجود أصلًا في سجل المواطنين؛ لا يستطيع الموظف نقله إلى هوية مختلفة عبر هذا المسار.
+‎`nationalId`‎ يجب أن يطابق رقم المواطن الموجود أصلًا في سجل المواطنين؛ لا يستطيع الموظف نقله إلى هوية مختلفة عبر هذا المسار.
 
 Body شهادة الميلاد:
 

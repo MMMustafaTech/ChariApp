@@ -1,32 +1,38 @@
 # README تطبيق المواطن (الجوال)
 
+> للقراءة المنسقة داخل VS Code افتح معاينة Markdown بهذا الاختصار:
+
+```text
+Ctrl + Shift + V
+```
+
 هذا الملف هو المرجع المستقل لصاحب تطبيق المواطن. يحتوي التسجيل وتسجيل الدخول، الملف الشخصي،
 طلبات الجواز والهوية وشهادة الميلاد، المرفقات، المواعيد، الإشعارات، الوثائق ورسائل الخطأ.
 
-> هذا الملف خاص بتطبيق المواطن فقط. لوحة الموظف والأدمن موثقة في `README_ADMIN_EMPLOYEE_AR.md`.
+> هذا الملف خاص بتطبيق المواطن فقط. لوحة الموظف والأدمن موثقة في ‎`README_ADMIN_EMPLOYEE_AR.md`‎.
 
-**Base URL المنشور للتجربة:** `https://chari-api.onrender.com`
+**Base URL المنشور للتجربة:** ‎`https://chari-api.onrender.com`‎
 
-**Base URL المحلي:** `http://localhost:8080`
-هوية الاختبار الجديدة `CID001`: ينشئها الباك اند عند تشغيل `APP_TEST_DATA_ENROLLMENT_CITIZEN_ENABLED=true` مرة، ثم يُعاد الإعداد إلى `false`. أنشئ حسابها عبر OTP واختر كلمة مرور؛ لا توجد كلمة مرور افتراضية. الهوية القديمة `123456789` وحسابها لا يتغيران. قد يتأخر أول طلب بعد السكون لأن Render يستخدم الخطة المجانية.
-كل مسار يبدأ بـ `/api/v1/me/` يحتاج Header:
+**Base URL المحلي:** ‎`http://localhost:8080`‎
+هوية الاختبار الجديدة ‎`CID001`‎: ينشئها الباك اند عند تشغيل ‎`APP_TEST_DATA_ENROLLMENT_CITIZEN_ENABLED=true`‎ مرة، ثم يُعاد الإعداد إلى ‎`false`‎. أنشئ حسابها عبر OTP واختر كلمة مرور؛ لا توجد كلمة مرور افتراضية. الهوية القديمة ‎`123456789`‎ وحسابها لا يتغيران. قد يتأخر أول طلب بعد السكون لأن Render يستخدم الخطة المجانية.
+كل مسار يبدأ بـ ‎`/api/v1/me/`‎ يحتاج Header:
 
 ```http
 Authorization: Bearer <accessToken>
 ```
 
-تطبيق الجوال لا يحتاج CORS. وعند تشغيل Flutter كويب محليًا، يسمح Render حاليًا بـ `http://localhost:*`. قبل نشر واجهة ويب حقيقية أضف domain الواجهة الصريح إلى `APP_ALLOWED_ORIGINS`.
+تطبيق الجوال لا يحتاج CORS. وعند تشغيل Flutter كويب محليًا، يسمح Render حاليًا بـ ‎`http://localhost:*`‎. قبل نشر واجهة ويب حقيقية أضف domain الواجهة الصريح إلى ‎`APP_ALLOWED_ORIGINS`‎.
 
 ## 1. الدخول والتسجيل
 
 | الطريقة والمسار | Body | يرجع |
 |---|---|---|
-| `POST /auth/enrollment/otp` | `{"nationalId":"123456789","phoneNumber":"+23599123456","email":"citizen@example.com"}` | `202` مع `{"challengeId":"uuid"}` |
-| `POST /auth/enrollment/otp/verify` | `{"challengeId":"uuid","code":"123456"}` | `204 No Content` |
-| `POST /auth/enrollment/accounts` | `{"challengeId":"uuid","email":"...","password":"..."}` | `201` مع `{"accountId":"uuid"}` |
-| `POST /api/v1/auth/login` | `{"nationalId":"CID001","password":"..."}` | `200` مع `accessToken`, `refreshToken`, `tokenType`, `expiresIn` |
-| `POST /api/v1/auth/refresh` | `{"refreshToken":"..."}` | Token pair جديد بنفس حقول login |
-| `POST /api/v1/auth/logout` | `{"refreshToken":"..."}` | `204 No Content` |
+| ‎`POST /auth/enrollment/otp`‎ | ‎`{"nationalId":"123456789","phoneNumber":"+23599123456","email":"citizen@example.com"}`‎ | ‎`202`‎ مع ‎`{"challengeId":"uuid"}`‎ |
+| ‎`POST /auth/enrollment/otp/verify`‎ | ‎`{"challengeId":"uuid","code":"123456"}`‎ | ‎`204 No Content`‎ |
+| ‎`POST /auth/enrollment/accounts`‎ | ‎`{"challengeId":"uuid","email":"...","password":"..."}`‎ | ‎`201`‎ مع ‎`{"accountId":"uuid"}`‎ |
+| ‎`POST /api/v1/auth/login`‎ | ‎`{"nationalId":"CID001","password":"..."}`‎ | ‎`200`‎ مع ‎`accessToken`‎, ‎`refreshToken`‎, ‎`tokenType`‎, ‎`expiresIn`‎ |
+| ‎`POST /api/v1/auth/refresh`‎ | ‎`{"refreshToken":"..."}`‎ | Token pair جديد بنفس حقول login |
+| ‎`POST /api/v1/auth/logout`‎ | ‎`{"refreshToken":"..."}`‎ | ‎`204 No Content`‎ |
 
 دخول المواطن بالرقم الوطني وكلمة المرور؛ البريد مطلوب عند التسجيل فقط. دخول البريد القديم مدعوم للتوافق، لكن لا ترسل البريد والرقم الوطني معًا.
 
@@ -45,10 +51,10 @@ Authorization: Bearer <accessToken>
 
 | الطريقة والمسار | يرجع |
 |---|---|
-| `GET /api/v1/me/home` | `unreadNotificationCount`, `openRequestCount`, `upcomingAppointment`, `recentRequests` |
-| `GET /api/v1/me/profile` | `email`, `maskedNationalId`, `maskedVerifiedPhone`, `phoneVerified`, `phoneVerifiedAt`, `accountCreatedAt` |
-| `PATCH /api/v1/me/profile/password` | `204 No Content` |
-| `POST /api/v1/me/profile/logout-all` | `{"revokedSessions": 2}` |
+| ‎`GET /api/v1/me/home`‎ | ‎`unreadNotificationCount`‎, ‎`openRequestCount`‎, ‎`upcomingAppointment`‎, ‎`recentRequests`‎ |
+| ‎`GET /api/v1/me/profile`‎ | ‎`email`‎, ‎`maskedNationalId`‎, ‎`maskedVerifiedPhone`‎, ‎`phoneVerified`‎, ‎`phoneVerifiedAt`‎, ‎`accountCreatedAt`‎ |
+| ‎`PATCH /api/v1/me/profile/password`‎ | ‎`204 No Content`‎ |
+| ‎`POST /api/v1/me/profile/logout-all`‎ | ‎`{"revokedSessions": 2}`‎ |
 
 تغيير كلمة المرور:
 
@@ -75,34 +81,34 @@ Authorization: Bearer <accessToken>
 }
 ```
 
-> بعد تغيير كلمة المرور أو `logout-all`: امسح الـtokens من الجهاز وانتقل إلى شاشة الدخول.
+> بعد تغيير كلمة المرور أو ‎`logout-all`‎: امسح الـtokens من الجهاز وانتقل إلى شاشة الدخول.
 
 ## 3. الطلبات
 
 ### شكل الاستجابة الموحد للطلب
 
-طلبات الجواز والهوية وشهادة الميلاد ترجع كائنًا يحتوي: `id`, `citizenId`, `kind`, `requestReason`, `status`, `reviewedBy`, `submittedAt`, `reviewedAt`, `decisionReason`.
+طلبات الجواز والهوية وشهادة الميلاد ترجع كائنًا يحتوي: ‎`id`‎, ‎`citizenId`‎, ‎`kind`‎, ‎`requestReason`‎, ‎`status`‎, ‎`reviewedBy`‎, ‎`submittedAt`‎, ‎`reviewedAt`‎, ‎`decisionReason`‎.
 
-الحالات: `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`.
+الحالات: ‎`SUBMITTED`‎, ‎`UNDER_REVIEW`‎, ‎`APPROVED`‎, ‎`REJECTED`‎.
 
 ### الجواز
 
 | الطريقة والمسار | Body عند الحاجة | يرجع |
 |---|---|---|
-| `POST /api/v1/me/passport-requests` | body الكامل موضح أدناه | الطلب المنشأ (`201`) |
-| `GET /api/v1/me/passport-requests` | - | قائمة طلبات الجواز للمستخدم |
-| `GET /api/v1/me/passport-requests/{requestId}/history` | - | قائمة تغيّرات الحالة |
+| ‎`POST /api/v1/me/passport-requests`‎ | body الكامل موضح أدناه | الطلب المنشأ (‎`201`‎) |
+| ‎`GET /api/v1/me/passport-requests`‎ | - | قائمة طلبات الجواز للمستخدم |
+| ‎`GET /api/v1/me/passport-requests/{requestId}/history`‎ | - | قائمة تغيّرات الحالة |
 
 ### الهوية الوطنية
 
 | الطريقة والمسار | Body عند الحاجة | يرجع |
 |---|---|---|
-| `POST /api/v1/me/national-identity-requests` | body الكامل موضح أدناه | الطلب المنشأ (`201`) |
-| `GET /api/v1/me/national-identity-requests` | - | قائمة طلبات الهوية للمستخدم |
-| `GET /api/v1/me/national-identity-requests/{requestId}/history` | - | قائمة تغيّرات الحالة |
+| ‎`POST /api/v1/me/national-identity-requests`‎ | body الكامل موضح أدناه | الطلب المنشأ (‎`201`‎) |
+| ‎`GET /api/v1/me/national-identity-requests`‎ | - | قائمة طلبات الهوية للمستخدم |
+| ‎`GET /api/v1/me/national-identity-requests/{requestId}/history`‎ | - | قائمة تغيّرات الحالة |
 
-قيم `kind` للجواز والهوية: `ISSUANCE`, `RENEWAL`, `LOST`, `DAMAGED`, `DATA_CORRECTION`.
-حقل `reason` مطلوب لـ `LOST`, `DAMAGED`, `DATA_CORRECTION`.
+قيم ‎`kind`‎ للجواز والهوية: ‎`ISSUANCE`‎, ‎`RENEWAL`‎, ‎`LOST`‎, ‎`DAMAGED`‎, ‎`DATA_CORRECTION`‎.
+حقل ‎`reason`‎ مطلوب لـ ‎`LOST`‎, ‎`DAMAGED`‎, ‎`DATA_CORRECTION`‎.
 
 نفس شكل الـbody يُستخدم للجواز والهوية:
 
@@ -119,28 +125,28 @@ Authorization: Bearer <accessToken>
 
 القواعد:
 
-- `beneficiaryType`: إما `SELF` أو `DEPENDENT_CHILD`.
-- `SELF` يتطلب أن تكون `dependentBirthCertificateId` بقيمة `null`.
-- `DEPENDENT_CHILD` متاح للإصدار الأول فقط، ويتطلب معرف شهادة ميلاد تابعة يملكها صاحب الحساب.
-- `paymentReference` مطلوب وبحد أقصى 128 حرفًا.
-- `LOST` يتطلب `reason` و`lossReportNumber`. الأنواع الأخرى يجب أن ترسل `lossReportNumber: null`.
+- ‎`beneficiaryType`‎: إما ‎`SELF`‎ أو ‎`DEPENDENT_CHILD`‎.
+- ‎`SELF`‎ يتطلب أن تكون ‎`dependentBirthCertificateId`‎ بقيمة ‎`null`‎.
+- ‎`DEPENDENT_CHILD`‎ متاح للإصدار الأول فقط، ويتطلب معرف شهادة ميلاد تابعة يملكها صاحب الحساب.
+- ‎`paymentReference`‎ مطلوب وبحد أقصى 128 حرفًا.
+- ‎`LOST`‎ يتطلب ‎`reason`‎ و‎`lossReportNumber`‎. الأنواع الأخرى يجب أن ترسل ‎`lossReportNumber: null`‎.
 - تفاصيل الدفع تُخزن مشفرة ولا تظهر في سجل التدقيق.
-- قبول وإصدار وثيقة `DEPENDENT_CHILD` النهائي غير مفعّل بعد؛ الباك إند يمنع إصدارها باسم الوالد ويرجع `409 DOCUMENT_ISSUANCE_DATA_UNAVAILABLE` إلى أن تضاف وثائق التابعين.
-- المرفقات تُرفع منفصلة بعد إنشاء الطلب، ويجب إرسال `documentType` مع كل ملف كما هو موضح في قسم المرفقات.
+- قبول وإصدار وثيقة ‎`DEPENDENT_CHILD`‎ النهائي غير مفعّل بعد؛ الباك إند يمنع إصدارها باسم الوالد ويرجع ‎`409 DOCUMENT_ISSUANCE_DATA_UNAVAILABLE`‎ إلى أن تضاف وثائق التابعين.
+- المرفقات تُرفع منفصلة بعد إنشاء الطلب، ويجب إرسال ‎`documentType`‎ مع كل ملف كما هو موضح في قسم المرفقات.
 
-- `ISSUANCE` مع وجود الوثيقة مسبقًا يرجع `409` و`code: DOCUMENT_ALREADY_EXISTS`.
-- `RENEWAL`, `LOST`, `DAMAGED`, `DATA_CORRECTION` دون وثيقة موجودة يرجع `404` و`code: DOCUMENT_NOT_FOUND`.
+- ‎`ISSUANCE`‎ مع وجود الوثيقة مسبقًا يرجع ‎`409`‎ و‎`code: DOCUMENT_ALREADY_EXISTS`‎.
+- ‎`RENEWAL`‎, ‎`LOST`‎, ‎`DAMAGED`‎, ‎`DATA_CORRECTION`‎ دون وثيقة موجودة يرجع ‎`404`‎ و‎`code: DOCUMENT_NOT_FOUND`‎.
 
 ### شهادة الميلاد
 
 | الطريقة والمسار | Body عند الحاجة | يرجع |
 |---|---|---|
-| `POST /api/v1/me/birth-certificate-requests` | موضح أدناه | الطلب المنشأ (`201`) |
-| `GET /api/v1/me/birth-certificate-requests` | - | قائمة طلبات شهادة الميلاد للمستخدم |
-| `GET /api/v1/me/birth-certificate-requests/{requestId}/history` | - | قائمة تغيّرات الحالة |
-| `GET /api/v1/me/birth-certificate-requests/{requestId}/newborn-registration` | - | بيانات المولود للطلب المحدد |
+| ‎`POST /api/v1/me/birth-certificate-requests`‎ | موضح أدناه | الطلب المنشأ (‎`201`‎) |
+| ‎`GET /api/v1/me/birth-certificate-requests`‎ | - | قائمة طلبات شهادة الميلاد للمستخدم |
+| ‎`GET /api/v1/me/birth-certificate-requests/{requestId}/history`‎ | - | قائمة تغيّرات الحالة |
+| ‎`GET /api/v1/me/birth-certificate-requests/{requestId}/newborn-registration`‎ | - | بيانات المولود للطلب المحدد |
 
-لـ`NEWBORN_REGISTRATION`:
+لـ‎`NEWBORN_REGISTRATION`‎:
 
 ```json
 {
@@ -160,81 +166,81 @@ Authorization: Bearer <accessToken>
 }
 ```
 
-قيم النوع: `NEWBORN_REGISTRATION`, `CERTIFICATE_EXTRACT`, `DATA_CORRECTION`. قيم الجنس: `MALE`, `FEMALE`.
+قيم النوع: ‎`NEWBORN_REGISTRATION`‎, ‎`CERTIFICATE_EXTRACT`‎, ‎`DATA_CORRECTION`‎. قيم الجنس: ‎`MALE`‎, ‎`FEMALE`‎.
 
-يسمح للمواطن بطلب مفتوح واحد من كل `kind` في الوقت نفسه؛ لذلك يمكن أن يكون لديه `CERTIFICATE_EXTRACT` و`NEWBORN_REGISTRATION` مفتوحان معًا. تكرار النوع المفتوح نفسه يرجع `409` مع `code: OPEN_REQUEST_EXISTS`. استخراج شهادة أو تصحيحها يتطلب وجود شهادة مخزنة، وإلا يرجع `404` مع `code: DOCUMENT_NOT_FOUND`. تسجيل المولود لا يُمنع بسبب امتلاك صاحب الحساب شهادة؛ لأن الشهادة تخص الطفل.
+يسمح للمواطن بطلب مفتوح واحد من كل ‎`kind`‎ في الوقت نفسه؛ لذلك يمكن أن يكون لديه ‎`CERTIFICATE_EXTRACT`‎ و‎`NEWBORN_REGISTRATION`‎ مفتوحان معًا. تكرار النوع المفتوح نفسه يرجع ‎`409`‎ مع ‎`code: OPEN_REQUEST_EXISTS`‎. استخراج شهادة أو تصحيحها يتطلب وجود شهادة مخزنة، وإلا يرجع ‎`404`‎ مع ‎`code: DOCUMENT_NOT_FOUND`‎. تسجيل المولود لا يُمنع بسبب امتلاك صاحب الحساب شهادة؛ لأن الشهادة تخص الطفل.
 
 ### استجابة تاريخ الطلب
 
-كل عنصر في التاريخ يرجع: `id`, `requestId`, `fromStatus`, `toStatus`, `reason`, `changedBy`, `changedAt`.
+كل عنصر في التاريخ يرجع: ‎`id`‎, ‎`requestId`‎, ‎`fromStatus`‎, ‎`toStatus`‎, ‎`reason`‎, ‎`changedBy`‎, ‎`changedAt`‎.
 
 ## 4. المرفقات
 
-استخدم `multipart/form-data` والحقل اسمه **`file`**، وأرسل نوع المستند في query parameter باسم `documentType`. المسموح JPEG وPNG وPDF فقط، حتى 5MB، والرفع متاح فقط عندما تكون حالة الطلب `SUBMITTED`.
+استخدم ‎`multipart/form-data`‎ والحقل اسمه **‎`file`‎**، وأرسل نوع المستند في query parameter باسم ‎`documentType`‎. المسموح JPEG وPNG وPDF فقط، حتى 5MB، والرفع متاح فقط عندما تكون حالة الطلب ‎`SUBMITTED`‎.
 
 | العملية | الجواز | الهوية | شهادة الميلاد | يرجع |
 |---|---|---|---|---|
-| رفع | `POST /api/v1/me/passport-requests/{id}/attachments?documentType=PERSONAL_PHOTO` | `POST /api/v1/me/national-identity-requests/{id}/attachments?documentType=PERSONAL_PHOTO` | `POST /api/v1/me/birth-certificate-requests/{id}/attachments?documentType=PERSONAL_PHOTO` | `201` مع metadata للمرفق |
-| حالة المتطلبات | `GET /api/v1/me/passport-requests/{id}/attachment-requirements` | `GET /api/v1/me/national-identity-requests/{id}/attachment-requirements` | `GET /api/v1/me/birth-certificate-requests/{id}/attachment-requirements` | `required` و`uploaded` و`missing` و`complete` |
-| القائمة | `GET /api/v1/me/passport-requests/{id}/attachments` | `GET /api/v1/me/national-identity-requests/{id}/attachments` | `GET /api/v1/me/birth-certificate-requests/{id}/attachments` | قائمة metadata |
-| تنزيل المحتوى | `GET /api/v1/me/passport-requests/{id}/attachments/{attachmentId}/content` | `GET /api/v1/me/national-identity-requests/{id}/attachments/{attachmentId}/content` | `GET /api/v1/me/birth-certificate-requests/{id}/attachments/{attachmentId}/content` | الملف نفسه كـbinary stream |
+| رفع | ‎`POST /api/v1/me/passport-requests/{id}/attachments?documentType=PERSONAL_PHOTO`‎ | ‎`POST /api/v1/me/national-identity-requests/{id}/attachments?documentType=PERSONAL_PHOTO`‎ | ‎`POST /api/v1/me/birth-certificate-requests/{id}/attachments?documentType=PERSONAL_PHOTO`‎ | ‎`201`‎ مع metadata للمرفق |
+| حالة المتطلبات | ‎`GET /api/v1/me/passport-requests/{id}/attachment-requirements`‎ | ‎`GET /api/v1/me/national-identity-requests/{id}/attachment-requirements`‎ | ‎`GET /api/v1/me/birth-certificate-requests/{id}/attachment-requirements`‎ | ‎`required`‎ و‎`uploaded`‎ و‎`missing`‎ و‎`complete`‎ |
+| القائمة | ‎`GET /api/v1/me/passport-requests/{id}/attachments`‎ | ‎`GET /api/v1/me/national-identity-requests/{id}/attachments`‎ | ‎`GET /api/v1/me/birth-certificate-requests/{id}/attachments`‎ | قائمة metadata |
+| تنزيل المحتوى | ‎`GET /api/v1/me/passport-requests/{id}/attachments/{attachmentId}/content`‎ | ‎`GET /api/v1/me/national-identity-requests/{id}/attachments/{attachmentId}/content`‎ | ‎`GET /api/v1/me/birth-certificate-requests/{id}/attachments/{attachmentId}/content`‎ | الملف نفسه كـbinary stream |
 
-قيم `documentType`:
+قيم ‎`documentType`‎:
 
-- `POPULATION_REGISTRY_EXTRACT`
-- `BIRTH_CERTIFICATE_COPY`
-- `PERSONAL_PHOTO`
-- `PROFESSION_PROOF`
-- `PAYMENT_RECEIPT`
-- `OLD_DOCUMENT`
-- `LOSS_OR_THEFT_REPORT`
-- `DATA_CORRECTION_PROOF`
-- `GUARDIANSHIP_CERTIFICATE`
-- `OTHER_SUPPORTING_DOCUMENT`
+- ‎`POPULATION_REGISTRY_EXTRACT`‎
+- ‎`BIRTH_CERTIFICATE_COPY`‎
+- ‎`PERSONAL_PHOTO`‎
+- ‎`PROFESSION_PROOF`‎
+- ‎`PAYMENT_RECEIPT`‎
+- ‎`OLD_DOCUMENT`‎
+- ‎`LOSS_OR_THEFT_REPORT`‎
+- ‎`DATA_CORRECTION_PROOF`‎
+- ‎`GUARDIANSHIP_CERTIFICATE`‎
+- ‎`OTHER_SUPPORTING_DOCUMENT`‎
 
-Metadata المرفق: `id`, `documentType`, `fileName`, `contentType`, `sizeBytes`, `uploadedAt`.
+Metadata المرفق: ‎`id`‎, ‎`documentType`‎, ‎`fileName`‎, ‎`contentType`‎, ‎`sizeBytes`‎, ‎`uploadedAt`‎.
 
 المطلوب للجواز والهوية لصاحب الحساب:
 
-- `ISSUANCE`: مستخرج السكان، شهادة الميلاد، الصورة، إثبات المهنة وإيصال الدفع.
-- `RENEWAL` أو `DAMAGED`: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع والوثيقة القديمة.
-- `LOST`: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع وبلاغ الفقد أو السرقة.
-- `DATA_CORRECTION`: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع وإثبات التصحيح.
+- ‎`ISSUANCE`‎: مستخرج السكان، شهادة الميلاد، الصورة، إثبات المهنة وإيصال الدفع.
+- ‎`RENEWAL`‎ أو ‎`DAMAGED`‎: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع والوثيقة القديمة.
+- ‎`LOST`‎: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع وبلاغ الفقد أو السرقة.
+- ‎`DATA_CORRECTION`‎: شهادة الميلاد، الصورة، إثبات المهنة، إيصال الدفع وإثبات التصحيح.
 - إصدار وثيقة لطفل: مستخرج السكان، شهادة الميلاد، الصورة وإيصال الدفع.
 
-قبل إظهار زر الإرسال أو المتابعة، استدعِ endpoint المتطلبات واعرض عناصر `missing`. عند محاولة الموظف بدء مراجعة طلب جواز أو هوية ناقص يرجع `409 MISSING_REQUIRED_ATTACHMENTS`. تصنيف مرفقات شهادة الميلاد مدعوم، لكن لم تُفرض عليها قائمة إلزامية حتى نعتمد متطلباتها الرسمية.
+قبل إظهار زر الإرسال أو المتابعة، استدعِ endpoint المتطلبات واعرض عناصر ‎`missing`‎. عند محاولة الموظف بدء مراجعة طلب جواز أو هوية ناقص يرجع ‎`409 MISSING_REQUIRED_ATTACHMENTS`‎. تصنيف مرفقات شهادة الميلاد مدعوم، لكن لم تُفرض عليها قائمة إلزامية حتى نعتمد متطلباتها الرسمية.
 
 ## 5. المواعيد
 
 | الطريقة والمسار | Body عند الحاجة | يرجع |
 |---|---|---|
-| `GET /api/v1/me/appointment-slots?serviceType=PASSPORT` | - | قائمة slots المتاحة |
-| `POST /api/v1/me/appointments` | `{"slotId":"uuid"}` | الموعد المحجوز (`201`) |
-| `GET /api/v1/me/appointments` | - | قائمة مواعيد المستخدم |
-| `POST /api/v1/me/appointments/{appointmentId}/cancel` | - | الموعد بعد أن تصبح حالته `CANCELLED` |
+| ‎`GET /api/v1/me/appointment-slots?serviceType=PASSPORT`‎ | - | قائمة slots المتاحة |
+| ‎`POST /api/v1/me/appointments`‎ | ‎`{"slotId":"uuid"}`‎ | الموعد المحجوز (‎`201`‎) |
+| ‎`GET /api/v1/me/appointments`‎ | - | قائمة مواعيد المستخدم |
+| ‎`POST /api/v1/me/appointments/{appointmentId}/cancel`‎ | - | الموعد بعد أن تصبح حالته ‎`CANCELLED`‎ |
 
-قيم `serviceType`: `PASSPORT`, `NATIONAL_IDENTITY`, `BIRTH_CERTIFICATE`.
+قيم ‎`serviceType`‎: ‎`PASSPORT`‎, ‎`NATIONAL_IDENTITY`‎, ‎`BIRTH_CERTIFICATE`‎.
 
-الـslot يرجع: `id`, `serviceType`, `officeName`, `startsAt`, `endsAt`, `capacity`, `reservedCount`, `active`.
-الموعد يرجع: `id`, `slotId`, `serviceType`, `officeName`, `startsAt`, `endsAt`, `status`, `bookedAt`, `cancelledAt`, `completedAt`.
+الـslot يرجع: ‎`id`‎, ‎`serviceType`‎, ‎`officeName`‎, ‎`startsAt`‎, ‎`endsAt`‎, ‎`capacity`‎, ‎`reservedCount`‎, ‎`active`‎.
+الموعد يرجع: ‎`id`‎, ‎`slotId`‎, ‎`serviceType`‎, ‎`officeName`‎, ‎`startsAt`‎, ‎`endsAt`‎, ‎`status`‎, ‎`bookedAt`‎, ‎`cancelledAt`‎, ‎`completedAt`‎.
 
 ## 6. الإشعارات
 
 | الطريقة والمسار | يرجع |
 |---|---|
-| `GET /api/v1/me/notifications` | قائمة إشعارات: `id`, `type`, `title`, `message`, `readAt`, `createdAt` |
-| `GET /api/v1/me/notifications/unread-count` | `{"count": 3}` |
-| `POST /api/v1/me/notifications/{notificationId}/read` | الإشعار بعد وضع `readAt` |
-| `POST /api/v1/me/notifications/read-all` | `{"updatedCount": 3}` |
+| ‎`GET /api/v1/me/notifications`‎ | قائمة إشعارات: ‎`id`‎, ‎`type`‎, ‎`title`‎, ‎`message`‎, ‎`readAt`‎, ‎`createdAt`‎ |
+| ‎`GET /api/v1/me/notifications/unread-count`‎ | ‎`{"count": 3}`‎ |
+| ‎`POST /api/v1/me/notifications/{notificationId}/read`‎ | الإشعار بعد وضع ‎`readAt`‎ |
+| ‎`POST /api/v1/me/notifications/read-all`‎ | ‎`{"updatedCount": 3}`‎ |
 
 ## 7. الوثائق الموجودة
 
 | الطريقة والمسار | يرجع |
 |---|---|
-| `GET /api/v1/me/documents/passport` | بيانات الجواز: الرقم، الاسم، الميلاد، الإصدار، الانتهاء، مكان الإصدار وغيرها |
-| `GET /api/v1/me/documents/national-identity` | بيانات الهوية: الرقم الوطني، الاسم، البطاقة، الميلاد، العنوان وغيرها |
-| `GET /api/v1/me/documents/birth-certificate` | بيانات شهادة الميلاد: رقم الشهادة، بيانات الميلاد، الأب والأم والعنوان |
-| `GET /api/v1/me/documents/dependent-birth-certificates` | شهادات المواليد الناتجة عن طلبات تسجيل المواليد لهذا الحساب |
+| ‎`GET /api/v1/me/documents/passport`‎ | بيانات الجواز: الرقم، الاسم، الميلاد، الإصدار، الانتهاء، مكان الإصدار وغيرها |
+| ‎`GET /api/v1/me/documents/national-identity`‎ | بيانات الهوية: الرقم الوطني، الاسم، البطاقة، الميلاد، العنوان وغيرها |
+| ‎`GET /api/v1/me/documents/birth-certificate`‎ | بيانات شهادة الميلاد: رقم الشهادة، بيانات الميلاد، الأب والأم والعنوان |
+| ‎`GET /api/v1/me/documents/dependent-birth-certificates`‎ | شهادات المواليد الناتجة عن طلبات تسجيل المواليد لهذا الحساب |
 
 هذه المسارات تقرأ أحدث إصدار مخزن. عند الموافقة على طلب الجواز أو الهوية أو مستخرج/تصحيح شهادة الميلاد يُنشئ الباك إند إصدارًا جديدًا تلقائيًا. تسجيل المولود ينشئ شهادة تابعة منفصلة حتى لا يستبدل شهادة ولي الأمر.
 
@@ -258,7 +264,7 @@ Metadata المرفق: `id`, `documentType`, `fileName`, `contentType`, `sizeByt
 }
 ```
 
-`issueingAuthority` اسم قديم مكتوب خطأ وموجود مؤقتًا للتوافق. استخدم `issuingAuthority` في الكود الجديد.
+‎`issueingAuthority`‎ اسم قديم مكتوب خطأ وموجود مؤقتًا للتوافق. استخدم ‎`issuingAuthority`‎ في الكود الجديد.
 
 استجابة الهوية:
 
@@ -282,42 +288,42 @@ Metadata المرفق: `id`, `documentType`, `fileName`, `contentType`, `sizeByt
 }
 ```
 
-`dateofBirth` اسم قديم موجود مؤقتًا للتوافق. استخدم `dateOfBirth` في الموديل الجديد. لا ترسل الرقم الوطني في URL؛ هذه المسارات تستخرج صاحب الوثيقة من access token.
+‎`dateofBirth`‎ اسم قديم موجود مؤقتًا للتوافق. استخدم ‎`dateOfBirth`‎ في الموديل الجديد. لا ترسل الرقم الوطني في URL؛ هذه المسارات تستخرج صاحب الوثيقة من access token.
 
 ## أخطاء مهمة
 
-كل الأخطاء ترجع الشكل نفسه: `code`, `message`, `status`, `timestamp`، وقد يظهر `fieldErrors` مع أخطاء الحقول.
+كل الأخطاء ترجع الشكل نفسه: ‎`code`‎, ‎`message`‎, ‎`status`‎, ‎`timestamp`‎، وقد يظهر ‎`fieldErrors`‎ مع أخطاء الحقول.
 
-| `code` | HTTP | المعنى |
+| ‎`code`‎ | HTTP | المعنى |
 |---|---:|---|
-| `UNAUTHORIZED` | `401` | التوكن مفقود أو منتهي أو غير صالح |
-| `FORBIDDEN` | `403` | المستخدم لا يملك الصلاحية |
-| `RESOURCE_NOT_FOUND` | `404` | الطلب أو المرفق غير موجود أو لا يخص المستخدم |
-| `DOCUMENT_NOT_FOUND` | `404` | الوثيقة المطلوبة غير موجودة |
-| `DOCUMENT_ALREADY_EXISTS` | `409` | محاولة إصدار وثيقة موجودة مسبقًا |
-| `OPEN_REQUEST_EXISTS` | `409` | يوجد طلب مفتوح متعارض |
-| `REQUEST_ATTACHMENTS_CLOSED` | `409` | لا يمكن الرفع بعد بدء المراجعة |
-| `SELF_REVIEW_NOT_ALLOWED` | `409` | الموظف يحاول مراجعة طلبه الشخصي |
-| `REQUEST_NOT_AWAITING_REVIEW` | `409` | الطلب ليس بانتظار المراجعة |
-| `REQUEST_NOT_UNDER_REVIEW` | `409` | الطلب ليس قيد المراجعة |
-| `REQUEST_REVIEWER_MISMATCH` | `409` | الموظف الحالي ليس من بدأ المراجعة |
-| `REJECTION_REASON_REQUIRED` | `400` | سبب الرفض مطلوب |
-| `ATTACHMENT_INVALID` | `400` | المرفق غير صالح |
-| `REQUEST_SUBMISSIONS_DISABLED` | `503` | الأدمن أوقف استقبال الطلبات مؤقتًا |
-| `INTERNAL_SERVER_ERROR` | `500` | خطأ داخلي غير متوقع |
+| ‎`UNAUTHORIZED`‎ | ‎`401`‎ | التوكن مفقود أو منتهي أو غير صالح |
+| ‎`FORBIDDEN`‎ | ‎`403`‎ | المستخدم لا يملك الصلاحية |
+| ‎`RESOURCE_NOT_FOUND`‎ | ‎`404`‎ | الطلب أو المرفق غير موجود أو لا يخص المستخدم |
+| ‎`DOCUMENT_NOT_FOUND`‎ | ‎`404`‎ | الوثيقة المطلوبة غير موجودة |
+| ‎`DOCUMENT_ALREADY_EXISTS`‎ | ‎`409`‎ | محاولة إصدار وثيقة موجودة مسبقًا |
+| ‎`OPEN_REQUEST_EXISTS`‎ | ‎`409`‎ | يوجد طلب مفتوح متعارض |
+| ‎`REQUEST_ATTACHMENTS_CLOSED`‎ | ‎`409`‎ | لا يمكن الرفع بعد بدء المراجعة |
+| ‎`SELF_REVIEW_NOT_ALLOWED`‎ | ‎`409`‎ | الموظف يحاول مراجعة طلبه الشخصي |
+| ‎`REQUEST_NOT_AWAITING_REVIEW`‎ | ‎`409`‎ | الطلب ليس بانتظار المراجعة |
+| ‎`REQUEST_NOT_UNDER_REVIEW`‎ | ‎`409`‎ | الطلب ليس قيد المراجعة |
+| ‎`REQUEST_REVIEWER_MISMATCH`‎ | ‎`409`‎ | الموظف الحالي ليس من بدأ المراجعة |
+| ‎`REJECTION_REASON_REQUIRED`‎ | ‎`400`‎ | سبب الرفض مطلوب |
+| ‎`ATTACHMENT_INVALID`‎ | ‎`400`‎ | المرفق غير صالح |
+| ‎`REQUEST_SUBMISSIONS_DISABLED`‎ | ‎`503`‎ | الأدمن أوقف استقبال الطلبات مؤقتًا |
+| ‎`INTERNAL_SERVER_ERROR`‎ | ‎`500`‎ | خطأ داخلي غير متوقع |
 
 | الحالة | تصرف الـFrontend |
 |---|---|
-| `400` | اعرض رسالة تحقق من البيانات |
-| `401` | جرّب refresh مرة واحدة، ثم امسح tokens إذا فشل |
-| `403` | لا يملك المستخدم الصلاحية |
-| `404` | الطلب/المرفق غير موجود أو لا يخصه |
-| `409` | يوجد طلب أو موعد مفتوح، أو حالة الطلب لا تسمح بالفعل |
-| `429` | انتظر قبل المحاولة مرة أخرى |
-| `503` | اعرض رسالة التوقف المؤقت واترك المستخدم يعيد المحاولة لاحقًا |
+| ‎`400`‎ | اعرض رسالة تحقق من البيانات |
+| ‎`401`‎ | جرّب refresh مرة واحدة، ثم امسح tokens إذا فشل |
+| ‎`403`‎ | لا يملك المستخدم الصلاحية |
+| ‎`404`‎ | الطلب/المرفق غير موجود أو لا يخصه |
+| ‎`409`‎ | يوجد طلب أو موعد مفتوح، أو حالة الطلب لا تسمح بالفعل |
+| ‎`429`‎ | انتظر قبل المحاولة مرة أخرى |
+| ‎`503`‎ | اعرض رسالة التوقف المؤقت واترك المستخدم يعيد المحاولة لاحقًا |
 
 ## ملاحظات حالية
 
 - الموافقة النهائية على جواز أو هوية لطفل تابع مؤجلة؛ لا تحاول اعتبار وثيقة ولي الأمر وثيقة للطفل.
 - تخزين المرفقات الإنتاجي الدائم سيُربط لاحقًا؛ لا تعتمد على الملفات التجريبية كأرشيف دائم.
-- لا ترسل `citizenId` أو رقم هوية مستخدم آخر لمسارات `/api/v1/me/**`؛ الباك إند يستخرج المواطن من الـaccess token.
+- لا ترسل ‎`citizenId`‎ أو رقم هوية مستخدم آخر لمسارات ‎`/api/v1/me/**`‎؛ الباك إند يستخرج المواطن من الـaccess token.
