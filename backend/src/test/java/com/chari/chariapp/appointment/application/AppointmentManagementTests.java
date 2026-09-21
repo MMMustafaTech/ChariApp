@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -75,6 +76,7 @@ class AppointmentManagementTests {
         Appointment cancelled = service.cancelByOperator(employeeId, appointment.id());
 
         assertThat(cancelled.status()).isEqualTo(AppointmentStatus.CANCELLED);
+        assertThat(cancelled.serviceType()).isEqualTo(AppointmentServiceType.CIVIL_STATUS);
         verify(slots).save(argThat(updated -> updated.reservedCount() == 0));
         verify(notifications).publish(citizenId, NotificationType.APPOINTMENT_CANCELLED,
                 "Appointment cancelled", "Your appointment has been cancelled.");
@@ -82,9 +84,46 @@ class AppointmentManagementTests {
                 "APPOINTMENT", appointment.id().toString(), null, NOW);
     }
 
+    @Test
+    void civilStatusAvailabilityIncludesLegacyIdentityAndBirthSlots() {
+        AccountId accountId = AccountId.newId();
+        CitizenId citizenId = CitizenId.newId();
+        AccountStore accounts = mock(AccountStore.class);
+        AppointmentSlotStore slots = mock(AppointmentSlotStore.class);
+        when(accounts.findById(accountId)).thenReturn(Optional.of(citizen(accountId, citizenId)));
+
+        AppointmentSlot identitySlot = AppointmentSlot.create(
+                AppointmentServiceType.NATIONAL_IDENTITY, "Civil office",
+                NOW.plusSeconds(3600), NOW.plusSeconds(5400), 5, AccountId.newId(), NOW
+        );
+        AppointmentSlot birthSlot = AppointmentSlot.create(
+                AppointmentServiceType.BIRTH_CERTIFICATE, "Civil office",
+                NOW.plusSeconds(7200), NOW.plusSeconds(9000), 5, AccountId.newId(), NOW
+        );
+        when(slots.findAvailable(AppointmentServiceType.NATIONAL_IDENTITY, NOW))
+                .thenReturn(List.of(identitySlot));
+        when(slots.findAvailable(AppointmentServiceType.BIRTH_CERTIFICATE, NOW))
+                .thenReturn(List.of(birthSlot));
+
+        AppointmentSlotService service = new AppointmentSlotService(
+                new PassportRequestActorAccess(accounts), slots, mock(OperationalAuditStore.class),
+                Clock.fixed(NOW, ZoneOffset.UTC)
+        );
+
+        List<AppointmentSlot> available = service.available(accountId, AppointmentServiceType.CIVIL_STATUS);
+
+        assertThat(available).hasSize(2);
+        assertThat(available).allMatch(slot -> slot.serviceType() == AppointmentServiceType.CIVIL_STATUS);
+    }
+
     private static Account employee(AccountId id) {
         return new Account(id, null, new EmailReference("a".repeat(64), "ciphertext"), "hash",
                 AccountStatus.ACTIVE, Set.of(AccountRole.EMPLOYEE),
                 Set.of(StaffPermission.APPOINTMENT_VIEW, StaffPermission.APPOINTMENT_MANAGE), NOW);
+    }
+
+    private static Account citizen(AccountId id, CitizenId citizenId) {
+        return new Account(id, citizenId, new EmailReference("b".repeat(64), "ciphertext"), "hash",
+                AccountStatus.ACTIVE, Set.of(AccountRole.CITIZEN), NOW);
     }
 }

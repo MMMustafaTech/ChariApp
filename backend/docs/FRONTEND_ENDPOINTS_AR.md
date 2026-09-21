@@ -58,7 +58,7 @@ Authorization: Bearer <accessToken>
   "openRequestCount": 1,
   "upcomingAppointment": {
     "id": "uuid",
-    "serviceType": "PASSPORT",
+    "department": "PASSPORT",
     "officeName": "N'Djamena Office",
     "startsAt": "2026-09-01T09:00:00Z",
     "endsAt": "2026-09-01T09:15:00Z"
@@ -202,15 +202,16 @@ Metadata المرفق: `id`, `documentType`, `fileName`, `contentType`, `sizeByt
 
 | الطريقة والمسار | Body عند الحاجة | يرجع |
 |---|---|---|
-| `GET /api/v1/me/appointment-slots?serviceType=PASSPORT` | - | قائمة slots المتاحة |
+| `GET /api/v1/me/appointment-slots?department=PASSPORT` | - | قائمة slots المتاحة لقسم الجوازات |
+| `GET /api/v1/me/appointment-slots?department=CIVIL_STATUS` | - | قائمة slots المتاحة للأحوال المدنية |
 | `POST /api/v1/me/appointments` | `{"slotId":"uuid"}` | الموعد المحجوز (`201`) |
 | `GET /api/v1/me/appointments` | - | قائمة مواعيد المستخدم |
 | `POST /api/v1/me/appointments/{appointmentId}/cancel` | - | الموعد بعد أن تصبح حالته `CANCELLED` |
 
-قيم `serviceType`: `PASSPORT`, `NATIONAL_IDENTITY`, `BIRTH_CERTIFICATE`.
+قيم `department` للمواعيد: `PASSPORT`, `CIVIL_STATUS`. موعد الأحوال المدنية عام، ولا يحدد إن كانت المعاملة هوية وطنية أو شهادة ميلاد.
 
-الـslot يرجع: `id`, `serviceType`, `officeName`, `startsAt`, `endsAt`, `capacity`, `reservedCount`, `active`.  
-الموعد يرجع: `id`, `slotId`, `serviceType`, `officeName`, `startsAt`, `endsAt`, `status`, `bookedAt`, `cancelledAt`, `completedAt`.
+الـslot يرجع: `id`, `department`, `officeName`, `startsAt`, `endsAt`, `capacity`, `reservedCount`, `active`.
+الموعد يرجع: `id`, `slotId`, `department`, `officeName`, `startsAt`, `endsAt`, `status`, `bookedAt`, `cancelledAt`, `completedAt`.
 
 ## 6. الإشعارات
 

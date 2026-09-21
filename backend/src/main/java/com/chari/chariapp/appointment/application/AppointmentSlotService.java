@@ -35,17 +35,25 @@ public class AppointmentSlotService {
     public AppointmentSlot create(AccountId actor, AppointmentServiceType type, String office,
                                   Instant startsAt, Instant endsAt, int capacity) {
         access.requireActiveOperator(actor);
+        requireAppointmentDepartment(type);
         Instant now = Instant.now(clock);
         if (!startsAt.isAfter(now)) throw new IllegalArgumentException("Appointment slot must start in the future");
         AppointmentSlot slot = slots.save(AppointmentSlot.create(type, office, startsAt, endsAt, capacity, actor, now));
         audit.record(actor.value().toString(), "APPOINTMENT_SLOT_CREATED", "APPOINTMENT_SLOT",
-                slot.id().toString(), "serviceType=" + type, now);
+                slot.id().toString(), "department=" + type, now);
         return slot;
     }
 
     public List<AppointmentSlot> available(AccountId actor, AppointmentServiceType type) {
         access.requireActiveCitizen(actor);
-        return slots.findAvailable(type, Instant.now(clock));
+        requireAppointmentDepartment(type);
+        Instant now = Instant.now(clock);
+        return java.util.Arrays.stream(AppointmentServiceType.values())
+                .filter(storedType -> storedType.belongsToDepartment(type))
+                .flatMap(storedType -> slots.findAvailable(storedType, now).stream())
+                .sorted(Comparator.comparing(AppointmentSlot::startsAt))
+                .map(AppointmentSlotService::forDepartmentDisplay)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -53,18 +61,20 @@ public class AppointmentSlotService {
                                                  Instant startsFrom, Instant startsTo, String office,
                                                  int page, int size) {
         access.requireActiveOperator(actor);
+        if (type != null) requireAppointmentDepartment(type);
         validatePage(page, size);
         if (startsFrom != null && startsTo != null && startsFrom.isAfter(startsTo)) {
             throw new IllegalArgumentException("startsFrom must not be after startsTo");
         }
         String normalizedOffice = office == null || office.isBlank() ? null : office.trim().toLowerCase(Locale.ROOT);
         List<AppointmentSlot> filtered = slots.findAll().stream()
-                .filter(slot -> type == null || slot.serviceType() == type)
+                .filter(slot -> type == null || slot.serviceType().belongsToDepartment(type))
                 .filter(slot -> active == null || slot.active() == active)
                 .filter(slot -> startsFrom == null || !slot.startsAt().isBefore(startsFrom))
                 .filter(slot -> startsTo == null || !slot.startsAt().isAfter(startsTo))
                 .filter(slot -> normalizedOffice == null || slot.officeName().toLowerCase(Locale.ROOT).contains(normalizedOffice))
                 .sorted(Comparator.comparing(AppointmentSlot::startsAt))
+                .map(AppointmentSlotService::forDepartmentDisplay)
                 .toList();
         return page(filtered, page, size);
     }
@@ -73,6 +83,7 @@ public class AppointmentSlotService {
     public AppointmentSlot update(AccountId actor, UUID slotId, AppointmentServiceType type, String office,
                                   Instant startsAt, Instant endsAt, int capacity) {
         access.requireActiveOperator(actor);
+        requireAppointmentDepartment(type);
         AppointmentSlot current = require(slotId);
         Instant now = Instant.now(clock);
         try {
@@ -102,6 +113,19 @@ public class AppointmentSlotService {
 
     private AppointmentSlot require(UUID id) {
         return slots.findByIdForUpdate(id).orElseThrow(() -> new NotFoundException("Appointment slot not found"));
+    }
+
+    private static void requireAppointmentDepartment(AppointmentServiceType type) {
+        if (type == null || !type.isAppointmentDepartment()) {
+            throw new IllegalArgumentException("Appointment department must be PASSPORT or CIVIL_STATUS");
+        }
+    }
+
+    private static AppointmentSlot forDepartmentDisplay(AppointmentSlot slot) {
+        AppointmentServiceType department = slot.serviceType().appointmentDepartment();
+        if (slot.serviceType() == department) return slot;
+        return new AppointmentSlot(slot.id(), department, slot.officeName(), slot.startsAt(), slot.endsAt(),
+                slot.capacity(), slot.reservedCount(), slot.active(), slot.createdBy(), slot.createdAt());
     }
 
     private static <T> OperationsPage<T> page(List<T> content, int page, int size) {

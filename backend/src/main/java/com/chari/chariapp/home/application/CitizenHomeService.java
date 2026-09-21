@@ -59,6 +59,6 @@ public class CitizenHomeService {
     private CitizenHome.RecentRequest passportSummary(PassportRequest request) { return new CitizenHome.RecentRequest(request.id(), "PASSPORT", request.kind().name(), request.status().name(), request.submittedAt()); }
     private CitizenHome.RecentRequest identitySummary(NationalIdentityRequest request) { return new CitizenHome.RecentRequest(request.id(), "NATIONAL_IDENTITY", request.kind().name(), request.status().name(), request.submittedAt()); }
     private CitizenHome.RecentRequest birthSummary(BirthCertificateRequest request) { return new CitizenHome.RecentRequest(request.id(), "BIRTH_CERTIFICATE", request.kind().name(), request.status().name(), request.submittedAt()); }
-    private CitizenHome.UpcomingAppointment appointmentSummary(Appointment appointment) { return new CitizenHome.UpcomingAppointment(appointment.id(), appointment.serviceType().name(), appointment.officeName(), appointment.startsAt(), appointment.endsAt()); }
+    private CitizenHome.UpcomingAppointment appointmentSummary(Appointment appointment) { return new CitizenHome.UpcomingAppointment(appointment.id(), appointment.serviceType().appointmentDepartment().name(), appointment.officeName(), appointment.startsAt(), appointment.endsAt()); }
     private record RequestState(boolean open) { }
 }

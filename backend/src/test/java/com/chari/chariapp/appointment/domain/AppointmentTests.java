@@ -19,17 +19,27 @@ class AppointmentTests {
 
     @Test
     void citizenCannotCancelAppointmentAfterItStarts() {
-        AppointmentSlot slot = AppointmentSlot.create(AppointmentServiceType.BIRTH_CERTIFICATE, "Central Office", NOW.plusSeconds(10), NOW.plusSeconds(1200), 2, AccountId.newId(), NOW);
+        AppointmentSlot slot = AppointmentSlot.create(AppointmentServiceType.CIVIL_STATUS, "Central Office", NOW.plusSeconds(10), NOW.plusSeconds(1200), 2, AccountId.newId(), NOW);
         Appointment appointment = Appointment.book(CitizenId.newId(), slot, NOW);
         assertThatThrownBy(() -> appointment.cancel(NOW.plusSeconds(10))).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void completingAppointmentRecordsTheResponsibleOperator() {
-        AppointmentSlot slot = AppointmentSlot.create(AppointmentServiceType.NATIONAL_IDENTITY, "Central Office", NOW.plusSeconds(3600), NOW.plusSeconds(5400), 2, AccountId.newId(), NOW);
+        AppointmentSlot slot = AppointmentSlot.create(AppointmentServiceType.CIVIL_STATUS, "Central Office", NOW.plusSeconds(3600), NOW.plusSeconds(5400), 2, AccountId.newId(), NOW);
         AccountId operator = AccountId.newId();
         Appointment completed = Appointment.book(CitizenId.newId(), slot, NOW).complete(operator, NOW.plusSeconds(3600));
         assertThat(completed.status()).isEqualTo(AppointmentStatus.COMPLETED);
         assertThat(completed.completedBy()).isEqualTo(operator);
+    }
+
+    @Test
+    void legacyCivilServicesAreGroupedUnderCivilStatusAppointments() {
+        assertThat(AppointmentServiceType.NATIONAL_IDENTITY.appointmentDepartment())
+                .isEqualTo(AppointmentServiceType.CIVIL_STATUS);
+        assertThat(AppointmentServiceType.BIRTH_CERTIFICATE.appointmentDepartment())
+                .isEqualTo(AppointmentServiceType.CIVIL_STATUS);
+        assertThat(AppointmentServiceType.PASSPORT.appointmentDepartment())
+                .isEqualTo(AppointmentServiceType.PASSPORT);
     }
 }

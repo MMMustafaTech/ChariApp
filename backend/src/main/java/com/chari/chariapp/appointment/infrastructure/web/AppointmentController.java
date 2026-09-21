@@ -30,8 +30,8 @@ public class AppointmentController {
 
     @GetMapping("/me/appointment-slots")
     public List<AppointmentSlot> availableSlots(@AuthenticationPrincipal Jwt jwt,
-                                                @RequestParam AppointmentServiceType serviceType) {
-        return slotService.available(accountId(jwt), serviceType);
+                                                @RequestParam AppointmentServiceType department) {
+        return slotService.available(accountId(jwt), department);
     }
 
     @PostMapping("/me/appointments")
@@ -55,28 +55,28 @@ public class AppointmentController {
     @PreAuthorize("hasAuthority('PERM_APPOINTMENT_MANAGE')")
     public AppointmentSlot createSlot(@AuthenticationPrincipal Jwt jwt,
                                       @Valid @RequestBody SlotSubmission body) {
-        return slotService.create(accountId(jwt), body.serviceType(), body.officeName(),
+        return slotService.create(accountId(jwt), body.department(), body.officeName(),
                 body.startsAt(), body.endsAt(), body.capacity());
     }
 
     @GetMapping("/operations/appointment-slots")
     @PreAuthorize("hasAuthority('PERM_APPOINTMENT_VIEW')")
     public OperationsPage<AppointmentSlot> slots(@AuthenticationPrincipal Jwt jwt,
-                                                  @RequestParam(required = false) AppointmentServiceType serviceType,
+                                                  @RequestParam(required = false) AppointmentServiceType department,
                                                   @RequestParam(required = false) Boolean active,
                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startsFrom,
                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startsTo,
                                                   @RequestParam(required = false) String office,
                                                   @RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "20") int size) {
-        return slotService.list(accountId(jwt), serviceType, active, startsFrom, startsTo, office, page, size);
+        return slotService.list(accountId(jwt), department, active, startsFrom, startsTo, office, page, size);
     }
 
     @PatchMapping("/operations/appointment-slots/{slotId}")
     @PreAuthorize("hasAuthority('PERM_APPOINTMENT_MANAGE')")
     public AppointmentSlot updateSlot(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID slotId,
                                       @Valid @RequestBody SlotSubmission body) {
-        return slotService.update(accountId(jwt), slotId, body.serviceType(), body.officeName(),
+        return slotService.update(accountId(jwt), slotId, body.department(), body.officeName(),
                 body.startsAt(), body.endsAt(), body.capacity());
     }
 
@@ -98,13 +98,13 @@ public class AppointmentController {
     public OperationsPage<AppointmentOperationsView> searchAppointments(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) AppointmentStatus status,
-            @RequestParam(required = false) AppointmentServiceType serviceType,
+            @RequestParam(required = false) AppointmentServiceType department,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startsFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startsTo,
             @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return appointmentService.search(accountId(jwt), status, serviceType, startsFrom, startsTo,
+        return appointmentService.search(accountId(jwt), status, department, startsFrom, startsTo,
                 query, page, size);
     }
 
@@ -128,7 +128,7 @@ public class AppointmentController {
     public record Booking(@NotNull UUID slotId) {
     }
 
-    public record SlotSubmission(@NotNull AppointmentServiceType serviceType,
+    public record SlotSubmission(@NotNull AppointmentServiceType department,
                                  @NotBlank @Size(max = 160) String officeName,
                                  @NotNull Instant startsAt,
                                  @NotNull Instant endsAt,

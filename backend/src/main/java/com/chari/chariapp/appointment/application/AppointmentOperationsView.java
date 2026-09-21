@@ -11,7 +11,7 @@ public record AppointmentOperationsView(
         UUID citizenId,
         String citizenNationalId,
         UUID slotId,
-        AppointmentServiceType serviceType,
+        AppointmentServiceType department,
         String officeName,
         Instant startsAt,
         Instant endsAt,

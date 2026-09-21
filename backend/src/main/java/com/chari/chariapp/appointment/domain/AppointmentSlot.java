@@ -1,11 +1,13 @@
 package com.chari.chariapp.appointment.domain;
 
 import com.chari.chariapp.account.domain.AccountId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-public record AppointmentSlot(UUID id, AppointmentServiceType serviceType, String officeName, Instant startsAt, Instant endsAt,
+public record AppointmentSlot(UUID id, @JsonProperty("department") AppointmentServiceType serviceType,
+                              String officeName, Instant startsAt, Instant endsAt,
                               int capacity, int reservedCount, boolean active, AccountId createdBy, Instant createdAt) {
     public AppointmentSlot {
         Objects.requireNonNull(id); Objects.requireNonNull(serviceType); officeName = requiredOffice(officeName); Objects.requireNonNull(startsAt); Objects.requireNonNull(endsAt); Objects.requireNonNull(createdBy); Objects.requireNonNull(createdAt);

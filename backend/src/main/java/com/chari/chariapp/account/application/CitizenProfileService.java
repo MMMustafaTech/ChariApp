@@ -36,7 +36,7 @@ public class CitizenProfileService {
                 .orElse(null);
         return new CitizenProfile(
                 dataProtector.decrypt(account.email().ciphertext()),
-                mask(dataProtector.decrypt(citizen.nationalId().ciphertext()), 4),
+                mask(dataProtector.decrypt(citizen.nationalId().ciphertext()), 2),
                 maskedPhone,
                 citizen.verifiedPhoneOptional().isPresent(),
                 citizen.phoneVerifiedAt(),

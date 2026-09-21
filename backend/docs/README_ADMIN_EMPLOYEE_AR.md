@@ -521,7 +521,7 @@ POST /api/v1/operations/appointment-slots
 Content-Type: application/json
 
 {
-  "serviceType": "PASSPORT",
+  "department": "PASSPORT",
   "officeName": "Main office",
   "startsAt": "2026-09-21T09:00:00Z",
   "endsAt": "2026-09-21T09:30:00Z",
@@ -529,12 +529,12 @@ Content-Type: application/json
 }
 ```
 
-قيم ‎`serviceType`‎: ‎`PASSPORT`‎, ‎`NATIONAL_IDENTITY`‎, ‎`BIRTH_CERTIFICATE`‎. النجاح ‎`201 Created`‎.
+قيم ‎`department`‎: ‎`PASSPORT`‎, ‎`CIVIL_STATUS`‎. موعد ‎`CIVIL_STATUS`‎ عام للأحوال المدنية ولا يحدد نوع المعاملة. النجاح ‎`201 Created`‎.
 
 ### قائمة خانات المواعيد
 
 ```http
-GET /api/v1/operations/appointment-slots?serviceType=PASSPORT&active=true&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&office=Main&page=0&size=20
+GET /api/v1/operations/appointment-slots?department=PASSPORT&active=true&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&office=Main&page=0&size=20
 ```
 
 كل الفلاتر اختيارية. ترجع الاستجابة صفحة موحدة فيها ‎`content`‎, ‎`page`‎, ‎`size`‎, ‎`totalElements`‎, ‎`totalPages`‎.
@@ -546,7 +546,7 @@ PATCH /api/v1/operations/appointment-slots/{slotId}
 Content-Type: application/json
 
 {
-  "serviceType": "PASSPORT",
+  "department": "PASSPORT",
   "officeName": "Main office",
   "startsAt": "2026-09-21T09:00:00Z",
   "endsAt": "2026-09-21T09:30:00Z",
@@ -567,7 +567,7 @@ POST /api/v1/operations/appointment-slots/{slotId}/deactivate
 ### البحث في الحجوزات
 
 ```http
-GET /api/v1/operations/appointments/search?status=BOOKED&serviceType=PASSPORT&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&query=CID002&page=0&size=20
+GET /api/v1/operations/appointments/search?status=BOOKED&department=PASSPORT&startsFrom=2026-09-20T00:00:00Z&startsTo=2026-09-30T23:59:59Z&query=CID002&page=0&size=20
 ```
 
 كل الفلاتر اختيارية. ‎`query`‎ يبحث بالرقم الوطني أو معرف المواطن أو معرف الموعد أو اسم المكتب. حالات الموعد: ‎`BOOKED`‎, ‎`CANCELLED`‎, ‎`COMPLETED`‎.
@@ -575,7 +575,7 @@ GET /api/v1/operations/appointments/search?status=BOOKED&serviceType=PASSPORT&st
 كل عنصر يرجع:
 
 - معرف الموعد والمواطن والخانة: ‎`id`‎, ‎`citizenId`‎, ‎`slotId`‎.
-- ‎`citizenNationalId`‎, ‎`serviceType`‎, ‎`officeName`‎, ‎`startsAt`‎, ‎`endsAt`‎.
+- ‎`citizenNationalId`‎, ‎`department`‎, ‎`officeName`‎, ‎`startsAt`‎, ‎`endsAt`‎.
 - ‎`status`‎, ‎`bookedAt`‎, ‎`cancelledAt`‎, ‎`completedAt`‎, ‎`completedBy`‎.
 
 المسار القديم التالي ما زال متاحًا للتوافق، لكنه يرجع قائمة غير مقسمة إلى صفحات لحالة واحدة:

@@ -43,13 +43,13 @@ class CitizenProfileServicesTests {
         when(accounts.findById(account.id())).thenReturn(Optional.of(account));
         when(citizens.findById(account.citizenId())).thenReturn(Optional.of(citizen));
         when(protector.decrypt("email-ciphertext")).thenReturn("citizen@example.test");
-        when(protector.decrypt("national-ciphertext")).thenReturn("123456789");
+        when(protector.decrypt("national-ciphertext")).thenReturn("CID002");
         when(protector.decrypt("phone-ciphertext")).thenReturn("+23590000001");
 
         CitizenProfile profile = new CitizenProfileService(accounts, citizens, protector).profile(account.id());
 
         assertThat(profile.email()).isEqualTo("citizen@example.test");
-        assertThat(profile.maskedNationalId()).isEqualTo("*****6789");
+        assertThat(profile.maskedNationalId()).isEqualTo("****02");
         assertThat(profile.maskedVerifiedPhone()).isEqualTo("*********001");
         assertThat(profile.phoneVerified()).isTrue();
     }

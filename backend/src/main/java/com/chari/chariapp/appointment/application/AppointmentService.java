@@ -53,7 +53,8 @@ public class AppointmentService {
         CitizenId citizen = access.requireActiveCitizen(actor);
         AppointmentSlot slot = slots.findByIdForUpdate(slotId)
                 .orElseThrow(() -> new NotFoundException("Appointment slot not found"));
-        if (appointments.hasActiveAppointment(citizen, slot.serviceType())) {
+        AppointmentServiceType department = slot.serviceType().appointmentDepartment();
+        if (hasActiveAppointmentInDepartment(citizen, department)) {
             throw new AppointmentConflictException("An active appointment already exists for this service");
         }
         Instant now = Instant.now(clock);
@@ -66,7 +67,7 @@ public class AppointmentService {
                     appointment.id().toString(), "slotId=" + slotId, now);
             notifications.publish(citizen, NotificationType.APPOINTMENT_BOOKED,
                     "Appointment booked", "Your appointment has been booked successfully.");
-            return appointment;
+            return appointment.forDepartmentDisplay();
         } catch (DataIntegrityViolationException exception) {
             throw new AppointmentConflictException("An active appointment already exists for this service");
         } catch (IllegalStateException exception) {
@@ -101,19 +102,23 @@ public class AppointmentService {
                     appointmentId.toString(), null, now);
             notifications.publish(updated.citizenId(), NotificationType.APPOINTMENT_COMPLETED,
                     "Appointment completed", "Your appointment has been marked as completed.");
-            return updated;
+            return updated.forDepartmentDisplay();
         } catch (IllegalStateException exception) {
             throw new AppointmentConflictException(exception.getMessage());
         }
     }
 
     public List<Appointment> mine(AccountId actor) {
-        return appointments.findByCitizenId(access.requireActiveCitizen(actor));
+        return appointments.findByCitizenId(access.requireActiveCitizen(actor)).stream()
+                .map(Appointment::forDepartmentDisplay)
+                .toList();
     }
 
     public List<Appointment> byStatus(AccountId actor, AppointmentStatus status) {
         access.requireActiveOperator(actor);
-        return appointments.findByStatus(status);
+        return appointments.findByStatus(status).stream()
+                .map(Appointment::forDepartmentDisplay)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +127,9 @@ public class AppointmentService {
                                                              Instant startsFrom, Instant startsTo,
                                                              String query, int page, int size) {
         access.requireActiveOperator(actor);
+        if (serviceType != null && !serviceType.isAppointmentDepartment()) {
+            throw new IllegalArgumentException("Appointment department must be PASSPORT or CIVIL_STATUS");
+        }
         validatePage(page, size);
         if (startsFrom != null && startsTo != null && startsFrom.isAfter(startsTo)) {
             throw new IllegalArgumentException("startsFrom must not be after startsTo");
@@ -129,7 +137,7 @@ public class AppointmentService {
         String normalized = query == null || query.isBlank() ? null : query.trim().toLowerCase(Locale.ROOT);
         List<AppointmentOperationsView> filtered = appointments.findAll().stream()
                 .filter(value -> status == null || value.status() == status)
-                .filter(value -> serviceType == null || value.serviceType() == serviceType)
+                .filter(value -> serviceType == null || value.serviceType().belongsToDepartment(serviceType))
                 .filter(value -> startsFrom == null || !value.startsAt().isBefore(startsFrom))
                 .filter(value -> startsTo == null || !value.startsAt().isAfter(startsTo))
                 .map(this::view)
@@ -154,7 +162,7 @@ public class AppointmentService {
                     current.id().toString(), null, now);
             notifications.publish(updated.citizenId(), NotificationType.APPOINTMENT_CANCELLED,
                     "Appointment cancelled", "Your appointment has been cancelled.");
-            return updated;
+            return updated.forDepartmentDisplay();
         } catch (IllegalStateException exception) {
             throw new AppointmentConflictException(exception.getMessage());
         }
@@ -171,7 +179,8 @@ public class AppointmentService {
         Citizen citizen = citizens.findById(value.citizenId())
                 .orElseThrow(() -> new NotFoundException("Citizen not found"));
         return new AppointmentOperationsView(value.id(), value.citizenId().value(),
-                protector.decrypt(citizen.nationalId().ciphertext()), value.slotId(), value.serviceType(),
+                protector.decrypt(citizen.nationalId().ciphertext()), value.slotId(),
+                value.serviceType().appointmentDepartment(),
                 value.officeName(), value.startsAt(), value.endsAt(), value.status(), value.bookedAt(),
                 value.cancelledAt(), value.completedAt(),
                 value.completedBy() == null ? null : value.completedBy().value());
@@ -183,6 +192,12 @@ public class AppointmentService {
                 || value.citizenId().toString().toLowerCase(Locale.ROOT).contains(query)
                 || value.citizenNationalId().toLowerCase(Locale.ROOT).contains(query)
                 || value.officeName().toLowerCase(Locale.ROOT).contains(query);
+    }
+
+    private boolean hasActiveAppointmentInDepartment(CitizenId citizen, AppointmentServiceType department) {
+        return java.util.Arrays.stream(AppointmentServiceType.values())
+                .filter(type -> type.belongsToDepartment(department))
+                .anyMatch(type -> appointments.hasActiveAppointment(citizen, type));
     }
 
     private static void validatePage(int page, int size) {

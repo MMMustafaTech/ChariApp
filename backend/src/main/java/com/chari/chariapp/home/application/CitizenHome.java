@@ -11,6 +11,6 @@ public record CitizenHome(
         UpcomingAppointment upcomingAppointment,
         List<RecentRequest> recentRequests
 ) {
-    public record UpcomingAppointment(UUID id, String serviceType, String officeName, Instant startsAt, Instant endsAt) { }
+    public record UpcomingAppointment(UUID id, String department, String officeName, Instant startsAt, Instant endsAt) { }
     public record RecentRequest(UUID id, String serviceType, String kind, String status, Instant submittedAt) { }
 }
